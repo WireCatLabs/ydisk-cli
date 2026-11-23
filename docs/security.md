@@ -16,7 +16,7 @@ such as the keyring, permissions, MCP and what never reaches a log, is on the
 
 | What | Where | How to remove it |
 | --- | --- | --- |
-| The Yandex token | The system keyring, or a private file where there is none | `ydisk personal session end` |
+| The Yandex token | The system keyring, or a private file where there is none | `ydisk personal session end`. The token stays valid at Yandex until you revoke it ([below](#revoke-the-token-at-yandex)) |
 | The text of the files in the chosen folders, with their names, paths, sizes, dates and MD5 checksums | The local store, `wirecat.db`, shared with the other WireCat tools | `folders remove` with the folder's id from `folders list`, then `sync` |
 | Your tags, notes and memories about documents | The local store | `tags remove`, `notes remove` |
 | Each mirror's folder pair, its last sync and the versions a sync replaced or deleted here | `profiles/<profile>/mirrors.json` and `profiles/<profile>/mirrors/` in the state folder, readable by you only | `mirrors remove <id>` forgets the pair; the versions stay until they expire ([mirrors](mirrors.md#earlier-versions-of-a-file)) |
@@ -27,6 +27,13 @@ The files themselves stay on the Disk. A copy of a file is saved only when you r
 a folder you [mirror](mirrors.md).
 Public links (`public_url`) are not kept by the sync. Nothing goes to WireCat: there is no WireCat server and no
 account with us.
+
+### Revoke the token at Yandex
+
+`session end` only removes the token from this computer. Yandex keeps accepting it until it expires or you revoke it.
+To revoke it, sign in to Yandex ID, open [Data access](https://id.yandex.ru/personal/data-access), and remove the app the token was issued for. Yandex
+also revokes every token of the account when you change the password or choose "Log out on all devices"
+([Yandex ID: revoking tokens](https://yandex.ru/dev/id/doc/en/tokens/token-invalidate)). Revoke it when the computer or the token may have leaked.
 
 ## What goes over the network
 
