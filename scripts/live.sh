@@ -110,9 +110,10 @@ node -e '
   "$work/after-wrong.json" "$work/probe.txt"
 # The flat listing a whole-Disk mirror reads (GET /v1/disk/resources/files): Yandex's docs show neither sha256 nor
 # resource_id on its items and name no largest page, so both are checked here, with limit and offset. A page of 1,000
-# did not come back within 30 s on 2026-11-21, and 100 files show the same fields.
-raw resources-files-list --limit 100 >"$work/flat-all.json"
-raw resources-files-list --limit 1 --offset 1 >"$work/flat-one.json"
+# did not come back within 30 s on 2026-11-21, and 100 files show the same fields. On 2026-11-23 even 100 took over
+# 30 s, so these two calls get the 2 minutes a mirror's page has.
+raw resources-files-list --limit 100 --timeout 2m >"$work/flat-all.json"
+raw resources-files-list --limit 1 --offset 1 --timeout 2m >"$work/flat-one.json"
 node -e '
   const fs = require("fs")
   const page = (f) => { const body = JSON.parse(fs.readFileSync(f, "utf8")); return body.item ?? body }
