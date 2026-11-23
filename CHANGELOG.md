@@ -2,6 +2,30 @@
 
 Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest first.
 
+## 0.5.0 — 23.11.2026
+
+### Added
+
+- **Earlier versions of every synced file, and a change log** (cli-core 0.722.0, was 0.711.0, and cli-base 0.128.0,
+  was 0.122.0). Sync keeps a document's text, title and front matter before each change and before it leaves the
+  copy.
+  `documents history <document>` lists the versions and `--revision <n>` shows one. `changes --since 1d` lists what
+  was added, changed, no longer visible or came back. Both read the copy, so agents get them over MCP too
+  ([usage](docs/usage.md#earlier-versions-and-what-changed)).
+- **`keep_versions_for_days`, 365 by default**, for a profile or `defaults`. A sync that finishes its pass drops older
+  versions and change log rows ([configuration](docs/configuration.md#other-settings)).
+- **`files show`, `files list` and `files download` give each file's `md5` and `sha256`**, so an agent can tell
+  whether a file changed since it read it.
+- **A cut text says so in the help and the terminal.** `files download` without `--output` still answers at most
+  200,000 characters with `truncated: true`; its help, [usage](docs/usage.md) and a terminal warning now say never
+  to write a cut text back over the file.
+
+### Fixed
+
+- **A file sync no longer finds keeps its text.** It leaves lists and search, is marked no longer visible, and comes
+  back as it was when the Disk shows it again. Before, sync blanked its text as if it were deleted, though the Disk
+  cannot tell sync a deletion from a move or a lost share.
+
 ## 0.4.0 — 19.11.2026
 
 ### Added
