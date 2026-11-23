@@ -238,12 +238,12 @@ node -e '
 fixtures="$root/src/testing/fixtures"
 "${cli[@]}" live files upload "$fixtures/budget.xlsx" --folder "$edit" --json >/dev/null
 wait_sha "$edit/budget.xlsx" "$(hash_of "$fixtures/budget.xlsx")"
-"${cli[@]}" live files sheets show "$edit/budget.xlsx" --json >"$work/s-show.json"
+"${cli[@]}" live files sheets show "$edit/budget.xlsx" "Synthetic Budget!A1:C4" --json >"$work/s-show.json"
 fingerprint=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.sha256)' "$work/s-show.json")
 "${cli[@]}" live files sheets update "$edit/budget.xlsx" "B2:C2" --values '[[1300, "paid"]]' \
   --expected-fingerprint "$fingerprint" --yes --json >"$work/s-update.json"
 wait_changed "$edit/budget.xlsx" "$fingerprint"
-"${cli[@]}" live files sheets show "$edit/budget.xlsx" "B2:C2" --json >"$work/s-after.json"
+"${cli[@]}" live files sheets show "$edit/budget.xlsx" "Synthetic Budget!B2:C2" --json >"$work/s-after.json"
 node -e '
   const cells = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.sheets[0].cells
   const value = (address) => cells.find((cell) => cell.address === address)?.value
