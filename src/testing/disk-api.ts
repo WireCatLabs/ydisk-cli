@@ -17,7 +17,12 @@ const resource = (path: string, type: "dir" | "file") => ({
   created: "2026-01-01T00:00:00+00:00",
   modified: "2026-01-02T00:00:00+00:00",
   ...(type === "file"
-    ? { size: 5, mime_type: "text/plain", md5: createHash("md5").update("hello").digest("hex") }
+    ? {
+        size: 5,
+        mime_type: "text/plain",
+        md5: createHash("md5").update("hello").digest("hex"),
+        sha256: createHash("sha256").update("hello").digest("hex"),
+      }
     : {}),
 })
 

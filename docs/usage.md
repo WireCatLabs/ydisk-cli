@@ -105,7 +105,10 @@ ydisk personal files unpublish /Documents/plan.pdf
 ```
 
 - `files download` without `--output` answers the file's text, up to 200,000 characters, so an agent can read a file
-  outside the chosen folders without saving it.
+  outside the chosen folders without saving it. A longer text is cut there and the answer says `truncated: true`.
+  Never write a cut text back over the file: the rest of it would be lost.
+- `files show`, `files list` and `files download` give each file's `md5` and `sha256`, so an agent can tell whether
+  a file changed since it read it.
 - `files delete` moves a file to the Disk's trash, and `files restore` brings it back by its path in the trash.
 - `files publish` makes a public link that anyone who has it can open. `files unpublish` closes it.
 - `--replace` on an upload, a copy or a move overwrites a file already at that path.

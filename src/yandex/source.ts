@@ -17,7 +17,7 @@ import type { Transport } from "./transport.js"
 export const FOLDER = "inode/directory"
 
 export interface DiskFile extends SourceFile {
-  providerMetadata: { path: string; md5?: string }
+  providerMetadata: { path: string; md5?: string; sha256?: string }
 }
 
 // Only the fields the source reads; Yandex sends more (https://yandex.ru/dev/disk-api/doc/en/reference/response-objects).
@@ -31,6 +31,7 @@ const Resource = v.object({
   size: v.optional(v.number()),
   mime_type: v.optional(v.string()),
   md5: v.optional(v.string()),
+  sha256: v.optional(v.string()),
   revision: v.optional(v.number()),
 })
 type Resource = v.InferOutput<typeof Resource>
@@ -92,7 +93,11 @@ const fileOf = (resource: Resource, parents: string[]): DiskFile => {
     url: webUrl(resource.path, folder),
     trashed: false,
     canDownload: !folder,
-    providerMetadata: { path: resource.path, ...(resource.md5 ? { md5: resource.md5 } : {}) },
+    providerMetadata: {
+      path: resource.path,
+      ...(resource.md5 ? { md5: resource.md5 } : {}),
+      ...(resource.sha256 ? { sha256: resource.sha256 } : {}),
+    },
   }
 }
 

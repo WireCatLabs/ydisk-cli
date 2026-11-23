@@ -37,6 +37,8 @@ const row = (file: DiskFile) => ({
   kind: file.mime === "inode/directory" ? "folder" : "file",
   mime: file.mime,
   size: file.size ?? null,
+  md5: file.providerMetadata.md5 ?? null,
+  sha256: file.providerMetadata.sha256 ?? null,
   modified_at: file.modifiedAt ?? null,
   url: file.url,
 })
@@ -141,7 +143,8 @@ const downloadCommand = () =>
       .summary("read a Disk file's text, or save the file on this computer")
       .description(
         "read a Disk file's text (PDF, docx, xlsx, CSV, TSV, text, Markdown), or with --output save the file itself; " +
-          "the token never goes to the download host",
+          `the token never goes to the download host. A text longer than ${TEXT_LIMIT.toLocaleString("en")} characters ` +
+          "is cut there with truncated: true: never write a cut text back over the file, it would lose the rest",
       )
       .argument("<path>", PATH)
       .addOption(ownerOnlyOption("--output <file>", "save the file here instead of answering its text"))
@@ -168,7 +171,11 @@ const downloadCommand = () =>
       const bytes = await saveTo(output, await disk.download(file.id, file), args.replace === true)
       return { path: file.providerMetadata.path, output, bytes }
     })
-    renderAnswer(this, outputFor(this), itemOf(answer))
+    const shown = outputFor(this)
+    // A person reading the text view would not see the flag; JSON carries it as truncated: true.
+    if ("truncated" in answer && answer.truncated && shown.format !== "json" && shown.format !== "jsonl")
+      shown.renderer.warn(`the text is cut at ${TEXT_LIMIT.toLocaleString("en")} characters; do not write it back`)
+    renderAnswer(this, shown, itemOf(answer))
   })
 
 const exists = (path: string) =>
