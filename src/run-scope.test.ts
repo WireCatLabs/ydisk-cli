@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
@@ -14,6 +15,9 @@ const scratch = mkdtempSync(join(tmpdir(), "ydisk-run-scope-"))
 const upload = join(scratch, "upload.txt")
 writeFileSync(upload, "notes")
 
+// The spec's fake answers every path as the file "hello".
+const HELLO = createHash("sha256").update("hello").digest("hex")
+
 const stdin = () => Object.assign(Readable.from([FAKE_TOKEN]), { isTTY: false })
 
 describe("each remote command runs inside cli-core's run", () => {
@@ -29,6 +33,17 @@ describe("each remote command runs inside cli-core's run", () => {
       "files show": ["personal", "files", "show", "/plan.txt"],
       "files download": ["personal", "files", "download", "/plan.txt"],
       "files upload": ["personal", "files", "upload", upload, "--folder", "/Work"],
+      "files update": [
+        "personal",
+        "files",
+        "update",
+        "/plan.txt",
+        "--text",
+        "notes",
+        "--expected-fingerprint",
+        HELLO,
+        "--yes",
+      ],
       "files copy": ["personal", "files", "copy", "/plan.txt", "--folder", "/Archive"],
       "files move": ["personal", "files", "move", "/plan.txt", "--folder", "/Archive"],
       "files create": ["personal", "files", "create", "/Archive"],
@@ -51,6 +66,16 @@ describe("each remote command runs inside cli-core's run", () => {
       "mirrors preview":
         "the same listing as mirrors sync, writing nothing; src/mirrors.test.ts runs it against fake-disk",
       "mirrors watch": "keeps running until stopped; src/mirrors.test.ts runs one cycle and its --timeout",
+      "files sheets show":
+        "reads a workbook, which the spec's fake has none of; src/edit.test.ts runs it against fake-disk",
+      "files sheets update": "edits a workbook; src/edit.test.ts runs it against fake-disk",
+      "files documents show":
+        "reads a .docx, which the spec's fake has none of; src/edit.test.ts runs it against fake-disk",
+      "files documents update": "edits a .docx; src/edit.test.ts runs it against fake-disk",
+      "files history":
+        "reads only the versions kept on this computer, so a silent service cannot stop it; src/edit.test.ts runs it",
+      "mirrors conflicts resolve":
+        "needs a conflict a sync recorded; src/mirrors.test.ts resolves one against fake-disk. cli-core connects it outside the command's run (WireCatLabs/cli-core#3230)",
       "files serve": "serves until stopped; src/mount.test.ts reads through it against fake-disk and stops it",
       "memories extract": "asks the configured model, not Yandex Disk; cli-core's shared command",
       doctor:

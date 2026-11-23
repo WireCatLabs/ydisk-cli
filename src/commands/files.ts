@@ -19,13 +19,15 @@ import {
   renderAnswer,
   writesFileOnlyWith,
 } from "@wirecat/cli-core/cli"
-import { fileText } from "@wirecat/cli-core/documents"
+import { fileText, fileVersions } from "@wirecat/cli-core/documents"
+import { addFileEditCommands, type FileEditCommands, type FileUpdatePort } from "@wirecat/cli-core/documents/cli"
 import { guardedWrite, newOperationId, readUpload, uploadBlob } from "@wirecat/cli-core/sends"
 import { Command } from "commander"
 import { DELETE_KEY, SHARE_KEY } from "../config.js"
-import { contextOf, type Disk, diskFor, tokenOf, withDisk, writeGuard } from "../context.js"
+import { contextOf, type Disk, diskFor, profileStateDir, tokenOf, withDisk, writeGuard } from "../context.js"
 import { IDENTITY } from "../identity.js"
 import { type DiskFile, diskPath, PAGE, skipReason, trashPath } from "../yandex/source.js"
+import { WORDS } from "./library.js"
 import { serveCommand } from "./mount.js"
 
 const CLI = IDENTITY.command
@@ -47,7 +49,7 @@ const row = (file: DiskFile) => ({
  * Every write's one path (WC-PERM-13): the profile's level for the command's key and for `extra` refuses or asks
  * once, the send journal records the attempt, and the answer carries the `operation_id` (WC-OUT-10).
  */
-const write = async <T>(command: Command, extra: readonly string[], act: (disk: Disk) => Promise<T>) => {
+const write = async <T extends object>(command: Command, extra: readonly string[], act: (disk: Disk) => Promise<T>) => {
   const context = contextOf(command)
   // Read before any question: a profile with no sign-in fails before the owner is asked anything.
   const token = tokenOf(command)
@@ -58,13 +60,16 @@ const write = async <T>(command: Command, extra: readonly string[], act: (disk: 
   guard.refuse(request)
   try {
     const done = await guardedWrite(guard, request, () => context.run((events) => act(diskFor(command, events, token))))
-    renderAnswer(command, outputFor(command), itemOf({ operation_id: operationId, ...done }))
+    return { operation_id: operationId, ...done }
   } catch (error) {
     if (error instanceof CliError && error.code === "outcome_unknown")
       throw new CliError("outcome_unknown", error.message, { ...error.details, operation_id: operationId })
     throw error
   }
 }
+
+const written = async (command: Command, extra: readonly string[], act: (disk: Disk) => Promise<object>) =>
+  renderAnswer(command, outputFor(command), itemOf(await write(command, extra, act)))
 
 const read = withDisk
 
@@ -165,8 +170,13 @@ const downloadCommand = () =>
       if (output === undefined) {
         const reason = skipReason(file)
         if (reason) return { ...row(file), text: null, not_read: reason }
-        const text = await fileText(await disk.bytes(file.id, file), file, CLI, env)
-        return { ...row(file), text: text.slice(0, TEXT_LIMIT), truncated: text.length > TEXT_LIMIT }
+        const bytes = await disk.bytes(file.id, file)
+        const text = await fileText(bytes, file, CLI, env)
+        const truncated = text.length > TEXT_LIMIT
+        // The sha256 promises the whole file: a cut text, or one read out of a PDF, docx or xlsx, written back with
+        // files update would replace the file with less (cli-core's RISK-4).
+        const whole = !truncated && Buffer.from(bytes).toString("utf8") === text
+        return { ...row(file), ...(whole ? {} : { sha256: null }), text: text.slice(0, TEXT_LIMIT), truncated }
       }
       const bytes = await saveTo(output, await disk.download(file.id, file), args.replace === true)
       return { path: file.providerMetadata.path, output, bytes }
@@ -253,7 +263,7 @@ const uploadCommand = () =>
       const target = diskPath(
         posix.join(diskPath(args.folder ?? "/").replace(/^disk:/u, ""), args.name ?? basename(local)),
       )
-      await write(this, args.replace ? [DELETE_KEY] : [], async (disk) => {
+      await written(this, args.replace ? [DELETE_KEY] : [], async (disk) => {
         // Built after the owner answered and before any request: a local file that changed size while the question
         // waited fails here, with nothing sent, instead of during the upload.
         const body = await uploadBlob(upload.source)
@@ -284,7 +294,7 @@ const transfer = (name: "copy" | "move") =>
           args.name ?? posix.basename(source.replace(/^disk:/u, "")),
         ),
       )
-      await write(this, args.replace ? [DELETE_KEY] : [], async (disk) => ({
+      await written(this, args.replace ? [DELETE_KEY] : [], async (disk) => ({
         from: source,
         path: target,
         ...(await disk.transfer(name, source, target, args.replace === true)),
@@ -296,15 +306,11 @@ const simple = (
   name: string,
   description: string,
   {
-    argument = PATH,
     example,
-    pathOf = diskPath,
     extra = [],
     act,
   }: {
-    argument?: string
     example: string
-    pathOf?: (input: string) => string
     extra?: readonly string[]
     act: (disk: Disk, path: string) => Promise<object>
   },
@@ -315,14 +321,39 @@ const simple = (
     examples: [`${CLI} personal files ${name} ${example}`],
   })
     .description(description)
-    .argument("<path>", argument)
+    .argument("<path>", PATH)
     .action(async function (this: Command, input: string) {
-      const path = pathOf(input)
-      await write(this, extra, async (disk) => ({ path, ...(await act(disk, path)) }))
+      const path = diskPath(input)
+      await written(this, extra, async (disk) => ({ path, ...(await act(disk, path)) }))
     })
 
-export const filesCommand = (): Command =>
-  annotate(new Command("files"), { effects: REMOTE_READ })
+/** What `files update`, `sheets`, `documents`, `history` and `restore` keep: one store, so history lists every edit. */
+const versionsOf = (command: Command) => fileVersions(join(profileStateDir(command), "files.versions"))
+
+/** The port cli-core's file edits write and read through, for the run `disk` was built in. */
+const portOf = (command: Command, disk: Disk): FileUpdatePort => {
+  const { signal } = contextOf(command).environment
+  return { target: disk.target, versions: versionsOf(command), ...(signal ? { signal } : {}) }
+}
+
+/** cli-core's file edits over the Disk; `files` is the group, for the helpers cli-core hands no command. */
+const editHelpers = (files: Command): FileEditCommands => ({
+  words: WORDS,
+  output: (body, command) => renderAnswer(command, outputFor(command), body),
+  path: diskPath,
+  reread: (input) => `${CLI} ${contextOf(files).profile} files show ${input}`,
+  stdin: () => contextOf(files).environment.stdin ?? process.stdin,
+  write: (extra, act, command) => write(command, extra, (disk) => act(portOf(command, disk))),
+  read: (act, command) => withDisk(command, (disk) => act(portOf(command, disk))),
+  restoreFromTrash: (input, command) => {
+    const path = trashPath(input)
+    return write(command, [], async (disk) => ({ path, ...(await disk.restore(path)) }))
+  },
+  deleteKey: DELETE_KEY,
+})
+
+export const filesCommand = (): Command => {
+  const files = annotate(new Command("files"), { effects: REMOTE_READ })
     .description("the files on Yandex Disk, live: list, read, download, upload, change, serve")
     .addCommand(listCommand())
     .addCommand(showCommand())
@@ -340,14 +371,6 @@ export const filesCommand = (): Command =>
       simple("delete", "move a file or folder to the Disk's trash; files restore brings it back", {
         example: "/Documents/old.pdf",
         act: (disk, path) => disk.trash(path),
-      }),
-    )
-    .addCommand(
-      simple("restore", "bring a file or folder back from the Disk's trash", {
-        argument: "its path in the trash, like trash:/old.pdf",
-        example: "trash:/old.pdf",
-        pathOf: trashPath,
-        act: (disk, path) => disk.restore(path),
       }),
     )
     .addCommand(
@@ -371,3 +394,6 @@ export const filesCommand = (): Command =>
       }),
     )
     .addCommand(serveCommand())
+  addFileEditCommands(files, editHelpers(files))
+  return files
+}

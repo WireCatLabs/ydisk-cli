@@ -53,6 +53,8 @@ export const API = {
 }
 
 const REPLACES = { key: DELETE_KEY, when: "with --replace" }
+/** cli-core's file edits replace a file only at the sha256 it was read at, which the flag carries. */
+const OVERWRITES = { key: DELETE_KEY, when: "with --expected-fingerprint" }
 
 /** A mirror's sync writes on both sides: what it sends checks as an upload, what it replaces or trashes as a delete. */
 const MIRROR_CHECKS = [
@@ -63,12 +65,17 @@ const MIRROR_CHECKS = [
 /** What a `files` write checks beside its own key, so `--dry-run` shows the same keys as the run. */
 const FILES_CHECKS: Readonly<Record<string, readonly (string | ConditionalKey)[]>> = {
   "files upload": [REPLACES],
+  "files update": [OVERWRITES],
+  "files restore": [OVERWRITES],
+  "files sheets update": [DELETE_KEY],
+  "files documents update": [DELETE_KEY],
   "files copy": [REPLACES],
   "files move": [REPLACES],
   "files publish": [SHARE_KEY],
   "files unpublish": [SHARE_KEY],
   "mirrors sync": MIRROR_CHECKS,
   "mirrors watch": MIRROR_CHECKS,
+  "mirrors conflicts resolve": MIRROR_CHECKS,
   // It reads every file it shows, as files download does, so a profile that denies that also refuses it.
   "files serve": ["files.download"],
 }

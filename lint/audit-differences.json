@@ -8,17 +8,10 @@
   },
   {
     "group": "ydisk",
-    "rule": "same-error-reason",
-    "target": "reason account-remove.unknown-profile=account-rename.unknown-profile",
-    "reason": "cli-core #3189 (0.717.0) makes account rename of an unknown profile fail with profile.unknown; every CLI here still ships the older cli-core, and the entry goes with the next cli-core bump.",
-    "review_after": "2026-12-05"
-  },
-  {
-    "group": "ydisk",
     "rule": "same-flag-meaning",
     "target": "max+tg+wa+ydisk --until",
     "expected": "ydisk: <when>, max: <time>, tg: <time>, wa: <time>",
-    "reason": "cli-core 0.722.0 mounts the document change log as changes --until <when>, where the messengers take --until <time>. Fixed in cli-core, then this entry goes: https://github.com/WireCatLabs/cli-core/issues/3227",
-    "review_after": "2026-12-22"
+    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the messengers take --until <time>; the shared command is cli-core's to rename (WireCatLabs/cli-core#3229), and the entry goes with the cli-core bump that does.",
+    "review_after": "2026-12-07"
   }
 ]

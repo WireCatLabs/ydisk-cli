@@ -17,7 +17,7 @@ export const PROVIDER = {
   opens: { document: "documents show" },
 } as const
 
-const WORDS: DocumentWords = {
+export const WORDS: DocumentWords = {
   app: IDENTITY.command,
   remote: "disk",
   provider: SERVICE,

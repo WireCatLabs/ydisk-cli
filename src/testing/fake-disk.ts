@@ -19,6 +19,8 @@ interface Node {
   type: "dir" | "file"
   resource_id: string
   text?: string
+  /** The file's content; `text` is it read as UTF-8, for the tests of text files. */
+  bytes?: Buffer
   mime_type?: string
   md5?: string
   sha256?: string
@@ -32,7 +34,7 @@ export interface FakeDisk {
   trash: Map<string, Node>
   calls: { method: string; url: URL; auth: string | null }[]
   refusals: string[]
-  put(path: string, text?: string, mime?: string): string
+  put(path: string, text?: string | Uint8Array, mime?: string): string
   remove(path: string): void
   move(from: string, to: string): void
   /** Makes a file answer this status from now on. */
@@ -63,7 +65,7 @@ const ALLOWED: Record<string, readonly string[]> = {
   "DELETE /v1/disk/resources": ["path", "permanently", "md5"],
 }
 
-const hash = (algorithm: "md5" | "sha256", text: string) => createHash(algorithm).update(text).digest("hex")
+const hash = (algorithm: "md5" | "sha256", bytes: Buffer) => createHash(algorithm).update(bytes).digest("hex")
 const parentOf = (path: string) => `disk:${posix.dirname(path.replace("disk:", ""))}`
 
 export const fakeDisk = (): FakeDisk => {
@@ -77,8 +79,9 @@ export const fakeDisk = (): FakeDisk => {
   const denied = new Map<string, 403 | 404>()
   const calls: FakeDisk["calls"] = []
   const refusals: string[] = []
-  const at = (path: string, type: Node["type"], text?: string, mime?: string) => {
+  const at = (path: string, type: Node["type"], content?: string | Uint8Array, mime?: string) => {
     const known = nodes.get(path)
+    const bytes = Buffer.from(content ?? "")
     const node: Node = {
       path,
       type,
@@ -86,10 +89,11 @@ export const fakeDisk = (): FakeDisk => {
       modified: `2026-01-0${(ids % 9) + 1}T00:00:00+00:00`,
       ...(type === "file"
         ? {
-            text: text ?? "",
-            mime_type: mime ?? "text/plain",
-            md5: hash("md5", text ?? ""),
-            sha256: hash("sha256", text ?? ""),
+            text: bytes.toString("utf8"),
+            bytes,
+            mime_type: mime ?? known?.mime_type ?? "text/plain",
+            md5: hash("md5", bytes),
+            sha256: hash("sha256", bytes),
           }
         : {}),
     }
@@ -106,7 +110,7 @@ export const fakeDisk = (): FakeDisk => {
     modified: node.modified,
     ...(node.type === "file"
       ? {
-          size: Buffer.byteLength(node.text ?? ""),
+          size: node.bytes?.length ?? 0,
           mime_type: node.mime_type,
           md5: node.md5,
           sha256: node.sha256,
@@ -138,7 +142,7 @@ export const fakeDisk = (): FakeDisk => {
       if (url.host === DOWNLOADS) {
         if (auth) return refuse("the download link was sent the token")
         const node = nodes.get(url.searchParams.get("path") ?? "")
-        return node?.type === "file" ? new Response(node.text ?? "") : json(404, { error: "DiskNotFoundError" })
+        return node?.type === "file" ? new Response(node.bytes ?? "") : json(404, { error: "DiskNotFoundError" })
       }
       if (url.host === UPLOADS) {
         if (auth) return refuse("the upload link was sent the token")
@@ -146,12 +150,12 @@ export const fakeDisk = (): FakeDisk => {
         if (method !== "PUT" || !path) return refuse(`no such upload ${url.pathname}`)
         uploads.delete(url.pathname)
         disk.beforeWrite?.("PUT", path)
-        const text = await new Response(init?.body).text()
+        const body = new Uint8Array(await new Response(init?.body).arrayBuffer())
         if (disk.acceptUploads === undefined) {
-          at(path, "file", text)
+          at(path, "file", body)
           return new Response(null, { status: 201 })
         }
-        operations.set(`op-${links}`, { polls: disk.acceptUploads, land: () => at(path, "file", text) })
+        operations.set(`op-${links}`, { polls: disk.acceptUploads, land: () => at(path, "file", body) })
         return new Response(null, { status: 202 })
       }
       if (url.host !== API) return refuse(`unknown host ${url.host}`)
