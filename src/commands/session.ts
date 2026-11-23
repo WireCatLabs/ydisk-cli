@@ -102,7 +102,10 @@ const endCommand = () =>
     }),
   )
     .summary("forget this profile's token on this computer")
-    .description(`forget this profile's token on this computer; the token itself stays valid in ${SERVICE}`)
+    .description(
+      `forget this profile's token on this computer; the token itself stays valid in ${SERVICE} until you remove the ` +
+        "app in Yandex ID's Data access: https://id.yandex.ru/personal/data-access",
+    )
     .action(function (this: Command) {
       refuseUnderReadOnly(this, "session end")
       const { profile, tokens } = contextOf(this)
