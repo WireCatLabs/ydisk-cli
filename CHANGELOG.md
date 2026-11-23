@@ -4,6 +4,50 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
 
 ## 0.5.0 — 23.11.2026
 
+### Added
+
+- **Earlier versions of every synced file, and a change log** (cli-core 0.722.0, was 0.711.0; cli-base 0.128.0, was
+  0.122.0). Sync keeps a document's text, title and front matter before each change and before it leaves the copy.
+  `documents history <document>` lists the versions and `--revision <n>` shows one. `changes --since 1d` lists what
+  was added, changed, no longer visible or came back. Both read the copy, so agents get them over MCP too
+  ([usage](docs/usage.md#earlier-versions-and-what-changed)).
+- **`keep_versions_for_days`, 365 by default**, for a profile or `defaults`. A sync that finishes its pass drops older
+  versions and change log rows ([configuration](docs/configuration.md#other-settings)).
+- **Edit a file on the Disk where it is.** `files update` replaces a text file's whole text, `files sheets show` and
+  `files sheets update` read and write an `.xlsx`'s cells, and `files documents show` and `files documents update`
+  read and change a `.docx`'s paragraphs, keeping the rest of the file as it is. Each edit takes the file's `sha256`
+  as `--expected-fingerprint` and asks as `files.delete` does. The file is checked just before the write, and what it
+  replaced is kept on this computer; a file changed since it was read is a `conflict`, with nothing uploaded.
+  `files history` lists what the edits replaced, and `files restore <path> <version>` puts one back. See
+  [edit a file on the Disk](docs/usage.md#edit-a-file-on-the-disk) and
+  [edit a file with your agent](docs/recipes.md#edit-a-file-with-your-agent).
+- **A mirror merges a text file changed on both sides.** A `.md`, `.markdown`, `.txt`, `.csv` or `.tsv` file up to
+  1 MB edited here and on the Disk in different places is merged line by line and written to both sides; the answer
+  lists it under `merged`. Changes on the same or neighbouring lines stay a conflict. See
+  [a file changed on both sides](docs/mirrors.md#a-file-changed-on-both-sides).
+- **`mirrors conflicts list|show|resolve`.** See each conflict a sync left, its three versions and the lines that
+  conflict, and settle it on both sides at once with `--keep local|disk|both` or the final file (`--file`, for you
+  only). A side that changed since is refused with nothing written.
+- **`mirrors sync --allow-replacements <count>`** lets one run replace up to that many existing files when the guard
+  stops it; `--replace` still allows any number.
+- **A whole-Disk sync goes on listing where the last run stopped.** A Disk too big to list in one run is listed over
+  several, so each run is the usual length; the stopped answer says to run it again instead of asking for more
+  time, and `listed` shows `resumed` and `so_far`. A folder's mirror still lists from the start each run.
+- **`files restore`** takes a version from `files history` as well as a path in the trash.
+- Requires `@wirecat/cli-core` 0.722.0 and `@wirecat/cli-base` 0.127.0.
+- **`files show` and `files list` give each file's `md5` and `sha256`**, so an agent can tell whether a file changed
+  since it read it. `files download` gives the `sha256` beside the file's whole text only: a text it cut or read out
+  of a PDF, docx or xlsx has `sha256: null`, so it cannot be written back over the file.
+- **A cut text says so in the help and the terminal.** `files download` without `--output` still answers at most
+  200,000 characters with `truncated: true`; its help, [usage](docs/usage.md) and a terminal warning now say never
+  to write a cut text back over the file.
+
+### Fixed
+
+- **A file sync no longer finds keeps its text.** It leaves lists and search, is marked no longer visible, and comes
+  back as it was when the Disk shows it again. Before, sync blanked its text as if it were deleted, though the Disk
+  cannot tell sync a deletion from a move or a lost share.
+
 ## 0.4.0 — 19.11.2026
 
 ### Added
