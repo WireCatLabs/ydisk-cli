@@ -87,7 +87,7 @@ ydisk session status [options]
 
 ### `ydisk session end`
 
-forget this profile's token on this computer; the token itself stays valid in Yandex Disk
+forget this profile's token on this computer; the token itself stays valid in Yandex Disk until you remove the app in Yandex ID's Data access: https://id.yandex.ru/personal/data-access
 
 **Changes something on this computer only.**
 

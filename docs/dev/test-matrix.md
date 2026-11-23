@@ -7,49 +7,49 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**199 ✅ · 168 ⛔ · 0 ❌** — 131 commands, 236 options.
+**30 ✅ · 227 ⛔ · 110 ❌** — 131 commands, 236 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
-| `commands` |  | ✅ |  |
-| `commands info` |  | ✅ |  |
-| `session start` |  | ✅ |  |
-| `session start` | `--credential-storage` | ✅ |  |
-| `session status` |  | ✅ |  |
-| `session status` | `--check` | ✅ |  |
-| `session end` |  | ✅ |  |
-| `session list` |  | ✅ |  |
-| `account remove` |  | ✅ |  |
-| `account remove` | `--keep-data` | ✅ |  |
-| `account remove` | `--delete-data` | ✅ |  |
-| `account remove` | `--dry-run` | ✅ |  |
-| `folders add` |  | ✅ |  |
-| `folders list` |  | ✅ |  |
-| `folders browse` |  | ✅ |  |
-| `folders browse` | `--folder` | ✅ |  |
-| `folders browse` | `--cursor` | ✅ |  |
+| `commands` |  | ❌ |  |
+| `commands info` |  | ❌ |  |
+| `session start` |  | ❌ |  |
+| `session start` | `--credential-storage` | ❌ |  |
+| `session status` |  | ❌ |  |
+| `session status` | `--check` | ❌ |  |
+| `session end` |  | ❌ |  |
+| `session list` |  | ❌ |  |
+| `account remove` |  | ❌ |  |
+| `account remove` | `--keep-data` | ❌ |  |
+| `account remove` | `--delete-data` | ❌ |  |
+| `account remove` | `--dry-run` | ❌ |  |
+| `folders add` |  | ❌ |  |
+| `folders list` |  | ❌ |  |
+| `folders browse` |  | ❌ |  |
+| `folders browse` | `--folder` | ❌ |  |
+| `folders browse` | `--cursor` | ❌ |  |
 | `folders remove` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `sync` |  | ✅ |  |
+| `sync` |  | ❌ |  |
 | `sync` | `--limit` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `sync` | `--rescan` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `sync` | `--embed` | ⛔ | needs a downloaded meaning model or a configured model provider; cli-core's documents kit tests the shared command with a fake model, and no test here downloads one |
-| `status` |  | ✅ |  |
-| `documents list` |  | ✅ |  |
+| `status` |  | ❌ |  |
+| `documents list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents list` | `--limit` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents list` | `--page` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `documents show` |  | ✅ |  |
+| `documents show` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents export` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents export` | `--output` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `documents history` |  | ✅ |  |
-| `documents history` | `--revision` | ✅ |  |
+| `documents history` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
+| `documents history` | `--revision` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents context` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `changes` |  | ✅ |  |
-| `changes` | `--since` | ✅ |  |
-| `changes` | `--until` | ✅ |  |
-| `changes` | `--event` | ✅ |  |
-| `changes` | `--limit` | ✅ |  |
-| `changes` | `--page` | ✅ |  |
-| `search` |  | ✅ |  |
+| `changes` |  | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `changes` | `--since` | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `changes` | `--until` | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `changes` | `--event` | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `changes` | `--limit` | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `changes` | `--page` | ⛔ | cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests drive it over the store |
+| `search` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `search` | `--limit` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `search` | `--page` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `search` | `--exact` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
@@ -66,18 +66,18 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `catalog tags list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `catalog tags add` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `catalog tags remove` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `tags list` |  | ✅ |  |
-| `tags add` |  | ✅ |  |
-| `tags remove` |  | ✅ |  |
+| `tags list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
+| `tags add` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
+| `tags remove` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships add` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships add` | `--kind` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships add` | `--role` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships add` | `--reason` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `relationships remove` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `notes add` |  | ✅ |  |
+| `notes add` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `notes add` | `--title` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `notes list` |  | ✅ |  |
+| `notes list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `notes list` | `--limit` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `notes list` | `--page` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `notes show` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
@@ -110,47 +110,47 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `facts reverse` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `identities list` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `identities link` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
-| `files list` |  | ✅ |  |
-| `files list` | `--folder` | ✅ |  |
-| `files list` | `--cursor` | ✅ |  |
-| `files show` |  | ✅ |  |
-| `files download` |  | ✅ |  |
-| `files download` | `--output` | ✅ |  |
-| `files download` | `--replace` | ✅ |  |
-| `files upload` |  | ✅ |  |
-| `files upload` | `--folder` | ✅ |  |
-| `files upload` | `--name` | ✅ |  |
-| `files upload` | `--replace` | ✅ |  |
-| `files upload` | `--allow-any-file` | ✅ |  |
-| `files copy` |  | ✅ |  |
-| `files copy` | `--folder` | ✅ |  |
-| `files copy` | `--name` | ✅ |  |
-| `files copy` | `--replace` | ✅ |  |
-| `files move` |  | ✅ |  |
-| `files move` | `--folder` | ✅ |  |
-| `files move` | `--name` | ✅ |  |
-| `files move` | `--replace` | ✅ |  |
-| `files create` |  | ✅ |  |
-| `files delete` |  | ✅ |  |
-| `files publish` |  | ✅ |  |
-| `files unpublish` |  | ✅ |  |
-| `files serve` |  | ✅ |  |
-| `files serve` | `--port` | ✅ |  |
-| `files sheets show` |  | ✅ |  |
-| `files sheets update` |  | ✅ |  |
-| `files sheets update` | `--values` | ✅ |  |
-| `files sheets update` | `--expected-fingerprint` | ✅ |  |
-| `files sheets update` | `--replace` | ✅ |  |
-| `files documents show` |  | ✅ |  |
-| `files documents update` |  | ✅ |  |
-| `files documents update` | `--payload` | ✅ |  |
-| `files documents update` | `--expected-fingerprint` | ✅ |  |
-| `files history` |  | ✅ |  |
-| `files restore` |  | ✅ |  |
-| `files restore` | `--expected-fingerprint` | ✅ |  |
-| `files update` |  | ✅ |  |
-| `files update` | `--text` | ✅ |  |
-| `files update` | `--expected-fingerprint` | ✅ |  |
+| `files list` |  | ❌ |  |
+| `files list` | `--folder` | ❌ |  |
+| `files list` | `--cursor` | ❌ |  |
+| `files show` |  | ❌ |  |
+| `files download` |  | ❌ |  |
+| `files download` | `--output` | ❌ |  |
+| `files download` | `--replace` | ❌ |  |
+| `files upload` |  | ❌ |  |
+| `files upload` | `--folder` | ❌ |  |
+| `files upload` | `--name` | ❌ |  |
+| `files upload` | `--replace` | ❌ |  |
+| `files upload` | `--allow-any-file` | ❌ |  |
+| `files copy` |  | ❌ |  |
+| `files copy` | `--folder` | ❌ |  |
+| `files copy` | `--name` | ❌ |  |
+| `files copy` | `--replace` | ❌ |  |
+| `files move` |  | ❌ |  |
+| `files move` | `--folder` | ❌ |  |
+| `files move` | `--name` | ❌ |  |
+| `files move` | `--replace` | ❌ |  |
+| `files create` |  | ❌ |  |
+| `files delete` |  | ❌ |  |
+| `files publish` |  | ❌ |  |
+| `files unpublish` |  | ❌ |  |
+| `files serve` |  | ❌ |  |
+| `files serve` | `--port` | ❌ |  |
+| `files sheets show` |  | ❌ |  |
+| `files sheets update` |  | ❌ |  |
+| `files sheets update` | `--values` | ❌ |  |
+| `files sheets update` | `--expected-fingerprint` | ❌ |  |
+| `files sheets update` | `--replace` | ❌ |  |
+| `files documents show` |  | ❌ |  |
+| `files documents update` |  | ❌ |  |
+| `files documents update` | `--payload` | ❌ |  |
+| `files documents update` | `--expected-fingerprint` | ❌ |  |
+| `files history` |  | ❌ |  |
+| `files restore` |  | ❌ |  |
+| `files restore` | `--expected-fingerprint` | ❌ |  |
+| `files update` |  | ❌ |  |
+| `files update` | `--text` | ❌ |  |
+| `files update` | `--expected-fingerprint` | ❌ |  |
 | `mirrors add` |  | ✅ |  |
 | `mirrors add` | `--ignore` | ✅ |  |
 | `mirrors list` |  | ✅ |  |
@@ -176,14 +176,14 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `mirrors conflicts resolve` |  | ✅ |  |
 | `mirrors conflicts resolve` | `--keep` | ✅ |  |
 | `mirrors conflicts resolve` | `--file` | ✅ |  |
-| `store info` |  | ✅ |  |
-| `api list` |  | ✅ |  |
+| `store info` |  | ❌ |  |
+| `api list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api show` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api disk-get` |  | ✅ |  |
+| `api disk-get` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api disk-get` | `--extra-fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api disk-get` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-list` |  | ✅ |  |
-| `api resources-list` | `--path` | ✅ |  |
+| `api resources-list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-list` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-list` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-list` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-list` | `--offset` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
@@ -191,27 +191,27 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `api resources-list` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-list` | `--sort` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-list` | `--all` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-create` |  | ✅ |  |
-| `api resources-create` | `--path` | ✅ |  |
+| `api resources-create` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-create` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-create` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-update` |  | ✅ |  |
-| `api resources-update` | `--path` | ✅ |  |
+| `api resources-update` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-update` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-update` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-update` | `--body` | ✅ |  |
+| `api resources-update` | `--body` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-update` | `--body-file` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-delete` |  | ✅ |  |
-| `api resources-delete` | `--path` | ✅ |  |
+| `api resources-delete` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-delete` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-delete` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-delete` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-delete` | `--md5` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-delete` | `--permanently` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-copy` |  | ✅ |  |
-| `api resources-copy` | `--from` | ✅ |  |
-| `api resources-copy` | `--path` | ✅ |  |
+| `api resources-copy` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-copy` | `--from` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-copy` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-copy` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-copy` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-copy` | `--overwrite` | ✅ |  |
-| `api resources-files-list` |  | ✅ |  |
+| `api resources-copy` | `--overwrite` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-files-list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-files-list` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-files-list` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-files-list` | `--media-type` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
@@ -220,19 +220,19 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `api resources-files-list` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-files-list` | `--sort` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-files-list` | `--all` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-last-uploaded-list` |  | ✅ |  |
+| `api resources-last-uploaded-list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-last-uploaded-list` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-last-uploaded-list` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-last-uploaded-list` | `--media-type` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-last-uploaded-list` | `--preview-crop` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-last-uploaded-list` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-move` |  | ✅ |  |
-| `api resources-move` | `--from` | ✅ |  |
-| `api resources-move` | `--path` | ✅ |  |
+| `api resources-move` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-move` | `--from` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-move` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-move` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-move` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-move` | `--overwrite` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-public-list` |  | ✅ |  |
+| `api resources-public-list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-public-list` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-public-list` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-public-list` | `--offset` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
@@ -240,22 +240,22 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `api resources-public-list` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-public-list` | `--type` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-public-list` | `--all` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-publish` |  | ✅ |  |
-| `api resources-publish` | `--path` | ✅ |  |
+| `api resources-publish` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-publish` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-publish` | `--allow-address-access` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-publish` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-publish` | `--body` | ✅ |  |
+| `api resources-publish` | `--body` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-publish` | `--body-file` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-unpublish` |  | ✅ |  |
-| `api resources-unpublish` | `--path` | ✅ |  |
+| `api resources-unpublish` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-unpublish` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-unpublish` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api resources-upload-url` |  | ✅ |  |
-| `api resources-upload-url` | `--path` | ✅ |  |
-| `api resources-upload-url` | `--url` | ✅ |  |
+| `api resources-upload-url` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-upload-url` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api resources-upload-url` | `--url` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-upload-url` | `--disable-redirects` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api resources-upload-url` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api public-resources-get` |  | ✅ |  |
-| `api public-resources-get` | `--public-key` | ✅ |  |
+| `api public-resources-get` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api public-resources-get` | `--public-key` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-get` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-get` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-get` | `--offset` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
@@ -264,20 +264,20 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `api public-resources-get` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-get` | `--sort` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-get` | `--all` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api public-settings-update` |  | ✅ |  |
-| `api public-settings-update` | `--path` | ✅ |  |
+| `api public-settings-update` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api public-settings-update` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-settings-update` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api public-settings-update` | `--body` | ✅ |  |
+| `api public-settings-update` | `--body` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-settings-update` | `--body-file` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api public-resources-save-to-disk` |  | ✅ |  |
-| `api public-resources-save-to-disk` | `--public-key` | ✅ |  |
+| `api public-resources-save-to-disk` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api public-resources-save-to-disk` | `--public-key` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-save-to-disk` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-save-to-disk` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-save-to-disk` | `--name` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-save-to-disk` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api public-resources-save-to-disk` | `--save-path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api trash-resources-list` |  | ✅ |  |
-| `api trash-resources-list` | `--path` | ✅ |  |
+| `api trash-resources-list` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api trash-resources-list` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-list` | `--apply-photoslice-filter` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-list` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-list` | `--limit` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
@@ -286,38 +286,38 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `api trash-resources-list` | `--preview-size` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-list` | `--sort` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-list` | `--all` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api trash-resources-delete` |  | ✅ |  |
+| `api trash-resources-delete` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-delete` | `--apply-photoslice-filter` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-delete` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-delete` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-delete` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api trash-resources-restore` |  | ✅ |  |
-| `api trash-resources-restore` | `--path` | ✅ |  |
+| `api trash-resources-restore` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api trash-resources-restore` | `--path` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-restore` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-restore` | `--force-async` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-restore` | `--name` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api trash-resources-restore` | `--overwrite` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `api operations-get` |  | ✅ |  |
-| `api operations-get` | `--operation-id` | ✅ |  |
+| `api operations-get` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
+| `api operations-get` | `--operation-id` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
 | `api operations-get` | `--fields` | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |
-| `doctor` |  | ✅ |  |
-| `doctor` | `--online` | ✅ |  |
+| `doctor` |  | ❌ |  |
+| `doctor` | `--online` | ❌ |  |
 | `doctor reports show` |  | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
 | `doctor reports create` |  | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
 | `doctor reports create` | `--run` | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
 | `doctor reports create` | `--output` | ⛔ | cli-core's appDoctorCommand; its app-mcp-command test creates and shows a report |
-| `skill show` |  | ✅ |  |
-| `skill show` | `--for` | ✅ |  |
-| `skill install` |  | ✅ |  |
-| `skill install` | `--for` | ✅ |  |
-| `skill status` |  | ✅ |  |
-| `mcp serve` |  | ✅ |  |
-| `mcp serve` | `--permission` | ✅ |  |
-| `mcp serve` | `--profiles` | ✅ |  |
+| `skill show` |  | ❌ |  |
+| `skill show` | `--for` | ❌ |  |
+| `skill install` |  | ❌ |  |
+| `skill install` | `--for` | ❌ |  |
+| `skill status` |  | ❌ |  |
+| `mcp serve` |  | ❌ |  |
+| `mcp serve` | `--permission` | ❌ |  |
+| `mcp serve` | `--profiles` | ❌ |  |
 | `mcp serve` | `--http` | ⛔ | starts an HTTP server or a background process that runs until stopped; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp serve` | `--port` | ⛔ | starts an HTTP server or a background process that runs until stopped; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp serve` | `--public-url` | ⛔ | starts an HTTP server or a background process that runs until stopped; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
-| `mcp revoke` |  | ✅ |  |
+| `mcp revoke` |  | ❌ |  |
 | `mcp revoke` | `--profiles` | ⛔ | cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp server start` |  | ⛔ | starts a detached `mcp serve --http` from the built entry; cli-core tests mcpServerCommand, and the background run was checked by hand against dist/ |
 | `mcp server start` | `--port` | ⛔ | starts a detached `mcp serve --http` from the built entry; cli-core tests mcpServerCommand, and the background run was checked by hand against dist/ |
@@ -328,53 +328,53 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `mcp server stop` | `--profiles` | ⛔ | stops the detached server that `mcp server start` wrote a pid file for; cli-core tests mcpServerCommand, and no live scenario starts a server to stop |
 | `mcp server status` |  | ⛔ | starts an HTTP server or a background process that runs until stopped; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp server status` | `--profiles` | ⛔ | starts an HTTP server or a background process that runs until stopped; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
-| `mcp config` |  | ✅ |  |
-| `mcp config` | `--permission` | ✅ |  |
-| `mcp config` | `--profiles` | ✅ |  |
+| `mcp config` |  | ❌ |  |
+| `mcp config` | `--permission` | ❌ |  |
+| `mcp config` | `--profiles` | ❌ |  |
 | `mcp add` |  | ⛔ | writes Codex's or Claude Code's own MCP settings; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp add` | `--allow-writes` | ⛔ | writes Codex's or Claude Code's own MCP settings; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp add` | `--permission` | ⛔ | writes Codex's or Claude Code's own MCP settings; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp check` |  | ⛔ | starts the installed CLI as a child process, as the agent would; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
 | `mcp check` | `--permission` | ⛔ | starts the installed CLI as a child process, as the agent would; cli-core's appMcpCommand; its app-mcp-command and mcp-server-command tests drive it, and src/mcp.test.ts runs this CLI's own server, config, revoke and refusals |
-| `upgrade` |  | ✅ |  |
-| `upgrade` | `--check` | ✅ |  |
-| `config show` |  | ✅ |  |
-| `config show` | `--bot` | ✅ |  |
-| `config set` |  | ✅ |  |
-| `config set` | `--defaults` | ✅ |  |
-| `config set` | `--personal` | ✅ |  |
-| `config set` | `--bot` | ✅ |  |
-| `config unset` |  | ✅ |  |
-| `config unset` | `--defaults` | ✅ |  |
-| `config unset` | `--personal` | ✅ |  |
-| `config unset` | `--bot` | ✅ |  |
-| `config migrate` |  | ✅ |  |
-| `config repair` |  | ✅ |  |
-| `config repair` | `--dry-run` | ✅ |  |
-| `runs list` |  | ✅ |  |
-| `runs list` | `--limit` | ✅ |  |
-| `runs list` | `--page` | ✅ |  |
-| `runs show` |  | ✅ |  |
-| `runs show` | `--problems` | ✅ |  |
-| `runs path` |  | ✅ |  |
-| `help` |  | ✅ |  |
+| `upgrade` |  | ❌ |  |
+| `upgrade` | `--check` | ❌ |  |
+| `config show` |  | ❌ |  |
+| `config show` | `--bot` | ❌ |  |
+| `config set` |  | ❌ |  |
+| `config set` | `--defaults` | ❌ |  |
+| `config set` | `--personal` | ❌ |  |
+| `config set` | `--bot` | ❌ |  |
+| `config unset` |  | ❌ |  |
+| `config unset` | `--defaults` | ❌ |  |
+| `config unset` | `--personal` | ❌ |  |
+| `config unset` | `--bot` | ❌ |  |
+| `config migrate` |  | ❌ |  |
+| `config repair` |  | ❌ |  |
+| `config repair` | `--dry-run` | ❌ |  |
+| `runs list` |  | ❌ |  |
+| `runs list` | `--limit` | ❌ |  |
+| `runs list` | `--page` | ❌ |  |
+| `runs show` |  | ❌ |  |
+| `runs show` | `--problems` | ❌ |  |
+| `runs path` |  | ❌ |  |
+| `help` |  | ❌ |  |
 | *global* | `--version` | ⛔ | Commander answers before any command runs, so the trace never sees it; `pnpm version:check` checks it |
-| *global* | `--verbose` | ✅ |  |
+| *global* | `--verbose` | ❌ |  |
 | *global* | `--json` | ✅ |  |
 | *global* | `--jsonl` | ✅ |  |
-| *global* | `--quiet` | ✅ |  |
-| *global* | `--trace` | ✅ |  |
-| *global* | `--debug` | ✅ |  |
+| *global* | `--quiet` | ❌ |  |
+| *global* | `--trace` | ❌ |  |
+| *global* | `--debug` | ❌ |  |
 | *global* | `--timeout` | ✅ |  |
-| *global* | `--offline` | ✅ |  |
-| *global* | `--no-input` | ✅ |  |
-| *global* | `--max-input-bytes` | ✅ |  |
-| *global* | `--max-output-bytes` | ✅ |  |
-| *global* | `--brief` | ✅ |  |
-| *global* | `--full` | ✅ |  |
-| *global* | `--compact` | ✅ |  |
+| *global* | `--offline` | ❌ |  |
+| *global* | `--no-input` | ❌ |  |
+| *global* | `--max-input-bytes` | ❌ |  |
+| *global* | `--max-output-bytes` | ❌ |  |
+| *global* | `--brief` | ❌ |  |
+| *global* | `--full` | ❌ |  |
+| *global* | `--compact` | ❌ |  |
 | *global* | `--dry-run` | ✅ |  |
 | *global* | `--yes` | ✅ |  |
-| *global* | `--record` | ✅ |  |
-| *global* | `--no-record` | ✅ |  |
+| *global* | `--record` | ❌ |  |
+| *global* | `--no-record` | ❌ |  |
 | *global* | `--help-all` | ⛔ | Commander answers before any command runs, so the trace never sees it; contracts/help.snap covers help |
