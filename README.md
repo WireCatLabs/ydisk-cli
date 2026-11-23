@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://wirecat.dev/en/docs/ydisk">Docs</a> ·
-  <a href="https://github.com/WireCatLabs/ydisk-cli/blob/main/docs/installation.md">Install</a> ·
+  <a href="https://wirecat.dev/en/docs/ydisk/installation">Install</a> ·
   <a href="https://github.com/WireCatLabs/ydisk-cli/blob/main/docs/usage.md">Usage</a>
 </p>
 
@@ -86,6 +86,9 @@ How it compares with rclone, Yandex's own apps and the Yandex Disk MCP servers:
 [compared with other tools](https://wirecat.dev/en/docs/ydisk/compare).
 
 ## Quick start
+
+In [WireCat Desktop](https://wirecat.dev/en/download), add Yandex Disk from the tool list and paste a Yandex OAuth token
+when it asks. Or in a terminal:
 
 ```sh
 npm install -g @wirecat/yandex-disk-cli
