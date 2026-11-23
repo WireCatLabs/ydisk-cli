@@ -7,7 +7,7 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**171 ✅ · 168 ⛔ · 0 ❌** — 120 commands, 219 options.
+**179 ✅ · 168 ⛔ · 0 ❌** — 122 commands, 225 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
@@ -40,7 +40,15 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `documents show` |  | ✅ |  |
 | `documents export` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `documents export` | `--output` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
+| `documents history` |  | ✅ |  |
+| `documents history` | `--revision` | ✅ |  |
 | `documents context` |  | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
+| `changes` |  | ✅ |  |
+| `changes` | `--since` | ✅ |  |
+| `changes` | `--until` | ✅ |  |
+| `changes` | `--event` | ✅ |  |
+| `changes` | `--limit` | ✅ |  |
+| `changes` | `--page` | ✅ |  |
 | `search` |  | ✅ |  |
 | `search` | `--limit` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |
 | `search` | `--page` | ⛔ | cli-core's shared documents command, mounted by documentLibraryCommands; cli-core's documents tests and documentCommandsContract drive it, and src/library.test.ts runs the contract over this CLI |

@@ -144,6 +144,37 @@ describe("the Yandex Disk source", () => {
   })
 })
 
+describe("the history of synced files", () => {
+  it("keeps a changed file's earlier text, and a file gone from the Disk as no longer visible, not deleted", async () => {
+    const disk = tree()
+    const env = sandbox()
+    const run = (...argv: string[]) => runCli(["personal", ...argv, "--json"], { service: disk, env })
+    await run("folders", "add", "/Work")
+    await run("sync")
+    const id = disk.nodes.get("disk:/Work/plan.txt")?.resource_id as string
+    disk.put("disk:/Work/plan.txt", "the budget was cut in half")
+    await run("sync")
+    disk.remove("disk:/Work/Notes/review.md")
+    expect((await run("sync")).json().item).toMatchObject({ removed: 1 })
+
+    const versions = (await run("documents", "history", id)).json().item as { versions: unknown[] }
+    expect(versions.versions.length).toBeGreaterThanOrEqual(2)
+    expect(JSON.stringify((await run("documents", "history", id, "--revision", "1")).json())).toContain(
+      "quarterly budget",
+    )
+    const events = ((await run("changes", "--since", "1h")).json().items as { path: string; event: string }[]).map(
+      (row) => row.event,
+    )
+    expect(events).toEqual(expect.arrayContaining(["changed", "unavailable"]))
+    expect(events).not.toContain("deleted")
+    const until = new Date(Date.now() + 60_000).toISOString()
+    const only = (
+      await run("changes", "--since", "1h", "--until", until, "--event", "unavailable", "--limit", "5", "--page", "1")
+    ).json().items as { path: string; event: string }[]
+    expect(only.map((row) => row.event)).toEqual(["unavailable"])
+  })
+})
+
 describe("a chosen folder renamed on the Disk", () => {
   it("is unavailable and its copies leave, until it is added again under its new path", async () => {
     const disk = tree()

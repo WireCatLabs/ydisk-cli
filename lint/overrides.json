@@ -15,36 +15,8 @@
   },
   {
     "rule": "unknown-resource",
-    "target": "mirrors",
-    "reason": "A mirror is a saved pairing of a local folder and a Disk folder that mirrors sync keeps the same both ways, as drive's mirrors; no shared noun names it yet. ydisk is the second CLI on cli-core's mirrors, so mirrors belongs in the cli-base vocabulary.",
-    "owner": "@WireCatLabs",
-    "review_after": "2026-12-22"
-  },
-  {
-    "rule": "unknown-resource",
     "target": "mirrors versions",
     "reason": "The local versions cli-core's file mirror keeps of what a sync replaced or deleted (fileVersions); no shared noun names them yet.",
-    "owner": "@WireCatLabs",
-    "review_after": "2026-12-22"
-  },
-  {
-    "rule": "option-role",
-    "target": "mirrors sync --keep",
-    "reason": "Picks which side wins where a file changed both locally and on the Disk (local, disk or both), as drive's mirrors sync --keep; no shared flag names a conflict side yet.",
-    "owner": "@WireCatLabs",
-    "review_after": "2026-12-22"
-  },
-  {
-    "rule": "option-role",
-    "target": "mirrors sync --allow-deletions",
-    "reason": "The number of deletions the owner allows when cli-core's mirror guard stops a run (mirror.too-many-deletions); owner-only, kept off MCP.",
-    "owner": "@WireCatLabs",
-    "review_after": "2026-12-22"
-  },
-  {
-    "rule": "option-role",
-    "target": "mirrors sync --repin",
-    "reason": "The owner confirms that a replaced Disk or local folder is the mirror's folder now (cli-core's repin); owner-only, kept off MCP.",
     "owner": "@WireCatLabs",
     "review_after": "2026-12-22"
   },
@@ -63,9 +35,9 @@
     "review_after": "2026-12-22"
   },
   {
-    "rule": "option-role",
-    "target": "mirrors preview --keep",
-    "reason": "The same choice as mirrors sync --keep, so the preview shows what that sync would do.",
+    "rule": "flag-two-meanings",
+    "target": "--until",
+    "reason": "cli-core 0.722.0 mounts the document change log as a bare changes command with --since, --until <when> and --event, outside the vocabulary. Fixed in cli-core, then this override goes: https://github.com/WireCatLabs/cli-core/issues/3227",
     "owner": "@WireCatLabs",
     "review_after": "2026-12-22"
   }

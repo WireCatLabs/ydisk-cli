@@ -49,7 +49,11 @@ ydisk personal status
 ```
 
 `sync` downloads the files that are new or whose content changed since the last sync, and reads their text. A file
-deleted on the Disk leaves the copy. A file moved inside the chosen folders keeps its tags and notes.
+moved inside the chosen folders keeps its tags and notes.
+
+A file sync no longer finds on the Disk leaves lists and search, but its text stays in the copy, marked no longer
+visible. The Disk does not tell sync whether the file was deleted, moved out or lost to a share, so sync never treats
+it as deleted. When the file shows again, it comes back as it was.
 
 One sync reads up to 200 files (`--limit`) and lists up to about 10,000 entries, then saves where it stopped. A large
 folder takes several runs: run `sync` again until `status` shows no pending work. A stop loses nothing, and the next
@@ -84,6 +88,20 @@ ydisk personal documents export 1a2b3c --output ./contract.md
 `documents show` prints the whole text of one document, found by its id from `search` or `documents list`. The id
 above is an example. `documents export` writes it to a new Markdown file. Tags, notes and memories stay with a
 document and never reach the Disk. See [find a document](search.md).
+
+## Earlier versions and what changed
+
+```sh
+ydisk personal documents history 1a2b3c
+ydisk personal documents history 1a2b3c --revision 2
+ydisk personal changes --since 7d
+ydisk personal changes --since 1d --event unavailable
+```
+
+Each sync keeps a document's text, title and front matter before it changes or leaves the copy.
+`documents history` lists those versions, and `--revision` shows one. `changes` lists what was added, changed, no
+longer visible, left the chosen folders or came back, newest first. Both read the copy only, so they work offline and
+over MCP. Versions and the change log are kept for `keep_versions_for_days`, one year by default.
 
 ## Work with files live
 

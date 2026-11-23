@@ -5,6 +5,7 @@ import {
   serviceApiPermissions,
   settingsFor,
 } from "@wirecat/cli-core/cli"
+import { DOCUMENT_HISTORY_SETTINGS } from "@wirecat/cli-core/documents/cli"
 import * as manifest from "./generated/manifest.js"
 import { IDENTITY, SERVICE } from "./identity.js"
 
@@ -85,4 +86,8 @@ export const permissions = commandPermissions({
   },
 })
 
-export const configuration: Configuration = settingsFor(IDENTITY, { permissions })
+export const configuration: Configuration = settingsFor(IDENTITY, {
+  permissions,
+  profile: DOCUMENT_HISTORY_SETTINGS.profile,
+  settings: DOCUMENT_HISTORY_SETTINGS.settings,
+})

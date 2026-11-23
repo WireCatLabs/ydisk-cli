@@ -607,7 +607,8 @@ it("a file deleted here is trashed on the Disk by its md5, with no download, and
       ?.url.searchParams.get("md5"),
   ).toBe(createHash("md5").update("g1").digest("hex"))
   const events = (await cli(["versions", "list", id, "gone.txt"])).json().items as { event: string }[]
-  expect(events.at(-1)).toMatchObject({ event: "deleted", from: "remote", old_in: "remote-trash", available: false })
+  // cli-core 0.721 keeps a mirrored text file's last synced content for merges, so the old version is here as well.
+  expect(events.at(-1)).toMatchObject({ event: "deleted", from: "remote", available: true })
 })
 
 /** The Disk with its flat listing stuck from `offset` on until the request is stopped, slower than any deadline. */

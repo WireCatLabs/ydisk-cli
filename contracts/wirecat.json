@@ -196,6 +196,18 @@
     {
       "path": [
         "documents",
+        "history"
+      ],
+      "summary": "list the versions of a document kept in the local copy, or show one with…",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "documents.history"
+    },
+    {
+      "path": [
+        "documents",
         "context"
       ],
       "summary": "show a document with its tags, relationships, notes, memories and editors",
@@ -204,6 +216,17 @@
         "local": "read"
       },
       "permission": "documents.context"
+    },
+    {
+      "path": [
+        "changes"
+      ],
+      "summary": "list the documents the sync added, changed, removed or brought back, newest…",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "changes"
     },
     {
       "path": [

@@ -65,6 +65,7 @@ only failures) or it ran with `--no-record`. `record_input` decides whether a ru
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `limit` | `20` | How many items a list shows at once. |
+| `keep_versions_for_days` | `365` | Days earlier versions of synced files, and the change log, are kept. A sync that finishes its pass drops older ones. A profile or `defaults`. |
 | `search_reranker` | `mmarco` | The model that orders search's first hits, or `off`. |
 | `embedding_provider` | `local` | `local` or `openai`: what turns text into vectors for search by meaning. `openai` sends the text to OpenAI. |
 | `update_check` | `true` | Check once a day for a newer version. |

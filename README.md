@@ -145,10 +145,12 @@ ydisk personal folders add /Documents
 ydisk personal sync                               # read what changed since the last sync
 ydisk personal search "quarterly budget" --json
 ydisk personal documents list
+ydisk personal changes --since 7d                 # what sync added, changed or no longer finds
 ```
 
 To read one document in full, pass an id from `documents list` or `search` to `ydisk personal documents show`.
 Tags, notes and memories stay attached to a document, and `documents export` writes it to a Markdown file.
+`documents history <id>` lists the earlier versions sync kept, and `--revision <n>` shows one.
 
 Choose folders rather than the whole Disk: each sync lists every one of their subfolders.
 
