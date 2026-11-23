@@ -39,7 +39,8 @@ Use ydisk CLI with profile personal. Open /Work/Q3/report.xlsx on my Disk and te
 ydisk personal files download /Work/Q3/report.xlsx --json
 ```
 
-`files download` without `--output` answers the file's text, so nothing is saved on your computer.
+`files download` without `--output` answers the file's text, so nothing is saved on your computer. The answer
+carries the file's `sha256`. A text longer than 200,000 characters is cut and says `truncated: true`.
 
 ## Tidy last year's invoices into an archive
 

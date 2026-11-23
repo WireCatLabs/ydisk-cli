@@ -1011,7 +1011,7 @@ ydisk files show <path>
 
 ### `ydisk files download`
 
-read a Disk file's text (PDF, docx, xlsx, CSV, TSV, text, Markdown), or with --output save the file itself; the token never goes to the download host
+read a Disk file's text (PDF, docx, xlsx, CSV, TSV, text, Markdown), or with --output save the file itself; the token never goes to the download host. A text longer than 200,000 characters is cut there with truncated: true: never write a cut text back over the file, it would lose the rest
 
 **Changes something on this computer only.**
 

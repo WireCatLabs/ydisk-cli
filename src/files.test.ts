@@ -1,8 +1,10 @@
+import { createHash } from "node:crypto"
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
 import { diskApi } from "./testing/disk-api.js"
+import { fakeDisk } from "./testing/fake-disk.js"
 import { runCli } from "./testing/harness.js"
 
 const configFile = join(process.env.YDISK_CONFIG_DIR ?? "", "config.json")
@@ -242,5 +244,32 @@ describe("files, the options of each command", () => {
     expect(bad.code).not.toBe(0)
     const next = await runCli(["personal", "folders", "browse", "--cursor", "200", "--json"], { service: diskApi() })
     expect(next.code, next.err).toBe(0)
+  })
+})
+
+describe("hashes and long texts", () => {
+  const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
+  const OLD = "# Notes\nthe first draft\n"
+  const setup = () => {
+    const service = fakeDisk()
+    service.put("disk:/notes.md", OLD, "text/markdown")
+    return service
+  }
+
+  it("show and download give the file's md5 and sha256", async () => {
+    const service = setup()
+    const shown = await runCli(["personal", "files", "show", "/notes.md", "--json"], { service })
+    expect(shown.json().item).toMatchObject({ sha256: sha256(OLD), md5: expect.any(String) })
+    const read = await runCli(["personal", "files", "download", "/notes.md", "--json"], { service })
+    expect(read.json().item).toMatchObject({ text: OLD, sha256: sha256(OLD), truncated: false })
+  })
+
+  it("a text longer than 200,000 characters is cut there and says truncated: true", async () => {
+    const service = setup()
+    service.put("disk:/long.txt", "x".repeat(200_010))
+    const read = await runCli(["personal", "files", "download", "/long.txt", "--json"], { service })
+    const item = read.json().item as { text: string; truncated: boolean }
+    expect(item.truncated).toBe(true)
+    expect(item.text).toHaveLength(200_000)
   })
 })
