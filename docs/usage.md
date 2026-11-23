@@ -11,9 +11,10 @@ assumes you have [signed in](installation.md).
 3. [Sync](#sync)
 4. [What the copy holds](#what-the-copy-holds)
 5. [Read a synced document](#read-a-synced-document)
-6. [Work with files live](#work-with-files-live)
-7. [Edit a file on the Disk](#edit-a-file-on-the-disk)
-8. [Output for scripts](#output-for-scripts)
+6. [Earlier versions and what changed](#earlier-versions-and-what-changed)
+7. [Work with files live](#work-with-files-live)
+8. [Edit a file on the Disk](#edit-a-file-on-the-disk)
+9. [Output for scripts](#output-for-scripts)
 
 ## The profile comes first
 
