@@ -17,14 +17,8 @@
   only). A side that changed since is refused with nothing written.
 - **`mirrors sync --allow-replacements <count>`** lets one run replace up to that many existing files when the guard
   stops it; `--replace` still allows any number.
-
 - **A whole-Disk sync goes on listing where the last run stopped.** A Disk too big to list in one run is listed over
   several, so each run is the usual length; the stopped answer says to run it again instead of asking for more
   time, and `listed` shows `resumed` and `so_far`. A folder's mirror still lists from the start each run.
 - **`files restore`** takes a version from `files history` as well as a path in the trash.
-
-### Changed — may break callers
-
-- **`files download` gives no `sha256` for a text it cut or read out of a PDF, docx or xlsx** (`sha256: null`), so
-  such a text cannot be written back over the file. `files show` still gives the file's hash.
 - Requires `@wirecat/cli-core` 0.722.0 and `@wirecat/cli-base` 0.127.0.

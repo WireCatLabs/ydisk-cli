@@ -278,6 +278,7 @@ sed 's/send the report/send the report to Anna/' "$work/merge/plan.md" >"$work/p
 wait_sha "$edit/merge/plan.md" "$(hash_of "$work/plan-disk.md")"
 sed -i 's/write the brief/write the brief and the budget/' "$work/merge/plan.md"
 "${cli[@]}" live mirrors sync "$merge_id" --yes --json >"$work/g-sync.json"
+wait_sha "$edit/merge/plan.md" "$(hash_of "$work/merge/plan.md")"
 "${cli[@]}" live files download "$edit/merge/plan.md" --output "$work/plan-merged.md" --json >/dev/null
 node -e '
   const fs = require("fs")
