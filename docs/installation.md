@@ -1,18 +1,31 @@
 # Install and sign in
 
-Set up `ydisk` once on each computer where you or an agent use it. After these steps your Disk is connected under a
-profile name you choose, and the first search works. Signing in means pasting a Yandex OAuth token: a key that Yandex
-gives you for your own account, which lets the tool use your Disk. Getting it takes about five minutes, once.
+Connect your Yandex Disk once, and from then on your AI agent finds any document on it by what it says. Yandex lets a
+program use your Disk only with an OAuth token, a key that Yandex gives you for your own account. Getting the token
+takes about five minutes, once.
+
+After these steps your Disk is connected under a profile name you choose, and the first search works. You can do it
+all in [WireCat Desktop](https://wirecat.dev/en/docs/desktop), an app that installs the tools for you, or in a terminal with npm.
 
 **On this page:**
 
-1. [Install the tool](#install-the-tool)
-2. [Get a Yandex token](#get-a-yandex-token)
-3. [Sign in](#sign-in)
-4. [Check that it works](#check-that-it-works)
-5. [A computer with no keyring](#a-computer-with-no-keyring)
-6. [Update](#update)
-7. [Remove](#remove)
+1. [In WireCat Desktop](#in-wirecat-desktop)
+2. [Install the tool](#install-the-tool)
+3. [Get a Yandex token](#get-a-yandex-token)
+4. [Sign in](#sign-in)
+5. [Check that it works](#check-that-it-works)
+6. [A computer with no keyring](#a-computer-with-no-keyring)
+7. [Update](#update)
+8. [Remove](#remove)
+
+## In WireCat Desktop
+
+1. Get a token, as [get a Yandex token](#get-a-yandex-token) shows.
+2. On the **Tools** page, click **Install** on the Yandex Disk row.
+3. Click **Manage**, type an account name, such as `personal`, and click **Sign in here**.
+4. Paste the token. Then choose the folders to copy.
+
+Desktop also gives your AI agents the tool's skill, so the terminal steps are not needed.
 
 ## Install the tool
 
@@ -115,8 +128,19 @@ your agent's instructions match the new version.
 
 ## Remove
 
-`ydisk personal session end` forgets the profile's token on this computer, and [Data access](https://id.yandex.ru/personal/data-access) in Yandex ID
-revokes it at Yandex. Then remove the tool:
+To forget one account on this computer, remove its profile:
+
+```sh
+ydisk personal account remove --keep-data
+```
+
+It deletes the profile's token and its settings. Say what happens to the files it copied: `--keep-data` leaves them
+in the store, where search still finds them, and `--delete-data` deletes them, with the list of folders you chose to
+copy. Nothing on your Disk changes. At a terminal it asks first, `--yes` answers for a script, and `--dry-run` lists
+what it would remove without removing it. The token stays valid at Yandex: revoke it in
+[Data access](https://id.yandex.ru/personal/data-access) in Yandex ID.
+
+`ydisk personal session end` forgets only the token and keeps the profile. To remove the tool itself:
 
 ```sh
 npm uninstall -g @wirecat/yandex-disk-cli

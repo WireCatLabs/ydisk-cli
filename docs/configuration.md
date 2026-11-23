@@ -4,6 +4,13 @@ Change how `ydisk` behaves for one profile or for all of them: what an agent may
 records are kept, and how search orders its hits. Settings live in one file, `config.json`, in the folder
 `ydisk doctor` shows. Each profile has its own part, and `defaults` apply to every profile.
 
+**On this page:**
+
+1. [Permissions](#permissions)
+2. [Run records](#run-records)
+3. [Other settings](#other-settings)
+4. [Environment variables](#environment-variables)
+
 ```sh
 ydisk personal config show
 ydisk personal config set limit 50
@@ -77,3 +84,4 @@ only failures) or it ran with `--no-record`. `record_input` decides whether a ru
 | --- | --- |
 | `YDISK_PROFILE` | The profile for commands that name none. |
 | `YDISK_READ_ONLY` | `1` refuses every change. |
+| `YDISK_TOKEN` | A Yandex OAuth token that every profile uses instead of its saved one, for a CI job or a container with no keyring. `session status` then names it as the token's source. |
