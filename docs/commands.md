@@ -249,7 +249,7 @@ ydisk documents list [query] [options]
 | `--limit <n>` | how many documents to return. Default: `50`. |
 | `--page <n>` | which page to return. Default: `1`. |
 
-**Next usually:** `ydisk documents show <document>`, `ydisk documents context <document>`, `ydisk tags list <document> [query]`
+**Next usually:** `ydisk documents show <document>`, `ydisk documents history <document>`, `ydisk documents context <document>`
 
 **Example:** `ydisk personal documents list`, `ydisk personal documents list tag:budget`, `ydisk personal documents list person:PERSON_UID --limit 10`
 
@@ -287,6 +287,24 @@ ydisk documents export <document> [options]
 
 **Example:** `ydisk personal documents export DOC_ID --output notes.md`
 
+### `ydisk documents history`
+
+list the versions of a document kept in the local copy, or show one with --revision
+
+```sh
+ydisk documents history <document> [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `document` | required | file id (resource_id) or a search hit's document: ref. |
+
+| Option | What it does |
+|---|---|
+| `--revision <n>` | show the text of this version. |
+
+**Example:** `ydisk personal documents history DOC_ID`, `ydisk personal documents history DOC_ID --revision 3`
+
 ### `ydisk documents context`
 
 show a document with its tags, relationships, notes, memories and editors
@@ -300,6 +318,24 @@ ydisk documents context <document>
 | `document` | required | Yandex Disk file or folder id or URL in the local catalog, or a document:<n> ref. |
 
 **Example:** `ydisk personal documents context DOC_ID`
+
+## `ydisk changes`
+
+list the documents the sync added, changed, removed or brought back, newest first
+
+```sh
+ydisk changes [options]
+```
+
+| Option | What it does |
+|---|---|
+| `--since <when>` | from this time: an ISO 8601 time, today, yesterday, or 30m, 2h, 1d ago. Default: `1d`. |
+| `--until <when>` | up to this time, in the same forms. |
+| `--event <events>` | only these, comma separated: added, changed, restored, deleted, unavailable, unsynced. |
+| `--limit <n>` | how many changes to return. Default: `50`. |
+| `--page <n>` | which page to return. Default: `1`. |
+
+**Example:** `ydisk personal changes`, `ydisk personal changes --since 7d --event deleted,unavailable`
 
 ## `ydisk search`
 
@@ -349,7 +385,7 @@ ydisk catalog show <file>
 |---|---|---|
 | `file` | required | Yandex Disk file or folder id, or its URL. |
 
-**Next usually:** `ydisk documents show <document>`, `ydisk documents context <document>`, `ydisk tags list <document> [query]`
+**Next usually:** `ydisk documents show <document>`, `ydisk documents history <document>`, `ydisk documents context <document>`
 
 **Example:** `ydisk personal catalog show FILE_ID --offline`
 
@@ -370,7 +406,7 @@ ydisk catalog list [query] [options]
 | `--limit <n>` | how many entries to return (at most 1000). Default: `50`. |
 | `--page <n>` | which page to return. Default: `1`. |
 
-**Next usually:** `ydisk documents show <document>`, `ydisk documents context <document>`, `ydisk tags list <document> [query]`
+**Next usually:** `ydisk documents show <document>`, `ydisk documents history <document>`, `ydisk documents context <document>`
 
 **Example:** `ydisk personal catalog list "parent:FOLDER_ID AND kind:file" --offline`
 
@@ -391,7 +427,7 @@ ydisk catalog search <query> [options]
 | `--limit <n>` | how many entries to return (at most 1000). Default: `50`. |
 | `--page <n>` | which page to return. Default: `1`. |
 
-**Next usually:** `ydisk documents show <document>`, `ydisk documents context <document>`, `ydisk tags list <document> [query]`
+**Next usually:** `ydisk documents show <document>`, `ydisk documents history <document>`, `ydisk documents context <document>`
 
 **Example:** `ydisk personal catalog search "budget AND person:Rin*" --offline`
 
@@ -2090,7 +2126,7 @@ ydisk config set <setting> <value> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities, crm.<provider>:<account>.files.max_files, crm.<provider>:<account>.files.max_file_mb, crm.<provider>:<account>.files.max_run_mb, crm.<provider>:<account>.files.run_minutes, crm.<provider>:<account>.files.days, crm.<provider>:<account>.files.max_total_mb. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, keep_versions_for_days, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities, crm.<provider>:<account>.files.max_files, crm.<provider>:<account>.files.max_file_mb, crm.<provider>:<account>.files.max_run_mb, crm.<provider>:<account>.files.run_minutes, crm.<provider>:<account>.files.days, crm.<provider>:<account>.files.max_total_mb. |
 | `value` | required | a number, true or false; for a group tg:work,max:Alice,email:me@x. |
 
 | Option | What it does |
@@ -2111,7 +2147,7 @@ ydisk config unset <setting> [options]
 
 | Argument | | What it is |
 |---|---|---|
-| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities, crm.<provider>:<account>.files.max_files, crm.<provider>:<account>.files.max_file_mb, crm.<provider>:<account>.files.max_run_mb, crm.<provider>:<account>.files.run_minutes, crm.<provider>:<account>.files.days, crm.<provider>:<account>.files.max_total_mb. |
+| `setting` | required | one of: limit, timeout_ms, color, record, record_input, keep_runs_for_days, keep_successful_runs_for_days, keep_store_runs_for_days, runs_size_limit_mb, permissions, requests_per_minute, search_reranker, embedding_provider, embedding_model, embedding_base_url, embedding_dims, models, keep_versions_for_days, update_check, skill_hint, search_stemmers.cyrillic, search_stemmers.latin, owner_languages, crm.<provider>:<account>.links, crm.<provider>:<account>.company-types, crm.<provider>:<account>.scope, crm.<provider>:<account>.unassigned, crm.<provider>:<account>.self, crm.<provider>:<account>.stage-tasks, crm.<provider>:<account>.activities, crm.<provider>:<account>.files.max_files, crm.<provider>:<account>.files.max_file_mb, crm.<provider>:<account>.files.max_run_mb, crm.<provider>:<account>.files.run_minutes, crm.<provider>:<account>.files.days, crm.<provider>:<account>.files.max_total_mb. |
 
 | Option | What it does |
 |---|---|

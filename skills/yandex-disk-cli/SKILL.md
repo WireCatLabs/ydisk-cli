@@ -23,6 +23,8 @@ The owner's chosen folders are copied to this computer as text. Search there fir
 ```sh
 ydisk personal search "quarterly budget" --json      # hits with the file id and an excerpt
 ydisk personal documents show <id> --json            # the whole text of one file
+ydisk personal documents history <id> --json         # earlier versions sync kept; --revision <n> shows one
+ydisk personal changes --since 1d --json             # what sync added, changed or no longer finds
 ydisk personal status --json                          # last sync, documents held, what is pending
 ydisk personal sync --json                            # bring the copy up to date; run again while it says complete: false
 ```
