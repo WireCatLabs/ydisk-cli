@@ -5,21 +5,5 @@
     "target": "entity selected_folder",
     "reason": "cli-core #3105 (0.700.0) adds a folder's name and Disk path to the shared folders list row; drive prints its own folders list and has not adopted name/path yet, and the entry goes once it does.",
     "review_after": "2026-12-03"
-  },
-  {
-    "group": "ydisk",
-    "rule": "same-flag-meaning",
-    "target": "drive+ydisk --since",
-    "expected": "ydisk: <when>, drive: <time>",
-    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the other CLIs take <time>; cli-core 0.724.0 (#3228) uses <time>, and the entry goes with the ydisk bump to it.",
-    "review_after": "2026-12-07"
-  },
-  {
-    "group": "ydisk",
-    "rule": "same-flag-meaning",
-    "target": "drive+max+tg+wa+ydisk --until",
-    "expected": "ydisk: <when>, drive: <time>, max: <time>, tg: <time>, wa: <time>",
-    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the other CLIs take <time>; cli-core 0.724.0 (#3228) uses <time>, and the entry goes with the ydisk bump to it.",
-    "review_after": "2026-12-07"
   }
 ]
