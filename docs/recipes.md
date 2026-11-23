@@ -11,8 +11,9 @@ paths and names to yours. The ones here are examples.
 3. [Tidy last year's invoices into an archive](#tidy-last-years-invoices-into-an-archive)
 4. [Share a file and close the link later](#share-a-file-and-close-the-link-later)
 5. [Put a report the agent wrote on the Disk](#put-a-report-the-agent-wrote-on-the-disk)
-6. [Undo a delete](#undo-a-delete)
-7. [Keep the copy current every morning](#keep-the-copy-current-every-morning)
+6. [Edit a file with your agent](#edit-a-file-with-your-agent)
+7. [Undo a delete](#undo-a-delete)
+8. [Keep the copy current every morning](#keep-the-copy-current-every-morning)
 
 ## Find a contract and quote its terms
 
@@ -39,8 +40,9 @@ Use ydisk CLI with profile personal. Open /Work/Q3/report.xlsx on my Disk and te
 ydisk personal files download /Work/Q3/report.xlsx --json
 ```
 
-`files download` without `--output` answers the file's text, so nothing is saved on your computer. The answer
-carries the file's `sha256`. A text longer than 200,000 characters is cut and says `truncated: true`.
+`files download` without `--output` answers the file's text, so nothing is saved on your computer. A text longer than
+200,000 characters is cut and says `truncated: true`. For the cells themselves, with their formulas,
+`ydisk personal files sheets show /Work/Q3/report.xlsx` answers them by address.
 
 ## Tidy last year's invoices into an archive
 
@@ -84,6 +86,63 @@ ydisk personal files upload ./summary.md --folder /Reports
 
 An upload refuses credential files, browser profiles and the WireCat folders, so an agent cannot send them to the
 Disk by mistake.
+
+## Edit a file with your agent
+
+The agent reads the file, edits it, and writes it back with the `sha256` it read. If someone changed the file in the
+meantime, the write is refused and nothing is uploaded: the agent reads it again and redoes the edit. What each edit
+replaced is kept on this computer.
+
+A Markdown note:
+
+```text prompt
+Use ydisk CLI with profile personal. In /Notes/plan.md on my Disk, tick "send the invoice" and add
+"call the bank" under Friday. Keep everything else as it is.
+```
+
+```sh
+ydisk personal files download /Notes/plan.md --json
+ydisk personal files update /Notes/plan.md --expected-fingerprint <sha256 from the download> < plan.md
+```
+
+The download answers the whole text and its `sha256`. A text cut at 200,000 characters has no `sha256`, so it can
+never be written back.
+
+A spreadsheet:
+
+```text prompt
+Use ydisk CLI with profile personal. In /Work/budget.xlsx, set the March rent to 1300 and mark it paid.
+```
+
+```sh
+ydisk personal files sheets show /Work/budget.xlsx "Sheet1!A1:D20" --json
+ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3:C3" --values '[[1300, "paid"]]' --expected-fingerprint <sha256>
+```
+
+Only those cells change; the formatting, the other sheets and the formulas stay. A formula cell is refused unless the
+agent adds `--replace`.
+
+A Word document:
+
+```text prompt
+Use ydisk CLI with profile personal. In /Work/letter.docx, replace the second paragraph with
+"The pond opens on Monday." and add "Kind regards, Anna" at the end.
+```
+
+```sh
+ydisk personal files documents show /Work/letter.docx --json
+ydisk personal files documents update /Work/letter.docx --payload '[{"index": 1, "text": "The pond opens on Monday."}, {"insert_after": 5, "text": "Kind regards, Anna"}]' --expected-fingerprint <sha256>
+```
+
+The paragraphs keep their style. A paragraph with a tracked change, an image, a comment or a link is refused with the
+reason, so the agent can tell you instead.
+
+To undo an edit:
+
+```sh
+ydisk personal files history /Work/letter.docx
+ydisk personal files restore /Work/letter.docx <version> --expected-fingerprint <sha256 the file has now>
+```
 
 ## Undo a delete
 

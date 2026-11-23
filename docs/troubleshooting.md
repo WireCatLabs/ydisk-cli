@@ -38,7 +38,7 @@ ydisk personal doctor --online
 | An upload fails because the Disk is full | Free space on the Disk or empty its trash. A retry does not help until there is room. |
 | A large upload is refused | Yandex limits one file's size by plan: 1 GB without a Yandex 360 plan, more with one ([Yandex's limits](https://yandex.ru/support/yandex-360/customers/disk/web/ru/uploading)). |
 | A change ended with "outcome_unknown", exit code 14 | Yandex failed during the change, so it may or may not have happened. Check with `files show` before you run it again. |
-| An agent changed a file you did not want changed | Over MCP the ask level lets a command run. Deny `files.delete` and `files.share`, or set `YDISK_READ_ONLY=1`. See [connect your agent](mcp.md#decide-what-the-agent-may-change). A deleted file is in the Disk's trash: `files restore`. |
+| An agent changed a file you did not want changed | Over MCP the ask level lets a command run. Deny `files.delete` and `files.share`, or set `YDISK_READ_ONLY=1`. See [connect your agent](mcp.md#decide-what-the-agent-may-change). A deleted file is in the Disk's trash: `files restore`. An edited file's old content is kept here: `files history`, then `files restore <path> <version>`. |
 | The settings file does not read | `doctor` lists every problem in the file under `config.issues`. Run the `config unset` each one gives, `config repair`, or fix the file by hand. |
 | `doctor` lists `files.problems` | Other users of the computer can read `config.json` or enter its folder. Run each `chmod` that `doctor` prints after "to make it private:". |
 

@@ -26,6 +26,9 @@
   WireCat's local store, and one search finds it by words and word forms, and by meaning once indexed.
 - **The whole Disk, live.** List, read, download, upload, copy, move, delete to the trash, restore and share files
   without opening a browser.
+- **Edit a file where it is.** An agent changes a Markdown note, cells of an Excel workbook or paragraphs of a Word
+  document on the Disk, at the content it read. The file is checked just before the write, and what it replaced is
+  kept on your computer.
 - **Safe to give to an agent.** Deleting and public links ask first at a terminal, and one setting turns either off
   for an agent.
 
@@ -35,12 +38,17 @@
   file name.
 - **Read a file without saving it.** An agent reads the text of a PDF, docx, xlsx, CSV or Markdown file on the Disk
   and answers from it.
+- **Change a note, a spreadsheet or a letter in place.** `files update` writes a text file, `files sheets update`
+  writes cells and keeps the workbook's formatting and formulas, `files documents update` replaces paragraphs and
+  keeps their style. Each takes the file's `sha256` from when it was read and is refused when someone changed the
+  file since; `files history` and `files restore` put an earlier version back.
 - **Keep the Disk tidy.** Move, copy, rename into a folder, and delete to the trash, where `files restore` brings a
   file back.
 - **Share on request.** A public link for a file or folder, and close it again when you are done.
 - **A folder on your computer that stays in step with the Disk.** Edit files with your own tools; a mirror sends
   your changes up and brings the Disk's down. Mirror one folder or the whole Disk, and leave out the folders you
-  choose. A deleted file goes to a trash, never away, and many deletions at once wait for your approval.
+  choose. A note edited here and on your phone in different places is merged; a real conflict waits for you in
+  `mirrors conflicts`. A deleted file goes to a trash, never away, and many deletions at once wait for your approval.
 - **The Disk as a folder in your file manager, read-only.** `ydisk personal files serve` shows a Disk folder next
   to your own, on Linux, macOS and Windows, with nothing to install. Open and read any file there; nothing can delete
   or change the Disk through it ([mount](https://github.com/WireCatLabs/ydisk-cli/blob/main/docs/mount.md)).
@@ -165,16 +173,21 @@ ydisk personal files move /Documents/old.pdf --folder /Archive
 ydisk personal files delete /Documents/old.pdf       # to the Disk's trash, files restore brings it back
 ydisk personal files publish /Documents/plan.pdf     # a public link: anyone with it can open the file
 ydisk personal files unpublish /Documents/plan.pdf
+ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint <sha256>
+ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3" --values '[[1300]]' --expected-fingerprint <sha256>
+ydisk personal files history /Work/budget.xlsx      # what this computer's edits replaced; files restore puts it back
 ```
 
-`files show`, `files copy` and `files create` (a new folder) are commands too.
+`files show`, `files copy`, `files create` (a new folder), `files sheets show` and `files documents show|update` are
+commands too. More: [edit a file on the Disk](https://github.com/WireCatLabs/ydisk-cli/blob/main/docs/usage.md#edit-a-file-on-the-disk)
 
 ### Keep a local folder in step
 
 ```sh
 ydisk personal mirrors add /Notes ~/notes
 ydisk personal mirrors preview                        # what a sync would copy, and nothing else
-ydisk personal mirrors sync                           # both ways; a file changed on both sides is reported
+ydisk personal mirrors sync                           # both ways; text edits on both sides merge
+ydisk personal mirrors conflicts list                 # what could not merge; show and resolve settle it
 ydisk personal mirrors watch                          # keep syncing until Ctrl-C
 ```
 

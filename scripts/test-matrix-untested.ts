@@ -48,6 +48,13 @@ export const UNTESTED: { command: string; option?: string; reason: string }[] = 
   ...["--limit", "--rescan"].map((option) => ({ command: "sync", option, reason: SHARED_DOCUMENTS })),
   ...["--limit", "--page", "--exact"].map((option) => ({ command: "search", option, reason: SHARED_DOCUMENTS })),
   ...shared,
+  ...[undefined, "--since", "--until", "--event", "--limit", "--page"].map((option) => ({
+    command: "changes",
+    ...(option ? { option } : {}),
+    reason:
+      "cli-core's shared change log of the synced copy, mounted by documentLibraryCommands; cli-core's history tests " +
+      "drive it over the store",
+  })),
   {
     command: "",
     option: "--help-all",

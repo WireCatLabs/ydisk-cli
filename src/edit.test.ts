@@ -192,6 +192,41 @@ describe("Office files edited in place", () => {
     expect(value("A3")).toBe("Heron food")
   })
 
+  it("sheets update refuses a formula cell unless --replace, which says Excel recalculates the workbook", async () => {
+    withPermissions({ "files.delete": "allow" })
+    const { service, cli } = setup()
+    const fingerprint = () => sha256(service.nodes.get("disk:/budget.xlsx")?.bytes ?? "")
+    const refused = await cli([
+      "sheets",
+      "update",
+      "/budget.xlsx",
+      "B4",
+      "--values",
+      "[[1]]",
+      "--expected-fingerprint",
+      fingerprint(),
+      "--json",
+    ])
+    expect(refused.json()).toMatchObject({ error: { code: "validation_error" } })
+    expect(JSON.stringify(refused.json())).toContain("--replace")
+    const replaced = await cli([
+      "sheets",
+      "update",
+      "/budget.xlsx",
+      "B4",
+      "--values",
+      "[[1]]",
+      "--expected-fingerprint",
+      fingerprint(),
+      "--replace",
+      "--json",
+    ])
+    expect(replaced.code, replaced.err).toBe(0)
+    const [sheet] = await readXlsxCells(new Uint8Array(service.nodes.get("disk:/budget.xlsx")?.bytes ?? []), {})
+    expect(sheet?.cells.find((cell) => cell.address === "B4")).toMatchObject({ value: 1 })
+    expect(sheet?.cells.find((cell) => cell.address === "B4")?.formula).toBeUndefined()
+  })
+
   it("documents show gives the paragraphs and the sha256; documents update changes one and keeps the rest", async () => {
     withPermissions({ "files.delete": "allow" })
     const { service, cli } = setup()

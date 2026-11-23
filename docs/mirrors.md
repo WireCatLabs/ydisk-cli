@@ -2,8 +2,9 @@
 
 A mirror keeps a folder on your computer and a folder on Yandex Disk the same, both ways. Edit a file in your editor,
 and the next sync puts it on the Disk. Change it on the Disk, on your phone or in the browser, and the sync brings it
-down. A deleted file goes to a trash, never away, and the version a sync replaces is kept, on either side. A file
-changed on both sides is never overwritten without you.
+down. A deleted file goes to a trash, never away, and the version a sync replaces is kept, on either side. A text file
+changed on both sides in different places is merged; any other file changed on both sides is never overwritten
+without you.
 
 Use a mirror when you work on files with local tools, such as an editor, a script or an agent, and want them on the
 Disk too, without installing the Yandex Disk app. The files stay as they are: a PDF stays a PDF, a note stays a
@@ -65,11 +66,13 @@ works like any other mirror: everything on this page holds for it. Two things ma
   versions stay for 30 days.
 - **Size.** A mirror holds up to 100,000 files, not counting the ones you leave out.
 - **Time.** One sync runs up to 15 minutes in a terminal and 45 seconds when an agent runs it. It stops before that on
-  its own, keeps what it did, and says how far it got: each mirror's `listed` shows how many Disk files it listed and
-  whether the listing was complete. Run `mirrors sync` again to go on. A first sync of a big Disk takes several runs.
-  When the listing alone fills the run, nothing is synced and the answer suggests a longer `--timeout`, such as
-  `ydisk personal mirrors sync --timeout 1h`. A listing cut short deletes nothing: the Disk files it did not reach are
-  only counted, under `unlisted`.
+  its own, keeps what it did, and says how far it got. Run `mirrors sync` again to go on: the next run lists the Disk
+  from where the last one stopped, not from the start, so a first sync of a big Disk finishes over several runs of
+  any length. Each mirror's `listed` shows how many Disk files this run listed (`files`), whether the listing is
+  complete, whether it went on from an earlier run (`resumed`), and how many files all the runs have listed so far
+  (`so_far`). The files listed so far sync at once; a deletion waits until the whole Disk is listed. A listing cut
+  short deletes nothing: the Disk files it did not reach yet are only counted, under `unlisted`. A place kept for more
+  than 7 days starts the listing over.
 
 ## Leave folders out
 
@@ -125,9 +128,32 @@ so it works offline.
 
 ## A file changed on both sides
 
-When a file changed here and on the Disk since the last sync, the sync leaves both copies alone and reports the
-file under `conflicts`, with the time and size of each side. The sync then ends with an error, so a script notices.
-Settle the conflicts with another run:
+A text file (`.md`, `.markdown`, `.txt`, `.csv` or `.tsv`, up to 1 MB) that changed here and on the Disk is merged
+line by line, as Git merges: your edit of one section and an edit of another section on your phone both land, on
+both sides. The answer lists the file under `merged`, and `mirrors preview` shows it as a `merge` step. Two changes
+need at least one unchanged line between them. Changes on the same or neighbouring lines are a conflict, because two
+edits that read fine alone can read wrong together. A Markdown checklist tick and an edit of the same item's text
+still merge. The three contents of every merge (the last sync's, yours and the Disk's) and the result are kept on
+this computer for good; [`versions list`](#earlier-versions-of-a-file) names each one's role.
+
+Any other file changed on both sides, and a merge that conflicts, is left alone on both sides and reported under
+`conflicts`, with the time and size of each side. The sync then ends with an error, so a script notices. See and
+settle each conflict:
+
+```sh
+ydisk personal mirrors conflicts list
+ydisk personal mirrors conflicts show 1a2b3c4d notes/plan.md
+ydisk personal mirrors conflicts resolve 1a2b3c4d notes/plan.md --keep disk
+ydisk personal mirrors conflicts resolve 1a2b3c4d notes/plan.md --file ~/plan-final.md
+```
+
+`conflicts show` gives the three versions and each stretch of lines that conflicts. Its `merged` is the whole file
+with Git's conflict markers: edit it into the final text and give it to `resolve --file`. `resolve` writes one final
+content to both sides at once: `--keep local`, `--keep disk`, `--keep both` (the Disk's copy beside yours), or
+`--file`. It refuses, with nothing written, when either side changed since the sync found the conflict; sync again
+and look at the new conflict. Every replaced version is kept.
+
+You can also settle every conflict of a mirror with the next run:
 
 | Command | What happens |
 | --- | --- |
@@ -172,11 +198,12 @@ list first:
 
 ```sh
 ydisk personal mirrors preview 1a2b3c4d
-ydisk personal mirrors sync 1a2b3c4d --allow-deletions 40 --replace
+ydisk personal mirrors sync 1a2b3c4d --allow-deletions 40 --allow-replacements 120
 ```
 
-`--allow-deletions` allows up to that many deletions, `--replace` any number of replacements, for that one run. Each
-replaced file is kept as a version first. With more than one mirror, both need the mirror's id, so an approval never
+`--allow-deletions` allows up to that many deletions and `--allow-replacements` up to that many replacements, for that
+one run. `--replace` allows any number of replacements. A merge counts as a replacement. Each replaced file is kept
+as a version first. With more than one mirror, both need the mirror's id, so an approval never
 covers another mirror. A stopped mirror does not hold up the others: they sync
 as usual. `mirrors watch` reports the stop again at every cycle that syncs the mirror, until you allow the run or put
 the files back.
@@ -204,12 +231,15 @@ ydisk personal mirrors versions restore 1a2b3c4d notes/plan.md <sha256>
 ```
 
 `versions list` shows each change, oldest first: when, which way, the content's hash before (`old`) and after
-(`new`), and which side the old content came from (`from`: `local`, or `remote` for the Disk). `available` says
+(`new`), and which side the old content came from (`from`: `local`, or `remote` for the Disk). A merge, a conflict
+and a resolution (`event` `merged`, `conflict` or `resolved`, direction `both`) list their contents under `versions`,
+each with its role: `base` (the last sync's), `local`, `remote` (the Disk's) and `result`. `available` says
 whether that content is still kept. When the Disk's old content was not kept because the file went to the Disk's
 trash, `old_in` is `remote-trash`: restore it from the Disk's trash. `versions restore` puts a kept version back into
 the local folder; the file there now is kept first. The next sync sends the restored file to the Disk.
 
-A version stays for 30 days. The last version of a file that was deleted stays for good. A version from the Disk is
+A version stays for 30 days. The last version of a file that was deleted, the contents of every merge and conflict,
+and the last synced content of each text file (the next merge's starting point) stay for good. A version from the Disk is
 restored into the local folder too, and the next sync sends it back.
 
 ## A folder that was replaced
@@ -250,8 +280,10 @@ Each sync write checks the command's own permission, `mirrors.sync` or `mirrors.
 With `files.delete` set to `deny`, a sync still sends and brings down new files, and lists each replace or deletion
 it skipped under `errors`. `YDISK_READ_ONLY=1` refuses a sync; `mirrors preview` and `mirrors status` still work.
 
-Over MCP an agent may run `mirrors list`, `mirrors status`, `mirrors preview` and `mirrors sync`, but not
-`--allow-deletions`, `--replace` or `--repin`: only you approve many changes at once. Over MCP nobody can
+Over MCP an agent may run `mirrors list`, `mirrors status`, `mirrors preview`, `mirrors sync` and `mirrors conflicts
+list`, `show` and `resolve --keep`, but not `--allow-deletions`, `--allow-replacements`, `--replace`, `--repin` or
+`resolve --file`: only you approve many changes at once, and only you give a file from this computer.
+`mirrors conflicts resolve` checks the same keys as a sync. Over MCP nobody can
 answer a question, so a level at `ask` lets the write through: set `files.delete` to `deny` for an agent that should
 not replace or delete files. Adding, changing or removing a mirror, `versions` and `watch` are for you only. See [connect your agent](mcp.md#decide-what-the-agent-may-change).
 
