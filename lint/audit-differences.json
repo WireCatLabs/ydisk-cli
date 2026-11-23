@@ -9,9 +9,17 @@
   {
     "group": "ydisk",
     "rule": "same-flag-meaning",
-    "target": "max+tg+wa+ydisk --until",
-    "expected": "ydisk: <when>, max: <time>, tg: <time>, wa: <time>",
-    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the messengers take --until <time>; the shared command is cli-core's to rename (WireCatLabs/cli-core#3229), and the entry goes with the cli-core bump that does.",
+    "target": "drive+ydisk --since",
+    "expected": "ydisk: <when>, drive: <time>",
+    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the other CLIs take <time>; cli-core 0.724.0 (#3228) uses <time>, and the entry goes with the ydisk bump to it.",
+    "review_after": "2026-12-07"
+  },
+  {
+    "group": "ydisk",
+    "rule": "same-flag-meaning",
+    "target": "drive+max+tg+wa+ydisk --until",
+    "expected": "ydisk: <when>, drive: <time>, max: <time>, tg: <time>, wa: <time>",
+    "reason": "cli-core 0.722.0 mounts changes --since/--until <when> through documentLibraryCommands, where the other CLIs take <time>; cli-core 0.724.0 (#3228) uses <time>, and the entry goes with the ydisk bump to it.",
     "review_after": "2026-12-07"
   }
 ]
