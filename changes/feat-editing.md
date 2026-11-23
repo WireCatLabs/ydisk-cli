@@ -8,9 +8,9 @@
   `files history` lists what the edits replaced, and `files restore <path> <version>` puts one back. See
   [edit a file on the Disk](../docs/usage.md#edit-a-file-on-the-disk) and
   [edit a file with your agent](../docs/recipes.md#edit-a-file-with-your-agent).
-- **A mirror merges a text file changed on both sides.** A `.md`, `.txt`, `.csv` or `.tsv` file up to 1 MB edited
-  here and on the Disk in different places is merged line by line and written to both sides; the answer lists it
-  under `merged`. Changes on the same or neighbouring lines stay a conflict. See
+- **A mirror merges a text file changed on both sides.** A `.md`, `.markdown`, `.txt`, `.csv` or `.tsv` file up to
+  1 MB edited here and on the Disk in different places is merged line by line and written to both sides; the answer
+  lists it under `merged`. Changes on the same or neighbouring lines stay a conflict. See
   [a file changed on both sides](../docs/mirrors.md#a-file-changed-on-both-sides).
 - **`mirrors conflicts list|show|resolve`.** See each conflict a sync left, its three versions and the lines that
   conflict, and settle it on both sides at once with `--keep local|disk|both` or the final file (`--file`, for you

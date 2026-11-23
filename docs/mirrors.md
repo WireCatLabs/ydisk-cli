@@ -280,9 +280,9 @@ Each sync write checks the command's own permission, `mirrors.sync` or `mirrors.
 With `files.delete` set to `deny`, a sync still sends and brings down new files, and lists each replace or deletion
 it skipped under `errors`. `YDISK_READ_ONLY=1` refuses a sync; `mirrors preview` and `mirrors status` still work.
 
-Over MCP an agent may run `mirrors list`, `mirrors status`, `mirrors preview`, `mirrors sync` and `mirrors conflicts
-list`, `show` and `resolve --keep`, but not `--allow-deletions`, `--allow-replacements`, `--replace`, `--repin` or
-`resolve --file`: only you approve many changes at once, and only you give a file from this computer.
+Over MCP an agent may run `mirrors list`, `mirrors status`, `mirrors preview`, `mirrors sync` and
+`mirrors conflicts list`, `show` and `resolve --keep`, but not `--allow-deletions`, `--allow-replacements`,
+`--replace`, `--repin` or `resolve --file`: only you approve many changes at once, and only you give a file from this computer.
 `mirrors conflicts resolve` checks the same keys as a sync. Over MCP nobody can
 answer a question, so a level at `ask` lets the write through: set `files.delete` to `deny` for an agent that should
 not replace or delete files. Adding, changing or removing a mirror, `versions` and `watch` are for you only. See [connect your agent](mcp.md#decide-what-the-agent-may-change).
