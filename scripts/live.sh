@@ -6,7 +6,10 @@
 # It creates /ydisk-live and its live-check.txt (holding the word wirecatlive) when they are missing. It reads, then
 # uploads one temporary file into /ydisk-live, moves it and deletes it to the trash: the download and
 # upload confirm the hosts the docs name, and the move confirms that a file keeps its resource_id. A mirror step
-# syncs a fresh folder /ydisk-live/mirror-<time> both ways and deletes it to the trash at the end.
+# syncs a fresh folder /ydisk-live/mirror-<time> both ways and deletes it to the trash at the end. An edit step works in
+# a fresh folder /ydisk-live/edit-<time>: files update at a wrong and the right sha256, history and restore, sheets
+# update of a small .xlsx, documents update of a small .docx (src/testing/fixtures), and a mirror merge of a Markdown
+# file edited in two sections, one here and one on the Disk; the folder goes to the trash at the end.
 # Needs: a token for a test Yandex account, never one that matters (cloud_api:disk.read, disk.write, disk.info)
 set -euo pipefail
 root=$(cd -- "$(dirname -- "$0")/.." && pwd)
@@ -107,9 +110,10 @@ node -e '
   "$work/after-wrong.json" "$work/probe.txt"
 # The flat listing a whole-Disk mirror reads (GET /v1/disk/resources/files): Yandex's docs show neither sha256 nor
 # resource_id on its items and name no largest page, so both are checked here, with limit and offset. A page of 1,000
-# did not come back within 30 s on 2026-11-21, and 100 files show the same fields.
-raw resources-files-list --limit 100 >"$work/flat-all.json"
-raw resources-files-list --limit 1 --offset 1 >"$work/flat-one.json"
+# did not come back within 30 s on 2026-11-21, and 100 files show the same fields. On 2026-11-23 even 100 took over
+# 30 s, so these two calls get the 2 minutes a mirror's page has.
+raw resources-files-list --limit 100 --timeout 2m >"$work/flat-all.json"
+raw resources-files-list --limit 1 --offset 1 --timeout 2m >"$work/flat-one.json"
 node -e '
   const fs = require("fs")
   const page = (f) => { const body = JSON.parse(fs.readFileSync(f, "utf8")); return body.item ?? body }
@@ -174,7 +178,123 @@ node -e '
 "${cli[@]}" live mirrors remove "$id" --json >/dev/null
 "${cli[@]}" live files delete "$mirror" --yes --json >/dev/null
 trap '"${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
+
+# Edits in place, each at the sha256 it was read at. The Disk can answer an upload before it lists the new sha256, so
+# each read waits for the hash of the content just sent.
+edit="/ydisk-live/edit-$stamp"
+"${cli[@]}" live files create "$edit" --json >/dev/null
+trap '"${cli[@]}" live files delete "$edit" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
+sha_of() {
+  "${cli[@]}" live files show "$1" --json 2>/dev/null |
+    node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf8")).item?.sha256 ?? "")' || true
+}
+wait_sha() {
+  for _ in $(seq 30); do
+    [ "$(sha_of "$1")" = "$2" ] && return 0
+    sleep 1
+  done
+  echo "the Disk never listed $1 with sha256 $2" >&2
+  return 1
+}
+# An edit's answer may carry no sha256 when the Disk has not listed one yet; then the edit is seen as a new hash.
+wait_changed() {
+  for _ in $(seq 30); do
+    now=$(sha_of "$1")
+    [ -n "$now" ] && [ "$now" != "$2" ] && return 0
+    sleep 1
+  done
+  echo "the Disk never listed $1 with a new sha256" >&2
+  return 1
+}
+hash_of() { sha256sum "$1" | cut -d" " -f1; }
+printf '# Notes %s\n\nthe first draft\n' "$stamp" >"$work/notes.md"
+printf '# Notes %s\n\nthe second draft\n' "$stamp" >"$work/notes-2.md"
+old=$(hash_of "$work/notes.md")
+new=$(hash_of "$work/notes-2.md")
+"${cli[@]}" live files upload "$work/notes.md" --folder "$edit" --json >/dev/null
+wait_sha "$edit/notes.md" "$old"
+"${cli[@]}" live files update "$edit/notes.md" --expected-fingerprint "$(printf '0%.0s' $(seq 64))" --yes --json \
+  <"$work/notes-2.md" >"$work/e-wrong.json" 2>&1 || true
+[ "$(sha_of "$edit/notes.md")" = "$old" ]
+"${cli[@]}" live files update "$edit/notes.md" --expected-fingerprint "$old" --yes --json \
+  <"$work/notes-2.md" >"$work/e-right.json"
+wait_sha "$edit/notes.md" "$new"
+"${cli[@]}" live files history "$edit/notes.md" --json >"$work/e-history.json"
+"${cli[@]}" live files restore "$edit/notes.md" "$old" --expected-fingerprint "$new" --yes --json >"$work/e-restore.json"
+wait_sha "$edit/notes.md" "$old"
+node -e '
+  const fs = require("fs")
+  const read = (f) => JSON.parse(fs.readFileSync(f, "utf8"))
+  const [wrong, right, history, restore] = process.argv.slice(1, 5).map(read)
+  const [old, now] = process.argv.slice(5, 7)
+  const fail = (message) => { throw new Error(message) }
+  if (wrong.error?.code !== "conflict") fail(`an update at a wrong sha256 was not a conflict: ${JSON.stringify(wrong)}`)
+  if (right.item?.replaced?.sha256 !== old || ![now, null].includes(right.item?.sha256))
+    fail(`files update answered other hashes: ${JSON.stringify(right)}`)
+  if (!history.item.versions.some((one) => one.version === old && one.available)) fail("history does not list the old version")
+  if (restore.item?.restored !== old) fail("files restore did not put the old version back")' \
+  "$work/e-wrong.json" "$work/e-right.json" "$work/e-history.json" "$work/e-restore.json" "$old" "$new"
+
+fixtures="$root/src/testing/fixtures"
+"${cli[@]}" live files upload "$fixtures/budget.xlsx" --folder "$edit" --json >/dev/null
+wait_sha "$edit/budget.xlsx" "$(hash_of "$fixtures/budget.xlsx")"
+"${cli[@]}" live files sheets show "$edit/budget.xlsx" "Synthetic Budget!A1:C4" --json >"$work/s-show.json"
+fingerprint=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.sha256)' "$work/s-show.json")
+"${cli[@]}" live files sheets update "$edit/budget.xlsx" "B2:C2" --values '[[1300, "paid"]]' \
+  --expected-fingerprint "$fingerprint" --yes --json >"$work/s-update.json"
+wait_changed "$edit/budget.xlsx" "$fingerprint"
+"${cli[@]}" live files sheets show "$edit/budget.xlsx" "Synthetic Budget!B2:C2" --json >"$work/s-after.json"
+node -e '
+  const cells = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.sheets[0].cells
+  const value = (address) => cells.find((cell) => cell.address === address)?.value
+  if (value("B2") !== 1300 || value("C2") !== "paid") throw new Error(`sheets update did not land: ${JSON.stringify(cells)}`)' \
+  "$work/s-after.json"
+
+"${cli[@]}" live files upload "$fixtures/letter.docx" --folder "$edit" --json >/dev/null
+wait_sha "$edit/letter.docx" "$(hash_of "$fixtures/letter.docx")"
+"${cli[@]}" live files documents show "$edit/letter.docx" --json >"$work/d-show.json"
+fingerprint=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.sha256)' "$work/d-show.json")
+"${cli[@]}" live files documents update "$edit/letter.docx" --payload "[{\"index\": 2, \"text\": \"Edited live $stamp.\"}]" \
+  --expected-fingerprint "$fingerprint" --yes --json >"$work/d-update.json"
+wait_changed "$edit/letter.docx" "$fingerprint"
+"${cli[@]}" live files documents show "$edit/letter.docx" --json >"$work/d-after.json"
+node -e '
+  const paragraphs = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.paragraphs
+  if (paragraphs[2]?.text !== `Edited live ${process.argv[2]}.`) throw new Error("documents update did not land")
+  if (paragraphs[1]?.text !== "Dear heron, the pond is ready.") throw new Error("documents update changed another paragraph")' \
+  "$work/d-after.json" "$stamp"
+
+# A mirror merge: the same Markdown file edited in two sections with unchanged lines between them, one here and one on
+# the Disk, lands on both sides with both edits.
+mkdir -p "$work/merge"
+printf '# Plan %s\n\n## Monday\n\nwrite the brief\n\n## Friday\n\nsend the report\n' "$stamp" >"$work/merge/plan.md"
+"${cli[@]}" live files create "$edit/merge" --json >/dev/null
+"${cli[@]}" live mirrors add "$edit/merge" "$work/merge" --json >"$work/g-add.json"
+merge_id=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.id)' "$work/g-add.json")
+"${cli[@]}" live mirrors sync "$merge_id" --yes --json >/dev/null
+wait_sha "$edit/merge/plan.md" "$(hash_of "$work/merge/plan.md")"
+sed 's/send the report/send the report to Anna/' "$work/merge/plan.md" >"$work/plan-disk.md"
+"${cli[@]}" live files upload "$work/plan-disk.md" --folder "$edit/merge" --name plan.md --replace --yes --json >/dev/null
+wait_sha "$edit/merge/plan.md" "$(hash_of "$work/plan-disk.md")"
+sed -i 's/write the brief/write the brief and the budget/' "$work/merge/plan.md"
+"${cli[@]}" live mirrors sync "$merge_id" --yes --json >"$work/g-sync.json"
+wait_sha "$edit/merge/plan.md" "$(hash_of "$work/merge/plan.md")"
+"${cli[@]}" live files download "$edit/merge/plan.md" --output "$work/plan-merged.md" --json >/dev/null
+node -e '
+  const fs = require("fs")
+  const synced = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).items[0]
+  const fail = (message) => { throw new Error(message) }
+  if (synced.merged?.join() !== "plan.md") fail(`the sync did not merge plan.md: ${JSON.stringify(synced)}`)
+  for (const file of process.argv.slice(2, 4)) {
+    const text = fs.readFileSync(file, "utf8")
+    if (!text.includes("write the brief and the budget") || !text.includes("send the report to Anna"))
+      fail(`${file} lacks one of the two edits`)
+  }' "$work/g-sync.json" "$work/merge/plan.md" "$work/plan-merged.md"
+"${cli[@]}" live mirrors remove "$merge_id" --json >/dev/null
+"${cli[@]}" live files delete "$edit" --yes --json >/dev/null
+trap '"${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 "${cli[@]}" live doctor --json >/dev/null
 
 "${cli[@]}" live session end --json >/dev/null
-echo "live check passed: describe format 2, sign-in, files list, folders browse, download, upload, move and delete, the sync facts, sync, search, the flat listing, a two-way mirror with an exclusion, doctor, sign-out"
+echo "live check passed: describe format 2, sign-in, files list, folders browse, download, upload, move and delete, the sync facts, sync, search, the flat listing, a two-way mirror with an exclusion, files update at a wrong and the right sha256, history and restore, sheets update, documents update, a mirror merge, doctor, sign-out"

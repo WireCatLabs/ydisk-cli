@@ -11,8 +11,10 @@ assumes you have [signed in](installation.md).
 3. [Sync](#sync)
 4. [What the copy holds](#what-the-copy-holds)
 5. [Read a synced document](#read-a-synced-document)
-6. [Work with files live](#work-with-files-live)
-7. [Output for scripts](#output-for-scripts)
+6. [Earlier versions and what changed](#earlier-versions-and-what-changed)
+7. [Work with files live](#work-with-files-live)
+8. [Edit a file on the Disk](#edit-a-file-on-the-disk)
+9. [Output for scripts](#output-for-scripts)
 
 ## The profile comes first
 
@@ -118,6 +120,10 @@ ydisk personal files move /Documents/old.pdf --folder /Archive
 ydisk personal files create /Projects/2026
 ydisk personal files delete /Documents/old.pdf
 ydisk personal files restore trash:/old.pdf
+ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint <sha256>
+ydisk personal files sheets show /Work/budget.xlsx "Sheet1!A1:C10"
+ydisk personal files documents show /Work/report.docx
+ydisk personal files history /Notes/plan.md
 ydisk personal files publish /Documents/plan.pdf
 ydisk personal files unpublish /Documents/plan.pdf
 ```
@@ -125,18 +131,41 @@ ydisk personal files unpublish /Documents/plan.pdf
 - `files download` without `--output` answers the file's text, up to 200,000 characters, so an agent can read a file
   outside the chosen folders without saving it. A longer text is cut there and the answer says `truncated: true`.
   Never write a cut text back over the file: the rest of it would be lost.
-- `files show`, `files list` and `files download` give each file's `md5` and `sha256`, so an agent can tell whether
-  a file changed since it read it.
+- `files show` and `files list` give each file's `md5` and `sha256`, so an agent can tell whether a file changed
+  since it read it. `files download` gives the `sha256` only beside the file's whole text: a cut text, or the text
+  read out of a PDF, a .docx or an .xlsx, has `sha256: null`, so an agent has no hash to write it back with.
 - `files delete` moves a file to the Disk's trash, and `files restore` brings it back by its path in the trash.
 - `files publish` makes a public link that anyone who has it can open. `files unpublish` closes it.
 - `--replace` on an upload, a copy or a move overwrites a file already at that path.
 
-At a terminal the tool asks before a delete, an overwrite and a public link. Over MCP there is no one to ask, so set
-those permissions for an agent. See [settings](configuration.md#permissions). Add `--dry-run` to any change to see
-what it would do without doing it.
+At a terminal the tool asks before a delete, an overwrite, an edit and a public link. Over MCP there is no one to
+ask, so set those permissions for an agent. See [settings](configuration.md#permissions). Add `--dry-run` to any
+change to see what it would do without doing it.
 
 Every operation of Yandex's Disk API is a command too: `ydisk personal api list` lists them, and
 `ydisk personal api show resources-list` shows one operation's parameters without calling Yandex.
+
+## Edit a file on the Disk
+
+An edit replaces a file only at the content it was read at. Read the file's `sha256` first and pass it as
+`--expected-fingerprint`. The file is checked just before the write, and what it replaced is kept on this computer,
+in the profile's state folder. If the file changed since it was read, the answer is a `conflict` that names the
+command to read it again, and nothing is uploaded. The Disk has no conditional upload, so a change that lands in the
+moment between that last check and the upload is not caught; the replaced content is still kept.
+
+| Command | What it changes |
+| --- | --- |
+| `files update <path> --text <text>` (or the text on stdin) | the whole text of a plain-text file, such as `.md`, `.txt` or `.csv`; a new file needs no fingerprint |
+| `files sheets update <path> <range> --values <json>` | cells of an `.xlsx`, from `files sheets show`; the rest of the workbook stays as it is |
+| `files documents update <path> --payload <json>` | paragraphs of a `.docx`, by the indexes `files documents show` gives |
+| `files restore <path> <version>` | puts back a version `files history` lists |
+
+`files update` refuses a `.pdf`, `.docx` or `.xlsx`: their text is extracted, and writing it back would replace the
+document. `sheets update` writes a text as text, even one that starts with `=`, and refuses to overwrite a formula
+unless `--replace`. `documents update` refuses a paragraph with a tracked change, a field, an image, a comment, a
+link or a footnote, and says why. Every edit asks as `files.delete` does. `files history` lists what this profile's
+edits replaced, newest last; each `version` is the sha256 of the replaced content, and `available` says whether it is
+still kept. See [edit a file with your agent](recipes.md#edit-a-file-with-your-agent).
 
 ## Output for scripts
 

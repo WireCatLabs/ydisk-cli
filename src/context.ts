@@ -1,4 +1,5 @@
-import { CliError } from "@wirecat/cli-base"
+import { join } from "node:path"
+import { CliError, resolvePaths } from "@wirecat/cli-base"
 import {
   type BaseEnvironment,
   baseContext,
@@ -45,6 +46,13 @@ export const contextOf = (command: Command) => {
       warn: base.renderer.warn,
     }),
   }
+}
+
+/** The profile's own folder under the state folder: its mirrors and the versions its file writes keep. */
+export const profileStateDir = (command: Command) => {
+  const { env, profile } = contextOf(command)
+  if (!profile) throw new CliError("validation_error", "a profile is required")
+  return join(resolvePaths({ appName: IDENTITY.appName, prefix: IDENTITY.envPrefix, env }).state, "profiles", profile)
 }
 
 export const refuseOffline = (flags: GlobalFlags) => {

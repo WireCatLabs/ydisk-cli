@@ -30,6 +30,12 @@ minutes, once.
   Yandex.
 - **The whole Disk, live.** List, read, download, upload, copy, move, delete to the trash, restore and share files
   without opening a browser.
+- **Edit a file where it is.** You or your agent change a note, Excel cells or Word paragraphs on the Disk without
+  downloading by hand. The rest of the file stays as it is, the file is checked just before the write, and what the
+  edit replaced is kept on your computer. See [edit a file on the Disk](usage.md#edit-a-file-on-the-disk).
+- **A folder that keeps up with the Disk.** A mirror keeps a folder on your computer and one on the Disk the same both
+  ways. A text file edited on both sides is merged; a real conflict waits for you with a diff. It stops before many
+  deletions or replacements. See [mirrors](mirrors.md).
 - **Safe to give to an agent.** At a terminal the tool asks before it deletes, overwrites or makes a public link. For
   an agent you can turn each of those off, or allow reading only.
 - **One search across your sources.** The copy sits in the same local store as your Telegram, WhatsApp, mail, notes

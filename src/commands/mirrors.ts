@@ -36,12 +36,13 @@ import {
   syncFileMirrors,
   watchMirrors,
 } from "@wirecat/cli-core/documents"
+import { fileConflictsCommand } from "@wirecat/cli-core/documents/cli"
 import { acquireLock, writeFileAtomic } from "@wirecat/cli-core/files"
 import { type Asker, guardedWrite, type KeyedGuard, newOperationId, refusedPlace } from "@wirecat/cli-core/sends"
 import { Command, Option } from "commander"
 import * as v from "valibot"
 import { DELETE_KEY, UPLOAD_KEY } from "../config.js"
-import { contextOf, type Disk, diskFor, tokenOf, withDisk, writeGuard } from "../context.js"
+import { contextOf, type Disk, diskFor, profileStateDir, tokenOf, withDisk, writeGuard } from "../context.js"
 import { IDENTITY, SERVICE } from "../identity.js"
 import { diskPath } from "../yandex/source.js"
 
@@ -61,13 +62,9 @@ type SavedMirror = v.InferOutput<typeof SavedMirror>
 
 /** The profile's mirrors, their sync state, version stores and lock, under its state folder. */
 const mirrorsHome = (command: Command) => {
-  const { env, profile } = contextOf(command)
+  const { profile } = contextOf(command)
   if (!profile) throw new CliError("validation_error", "a profile is required")
-  const dir = join(
-    resolvePaths({ appName: IDENTITY.appName, prefix: IDENTITY.envPrefix, env }).state,
-    "profiles",
-    profile,
-  )
+  const dir = profileStateDir(command)
   const listPath = join(dir, "mirrors.json")
   const states = join(dir, "mirrors")
   const mirrors = (): SavedMirror[] => {
@@ -204,9 +201,15 @@ const beforeDeadline = (command: Command) => {
   }
 }
 
+/**
+ * How far one run's Disk listing got: `files` is this run's, `resumed` says it went on from where an earlier run
+ * stopped, and `so_far` counts every file listed across the runs while the listing is kept to go on.
+ */
 interface Listed {
   files: number
   complete: boolean
+  resumed?: true
+  soFar?: number
 }
 
 /** The target with each listing's size kept by Disk folder, so the answer says how far it got. */
@@ -214,7 +217,12 @@ const recorded = (target: FileTarget) => {
   const listings = new Map<string, Listed>()
   const list: FileTarget["list"] = async (folder, signal, options) => {
     const listing = await target.list(folder, signal, options)
-    if (listing) listings.set(folder, { files: listing.files.length, complete: listing.complete })
+    if (listing)
+      listings.set(folder, {
+        files: listing.files.length,
+        complete: listing.complete,
+        ...(options?.from === undefined ? {} : { resumed: true as const }),
+      })
     return listing
   }
   return { listings, target: { ...target, list } }
@@ -249,7 +257,10 @@ const syncEach = async (
         continue
       }
       const one = await syncFileMirrors({ ...engine, ...options, lock, mirrors: [mirror] })
-      const listed = listings.get(mirror.folder)
+      // A dry run saves no listing, so only a sync's kept place says the next run goes on from it.
+      const kept = options.dryRun ? undefined : engine.stateOf(mirror).read().listing
+      const run = listings.get(mirror.folder)
+      const listed = run && kept ? { ...run, soFar: kept.files.length } : run
       for (const item of one.items) {
         const cut = item.stopped === true || (listed?.complete === false && stop.aborted)
         const unreached = cut && listed?.complete === false
@@ -273,11 +284,15 @@ const syncEach = async (
 
 const moved = (item: Reported) =>
   "uploaded" in item &&
-  [item.uploaded, item.downloaded, item.trashed, item.renamed, item.adopted].some((done) => done.length)
+  [item.uploaded, item.downloaded, item.merged, item.trashed, item.renamed, item.adopted].some((done) => done.length)
+
+/** A sync kept its place in the Disk's listing, so the next run lists from there instead of from the start. */
+const keptPlace = (item: Reported) => "listed" in item && item.listed?.soFar !== undefined
 
 /**
- * What a stopped run offers: the same run again when it moved, since it goes on from where it stopped; when only the
- * listing fit, a longer run, as the same deadline would list the same files again.
+ * What a stopped run offers: the same run again when it moved or kept its place in the listing, since it goes on from
+ * where it stopped; when only a listing that cannot go on fit (a folder's, or any preview's), a longer run, as the
+ * same deadline would list the same files again.
  */
 const resumeOf = (
   command: Command,
@@ -292,16 +307,19 @@ const resumeOf = (
   const timeout = command.optsWithGlobals<{ timeout?: string }>().timeout
   const ms = deadline?.ms ?? 0
   const longer = ms < 15 * 60_000 ? "15m" : `${Math.ceil((ms * 2) / 3_600_000)}h`
-  const again = name === "sync" && items.some(moved)
+  const again = name === "sync" && items.some((item) => moved(item) || keptPlace(item))
+  const listing = again && !items.some(moved)
   return [
     {
       kind: "command" as const,
       step: again ? "mirrors.sync" : `mirrors.${name}.longer`,
       command: `mirrors ${name}`,
       args: { ...(only ? { id: only } : {}), ...(again ? (timeout ? { timeout } : {}) : { timeout: longer }) },
-      why: again
-        ? "the sync stopped before its deadline and kept what it did; running it again goes on from there"
-        : `listing the ${SERVICE} took the whole run; give it more time, in a terminal`,
+      why: listing
+        ? `the ${SERVICE} listing stopped before its deadline and kept its place; run it again to go on from there`
+        : again
+          ? "the sync stopped before its deadline and kept what it did; run it again to go on from there"
+          : `listing the ${SERVICE} took the whole run; give it more time, in a terminal`,
       safe_to_auto_execute: false,
     },
   ]
@@ -320,7 +338,6 @@ const hintsOf = (profile: string) => ({
   repin: `\`${CLI} ${profile} mirrors sync <id> --repin\``,
   sync: `${CLI} ${profile} mirrors sync <id>`,
   allowDeletions: "--allow-deletions <count>",
-  allowReplacements: "--replace",
   exclude: `${CLI} ${profile} mirrors update <id> --ignore <path>`,
 })
 /** The engine's refusals of a whole run, which a sync ends with instead of the generic partial one. */
@@ -569,7 +586,7 @@ const previewCommand = () =>
   })
     .summary("list the Disk and show what mirrors sync would do")
     .description(
-      "list the Disk and show what mirrors sync would do: each upload, download, rename, trash and conflict; " +
+      "list the Disk and show what mirrors sync would do: each upload, download, merge, rename, trash and conflict; " +
         "nothing is changed on either side",
     )
     .argument("[id]", `${ID}; every mirror of the profile when omitted`)
@@ -623,8 +640,9 @@ const syncCommand = () =>
     .summary("sync mirrors both ways once")
     .description(
       "sync mirrors both ways once: a change on one side is copied to the other, a deletion goes to the other " +
-        "side's trash, and a file changed on both sides is reported and left for --keep; mirrors preview shows " +
-        "the plan first. A run stops before its deadline, keeps what it did, and the next sync goes on from there",
+        "side's trash, a text file changed on both sides in different places is merged, and any other file changed " +
+        "on both sides is reported for mirrors conflicts or --keep; mirrors preview shows the plan first. A run " +
+        "stops before its deadline, keeps what it did, and the next sync goes on from there",
     )
     .argument("[id]", `${ID}; every mirror of the profile when omitted`)
     .addOption(keepOption())
@@ -633,8 +651,14 @@ const syncCommand = () =>
     )
     .addOption(
       ownerOnlyOption(
+        "--allow-replacements <count>",
+        "let this run overwrite up to this many existing files when the guard stops it; each is kept as a version first",
+      ),
+    )
+    .addOption(
+      ownerOnlyOption(
         "--replace",
-        "let this run overwrite more than 50 existing files when the guard stops it; each is kept as a version first",
+        "let this run overwrite any number of existing files when the guard stops it; each is kept as a version first",
       ),
     )
     .addOption(
@@ -646,6 +670,7 @@ const syncCommand = () =>
       args: {
         keep?: "local" | "disk" | "both"
         allowDeletions?: string
+        allowReplacements?: string
         replace?: boolean
         repin?: boolean
       },
@@ -663,16 +688,25 @@ const syncCommand = () =>
             },
           )
       }
-      const allowDeletions = args.allowDeletions === undefined ? undefined : Number(args.allowDeletions)
-      if (allowDeletions !== undefined) {
-        if (!Number.isSafeInteger(allowDeletions) || allowDeletions < 1)
-          throw new CliError("validation_error", "--allow-deletions takes the number of files the run may delete", {
-            param: "--allow-deletions",
+      const countOf = (flag: string, value: string | undefined, what: string) => {
+        if (value === undefined) return undefined
+        const count = Number(value)
+        if (!Number.isSafeInteger(count) || count < 1)
+          throw new CliError("validation_error", `${flag} takes the number of files the run may ${what}`, {
+            param: flag,
           })
-        oneMirror("--allow-deletions")
+        oneMirror(flag)
+        return count
       }
+      const allowDeletions = countOf("--allow-deletions", args.allowDeletions, "delete")
+      if (args.replace && args.allowReplacements !== undefined)
+        throw new CliError("validation_error", "give --allow-replacements <count> or --replace, not both", {
+          param: "--replace",
+        })
       if (args.replace) oneMirror("--replace")
-      const allowReplacements = args.replace ? Number.POSITIVE_INFINITY : undefined
+      const allowReplacements = args.replace
+        ? Number.POSITIVE_INFINITY
+        : countOf("--allow-replacements", args.allowReplacements, "replace")
       const keep = keepOf(args.keep)
       const token = tokenOf(this)
       const soon = beforeDeadline(this)
@@ -710,7 +744,8 @@ const syncCommand = () =>
       if (issues.length)
         throw new CliError(
           "provider_error",
-          `some files were not synced; see conflicts, unknown and errors, then rerun with --keep local, ${REMOTE} or both`,
+          `some files were not synced; see conflicts, unknown and errors, then settle each conflict with mirrors ` +
+            `conflicts resolve, or rerun with --keep local, ${REMOTE} or both`,
           { reason: "mirror.partial" },
         )
     })
@@ -724,6 +759,7 @@ interface Cycle {
     id: string
     uploaded: string[]
     downloaded: string[]
+    merged: string[]
     trashed: unknown[]
     conflicts: unknown[]
     errors: { path: string; message: string }[]
@@ -735,8 +771,10 @@ const describeCycle = (cycle: Cycle) => {
   if (cycle.error) return `${time} ${cycle.triggers.join("+")}: ${cycle.error.message}; trying again`
   const parts = (cycle.results ?? []).map(
     (result) =>
-      `${result.id} ${result.uploaded.length} sent, ${result.downloaded.length} pulled, ${result.trashed.length} trashed` +
-      (result.conflicts.length ? `, ${result.conflicts.length} conflicts (mirrors sync ${result.id} --keep …)` : "") +
+      `${result.id} ${result.uploaded.length} sent, ${result.downloaded.length} pulled, ` +
+      (result.merged.length ? `${result.merged.length} merged, ` : "") +
+      `${result.trashed.length} trashed` +
+      (result.conflicts.length ? `, ${result.conflicts.length} conflicts (mirrors conflicts list ${result.id})` : "") +
       // A run the guard or a root problem stopped says why at every cycle, until the owner settles it.
       result.errors
         .filter((error) => error.path === ".")
@@ -756,7 +794,7 @@ const watchCommand = () =>
     .summary("keep syncing both ways until Ctrl-C or --timeout")
     .description(
       "keep syncing both ways until Ctrl-C or --timeout: on each local save, and when the Disk's revision moves; " +
-        "a file changed on both sides is reported and left for mirrors sync --keep",
+        "a file changed on both sides that cannot be merged is reported for mirrors conflicts",
     )
     .argument("[id]", `${ID}; every mirror of the profile when omitted`)
     .option("--every <duration>", `how often to ask ${SERVICE} whether anything changed`, "60s")
@@ -884,6 +922,26 @@ const versionsCommand = () =>
         }),
     )
 
+/** cli-core's `mirrors conflicts list|show|resolve` over this profile's mirrors; a resolve writes as a sync does. */
+const conflictsCommand = () =>
+  fileConflictsCommand({
+    identity: IDENTITY,
+    remote: REMOTE,
+    output,
+    mirrors: (command, id) => mirrorsHome(command).chosen(id),
+    pathOf: (mirror, input) => insideOf(mirror.path, input),
+    stateOf: (command, mirror) => mirrorsHome(command).stateOf(mirror as SavedMirror),
+    versionsOf: (command, mirror) => mirrorsHome(command).versionsOf(mirror),
+    connect: async (command, mirror) => {
+      const { target, principal, guard, operationId, lock, signal } = engineOf(
+        command,
+        diskFor(command, undefined, tokenOf(command)),
+        [mirror as SavedMirror],
+      )
+      return { target, principal, guard, operationId, lock, ...(signal ? { signal } : {}) }
+    },
+  })
+
 export const mirrorsCommand = (): Command =>
   annotate(new Command("mirrors"), { effects: LOCAL_READ })
     .description(`keep local folders and ${SERVICE} folders the same, both ways, file by file`)
@@ -896,3 +954,4 @@ export const mirrorsCommand = (): Command =>
     .addCommand(updateCommand())
     .addCommand(removeCommand())
     .addCommand(versionsCommand())
+    .addCommand(conflictsCommand())

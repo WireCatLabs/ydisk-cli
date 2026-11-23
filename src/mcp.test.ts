@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { changesAuthorityAt, type RunOptions, readsOverMcpAt } from "@wirecat/cli-core/cli"
@@ -144,5 +144,40 @@ it("over MCP an agent can neither approve many changes nor change a mirror's exc
     expect(service.calls).toEqual([])
   } finally {
     expect(await mcp.close()).toBe(0)
+  }
+})
+
+it("over MCP an agent edits a text file at the sha256 it read, as a write, and reads a workbook's cells", async () => {
+  const file = join(process.env.YDISK_CONFIG_DIR ?? "", "config.json")
+  mkdirSync(join(file, ".."), { recursive: true })
+  writeFileSync(file, JSON.stringify({ profiles: { personal: { permissions: { "files.delete": "allow" } } } }))
+  const service = fakeDisk()
+  service.put("disk:/notes.md", "first draft")
+  service.put("disk:/budget.xlsx", readFileSync(join(import.meta.dirname, "testing", "fixtures", "budget.xlsx")))
+  const env = { ...process.env, YDISK_STATE_DIR: join(mkdtempSync(join(tmpdir(), "ydisk-mcp-")), "state") }
+  const options: RunOptions & ServiceEnvironment = { tty: false, keyring: signedIn(), fetch: service.fetch, env }
+  const mcp = await mcpOverStdio((streams) => run(["personal", "mcp", "serve"], { ...options, ...streams }))
+  try {
+    const shown = await mcp.call("ydisk_read", { command: "files show", arguments: { path: "/notes.md" } })
+    const { sha256 } = (shown.body as { item: { sha256: string } }).item
+    const written = await mcp.call("ydisk_write", {
+      command: "files update",
+      arguments: { path: "/notes.md", text: "second draft", expected_fingerprint: sha256 },
+    })
+    expect(written.isError, JSON.stringify(written.body)).toBe(false)
+    expect(service.nodes.get("disk:/notes.md")?.text).toBe("second draft")
+    const asRead = await mcp.call("ydisk_read", { command: "files update", arguments: { path: "/x.md", text: "x" } })
+    expect(asRead.isError).toBe(true)
+    expect(service.nodes.has("disk:/x.md")).toBe(false)
+    const noText = await mcp.call("ydisk_write", { command: "files update", arguments: { path: "/empty.md" } })
+    expect(JSON.stringify(noText.body)).toContain("--text")
+    expect(service.nodes.has("disk:/empty.md")).toBe(false)
+    const cells = await mcp.call("ydisk_read", { command: "files sheets show", arguments: { path: "/budget.xlsx" } })
+    expect(cells.isError, JSON.stringify(cells.body)).toBe(false)
+    const history = await mcp.call("ydisk_read", { command: "files history", arguments: { path: "/notes.md" } })
+    expect(JSON.stringify(history.body)).toContain(sha256)
+  } finally {
+    expect(await mcp.close()).toBe(0)
+    rmSync(file, { force: true })
   }
 })

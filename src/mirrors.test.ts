@@ -257,6 +257,10 @@ it("preview lists the Disk and shows the plan; sync --dry-run shows the keys; ne
   expect(dry.code, dry.err).toBe(0)
   expect(dry.json().item).toMatchObject({ permission: { key: "mirrors.sync" } })
   expect(JSON.stringify(dry.json())).toContain("files.delete")
+  const resolve = await cli(["conflicts", "resolve", id, "here.txt", "--keep", "disk", "--dry-run"])
+  expect(resolve.code, resolve.err).toBe(0)
+  expect(resolve.json().item).toMatchObject({ permission: { key: "mirrors.conflicts.resolve" } })
+  expect(JSON.stringify(resolve.json())).toContain("files.delete")
   expect(disk.calls.length).toBe(calls)
   expect(disk.revision()).toBe(before)
   expect(existsSync(join(root, "there.txt"))).toBe(false)
@@ -401,7 +405,7 @@ it("stops a run that would delete more than 10 files until --allow-deletions cov
   expect(disk.trash.size).toBe(11)
 })
 
-it("stops a run that would replace more than 50 files until --replace allows them", async () => {
+it("stops a run that would replace more than 50 files until --allow-replacements covers them, or --replace", async () => {
   const files = Object.fromEntries(Array.from({ length: 51 }, (_, n) => [`f${n}.txt`, String(n)]))
   const { cli, root, disk, permit } = setup(files, files)
   const id = await added(cli, root)
@@ -412,16 +416,28 @@ it("stops a run that would replace more than 50 files until --replace allows the
     error: {
       code: "confirmation_required",
       reason: "mirror.too-many-replacements",
-      message: expect.stringContaining(`\`ydisk personal mirrors sync ${id} --replace\``),
+      message: expect.stringContaining(`\`ydisk personal mirrors sync ${id} --allow-replacements 51\``),
     },
   })
   expect(read(root, "f0.txt")).toBe("0")
+  const short = await synced(cli, id, "--allow-replacements", "50")
+  expect(JSON.parse(short.err)).toMatchObject({ error: { reason: "mirror.too-many-replacements" } })
+  expect(read(root, "f0.txt")).toBe("0")
   // Past the guard, each replacement still checks files.delete; denied here, so the test makes no 51 downloads.
   permit({ "files.delete": "deny" })
-  const allowed = await synced(cli, id, "--replace")
-  expect(allowed.result.errors).toHaveLength(51)
-  expect(allowed.result.errors.every((error) => error.path !== ".")).toBe(true)
+  for (const flag of [["--allow-replacements", "51"], ["--replace"]]) {
+    const allowed = await synced(cli, id, ...flag)
+    expect(allowed.result.errors).toHaveLength(51)
+    expect(allowed.result.errors.every((error) => error.path !== ".")).toBe(true)
+  }
   expect(read(root, "f0.txt")).toBe("0")
+  for (const flag of [
+    ["--allow-replacements", "0"],
+    ["--allow-replacements", "5", "--replace"],
+  ]) {
+    const refused = await synced(cli, id, ...flag)
+    expect(refused.json()).toMatchObject({ error: { code: "validation_error" } })
+  }
 })
 
 it("an allow flag needs the mirror's id when the profile has more than one mirror", async () => {
@@ -430,7 +446,7 @@ it("an allow flag needs the mirror's id when the profile has more than one mirro
   const other = join(dir, "other")
   mkdirSync(other)
   expect((await cli(["add", "/Notes", other])).code).toBe(0)
-  for (const flag of [["--allow-deletions", "20"], ["--replace"]]) {
+  for (const flag of [["--allow-deletions", "20"], ["--allow-replacements", "60"], ["--replace"]]) {
     const refused = await synced(cli, ...flag)
     expect(refused.json()).toMatchObject({ error: { code: "validation_error", param: flag[0] } })
   }
@@ -587,18 +603,19 @@ it("never lists or brings down a Disk .git or node_modules folder", async () => 
 })
 
 it("a file deleted here is trashed on the Disk by its md5, with no download, and its version is in the Disk trash", async () => {
-  const { cli, root, disk } = setup({ "gone.txt": "g1", "keep.txt": "k" })
+  // Not a text file: the store keeps a text file's last synced content as its next merge's base.
+  const { cli, root, disk } = setup({ "gone.bin": "g1", "keep.txt": "k" })
   const id = await added(cli, root)
   await synced(cli, id)
-  rmSync(join(root, "gone.txt"))
+  rmSync(join(root, "gone.bin"))
   disk.calls.length = 0
   const ran = await synced(cli, id)
   expect(ran.code, ran.err).toBe(0)
-  expect(ran.result.trashed).toEqual([{ path: "gone.txt", side: "remote" }])
-  expect(disk.trash.get("disk:/Notes/gone.txt")?.text).toBe("g1")
+  expect(ran.result.trashed).toEqual([{ path: "gone.bin", side: "remote" }])
+  expect(disk.trash.get("disk:/Notes/gone.bin")?.text).toBe("g1")
   const asked = (pathname: string) =>
     disk.calls.filter(
-      (call) => call.url.pathname === pathname && call.url.searchParams.get("path")?.endsWith("gone.txt"),
+      (call) => call.url.pathname === pathname && call.url.searchParams.get("path")?.endsWith("gone.bin"),
     )
   expect(asked("/v1/disk/resources/download")).toEqual([])
   expect(
@@ -606,9 +623,8 @@ it("a file deleted here is trashed on the Disk by its md5, with no download, and
       .find((call) => call.method === "DELETE")
       ?.url.searchParams.get("md5"),
   ).toBe(createHash("md5").update("g1").digest("hex"))
-  const events = (await cli(["versions", "list", id, "gone.txt"])).json().items as { event: string }[]
-  // cli-core 0.721 keeps a mirrored text file's last synced content for merges, so the old version is here as well.
-  expect(events.at(-1)).toMatchObject({ event: "deleted", from: "remote", available: true })
+  const events = (await cli(["versions", "list", id, "gone.bin"])).json().items as { event: string }[]
+  expect(events.at(-1)).toMatchObject({ event: "deleted", from: "remote", old_in: "remote-trash", available: false })
 })
 
 /** The Disk with its flat listing stuck from `offset` on until the request is stopped, slower than any deadline. */
@@ -642,17 +658,78 @@ it("a sync stops before its deadline when the Disk listing is slow, says how far
   const body = ran.json()
   expect(body).toMatchObject({ meta: { complete: false } })
   expect(body.next).toEqual([
-    expect.objectContaining({ command: "mirrors sync", args: { timeout: "15m" }, safe_to_auto_execute: false }),
+    expect.objectContaining({
+      step: "mirrors.sync",
+      command: "mirrors sync",
+      args: { timeout: "10s" },
+      why: expect.stringContaining("run it again"),
+      safe_to_auto_execute: false,
+    }),
   ])
   expect(body.items).toEqual([
-    expect.objectContaining({ id: whole, stopped: true, listed: { files: 1, complete: false }, unlisted: 2 }),
+    expect.objectContaining({
+      id: whole,
+      stopped: true,
+      listed: { files: 1, complete: false, so_far: 1 },
+      unlisted: 2,
+    }),
     { id: folder, path: notes, stopped: true },
   ])
   expect((body.items as Synced[])[0]).toMatchObject({ trashed: [], unknown: [], downloaded: [] })
   expect(read(root, "Docs/gone.txt")).toBe("g")
   expect(localTrash(root)).toEqual([])
+
+  // The second run goes on from the first one's place, lists one more page and stops again.
+  const pages = () =>
+    disk.calls
+      .filter((call) => call.url.pathname === "/v1/disk/resources/files")
+      .map((call) => call.url.searchParams.get("offset"))
+  disk.calls.length = 0
+  const second = await runCli(["personal", "mirrors", "sync", whole, "--yes", "--json", "--timeout", "10s"], {
+    service: stuckFrom(disk, 2),
+    env,
+  })
+  expect(second.code, second.err).toBe(0)
+  expect(pages()[0]).toBe("1")
+  expect(second.json().items).toEqual([
+    expect.objectContaining({
+      id: whole,
+      stopped: true,
+      listed: { files: 1, complete: false, resumed: true, so_far: 2 },
+    }),
+  ])
+  expect(read(root, "Docs/gone.txt")).toBe("g")
+
+  disk.calls.length = 0
   const after = await synced(cli)
+  expect(pages()[0]).toBe("2")
   expect(after.result).toMatchObject({ id: whole, trashed: [{ path: "Docs/gone.txt", side: "local" }] })
+  expect(after.json().next).toBeUndefined()
+})
+
+it("a sync of a Disk folder keeps no place in its listing, so a stopped one asks for more time", async () => {
+  const { cli, disk, env, root } = setup({ "a.txt": "a", "b.txt": "b" })
+  const id = await added(cli, root)
+  const stuck = {
+    fetch: (input: string | URL | Request, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : String(input))
+      if (url.pathname !== "/v1/disk/resources" || url.searchParams.get("limit") === "0") return disk.fetch(input, init)
+      return new Promise<Response>((_, reject) =>
+        init?.signal?.addEventListener("abort", () => reject(init.signal?.reason), { once: true }),
+      )
+    },
+  }
+  const ran = await runCli(["personal", "mirrors", "sync", id, "--yes", "--json", "--timeout", "10s"], {
+    service: stuck,
+    env,
+  })
+  expect(ran.code, ran.err).toBe(0)
+  expect(ran.json().items).toEqual([
+    expect.objectContaining({ id, stopped: true, listed: { files: 0, complete: false } }),
+  ])
+  expect(ran.json().next).toEqual([
+    expect.objectContaining({ step: "mirrors.sync.longer", args: { id, timeout: "15m" } }),
+  ])
 })
 
 it("sync gets a sync's deadline and preview a cooperative one, not a one-shot's 30 s", () => {
@@ -720,4 +797,89 @@ it("a preview stops before its deadline when the Disk listing is slow, and fails
   expect(body.next).toEqual([
     expect.objectContaining({ step: "mirrors.preview.longer", args: { id: whole, timeout: "15m" } }),
   ])
+})
+
+const PLAN = "# Plan\n\n## Monday\n\nwrite the brief\n\n## Friday\n\nsend the report\n"
+
+it("merges a text file both sides changed in different sections, and keeps the three versions", async () => {
+  const { cli, root, disk } = setup({ "plan.md": PLAN }, { "plan.md": PLAN })
+  const id = await added(cli, root)
+  expect((await synced(cli, id)).code).toBe(0)
+  write(root, "plan.md", PLAN.replace("write the brief", "write the brief and the budget"))
+  disk.put("disk:/Notes/plan.md", PLAN.replace("send the report", "send the report to Anna"))
+  const preview = await cli(["preview", id])
+  expect((preview.json().items as Synced[])[0]?.plan).toEqual([
+    expect.objectContaining({ kind: "merge", path: "plan.md" }),
+  ])
+  const merged = await synced(cli, id)
+  expect(merged.code, merged.err).toBe(0)
+  expect(merged.result).toMatchObject({ merged: ["plan.md"], conflicts: [] })
+  const both = PLAN.replace("write the brief", "write the brief and the budget").replace(
+    "send the report",
+    "send the report to Anna",
+  )
+  expect(read(root, "plan.md")).toBe(both)
+  expect(text(disk, "plan.md")).toBe(both)
+  const events = (await cli(["versions", "list", id, "plan.md"])).json().items as {
+    event: string
+    versions?: { role: string }[]
+  }[]
+  const event = events.find((one) => one.event === "merged")
+  expect(event?.versions?.map((one) => one.role).sort()).toEqual(["base", "local", "remote", "result"])
+})
+
+it("a line both sides changed is a conflict that conflicts list, show and resolve settle on both sides", async () => {
+  const { cli, root, disk, dir } = setup({ "plan.md": PLAN }, { "plan.md": PLAN })
+  const id = await added(cli, root)
+  expect((await synced(cli, id)).code).toBe(0)
+  const local = PLAN.replace("send the report", "send the report on Thursday")
+  const remote = PLAN.replace("send the report", "send the report on Saturday")
+  write(root, "plan.md", local)
+  disk.put("disk:/Notes/plan.md", remote)
+  const partial = await synced(cli, id)
+  expect(partial.code).not.toBe(0)
+  expect(partial.result.conflicts).toEqual([expect.objectContaining({ path: "plan.md" })])
+  expect(read(root, "plan.md")).toBe(local)
+  expect(text(disk, "plan.md")).toBe(remote)
+
+  const listed = await cli(["conflicts", "list", id])
+  expect(listed.code, listed.err).toBe(0)
+  expect(listed.json().items).toEqual([expect.objectContaining({ id, path: "plan.md" })])
+  const shown = await cli(["conflicts", "show", id, "plan.md"])
+  expect(shown.code, shown.err).toBe(0)
+  const view = shown.json().item as { merged: string }
+  expect(view.merged).toContain("<<<<<<<")
+  expect(view.merged).toContain("on Thursday")
+  expect(view.merged).toContain("on Saturday")
+
+  const final = join(dir, "final.md")
+  writeFileSync(final, PLAN.replace("send the report", "send the report on Friday"))
+  const resolved = await cli(["conflicts", "resolve", id, "plan.md", "--file", final, "--yes"])
+  expect(resolved.code, resolved.err).toBe(0)
+  expect(resolved.json().item).toMatchObject({ id, path: "plan.md", resolution: "file" })
+  expect(read(root, "plan.md")).toContain("on Friday")
+  expect(text(disk, "plan.md")).toContain("on Friday")
+  expect((await cli(["conflicts", "list", id])).json().items).toEqual([])
+  expect((await synced(cli, id)).result).toMatchObject({ conflicts: [], uploaded: [], downloaded: [] })
+})
+
+it("conflicts resolve --keep disk takes the Disk's version, and refuses when a side changed since", async () => {
+  const { cli, root, disk } = setup({ "plan.md": PLAN }, { "plan.md": PLAN })
+  const id = await added(cli, root)
+  await synced(cli, id)
+  write(root, "plan.md", PLAN.replace("brief", "local brief"))
+  disk.put("disk:/Notes/plan.md", PLAN.replace("brief", "disk brief"))
+  await synced(cli, id)
+  write(root, "plan.md", PLAN.replace("brief", "newer local brief"))
+  const refused = await cli(["conflicts", "resolve", id, "plan.md", "--keep", "disk", "--yes"])
+  expect(refused.code).not.toBe(0)
+  expect(text(disk, "plan.md")).toContain("disk brief")
+  expect(read(root, "plan.md")).toContain("newer local brief")
+  await synced(cli, id)
+  const kept = await cli(["conflicts", "resolve", id, "plan.md", "--keep", "disk", "--yes"])
+  expect(kept.code, kept.err).toBe(0)
+  expect(read(root, "plan.md")).toContain("disk brief")
+  expect((await cli(["conflicts", "resolve", id, "plan.md"])).json()).toMatchObject({
+    error: { code: "validation_error" },
+  })
 })

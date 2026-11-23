@@ -2,6 +2,8 @@
 
 Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest first.
 
+## 0.5.0 — 23.11.2026
+
 ## 0.4.0 — 19.11.2026
 
 ### Added

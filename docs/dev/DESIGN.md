@@ -109,6 +109,21 @@ the commands. Settled on 2026-11-18 by live probes, asserted by `scripts/live.sh
 - **Ranges:** Yandex's docs do not say a download link serves a `Range`; it is forwarded, and a 200 answer is passed
   on whole. Download links are kept a minute per file and version.
 
+## Editing files in place (2026-11-23)
+
+- **The edit commands are cli-core's** (`addFileEditCommands`: `files update`, `sheets`, `documents`, `history`,
+  `restore`). ydisk gives the write and read paths, the Disk's mirror target as the `FileTarget`, and its trash
+  restore as `restoreFromTrash`, so `files restore` keeps the trash form beside the version form.
+- **One version store per profile, `<state>/profiles/<profile>/files.versions`**, apart from each mirror's store:
+  the edits, the update and the restore keep into it and `history` reads it. It is never inside a mirrored folder.
+- **The Disk has no conditional upload.** The target reads the file again just before it sends, so a change landing
+  between that read and the upload is not caught. The docs say "the file is checked just before the write and what it
+  replaced is kept locally", never that a newer remote cannot be overwritten.
+- **`files download` gives a `sha256` only beside the file's whole text:** null when it cut the text, or when the text
+  is not the file's bytes read as UTF-8 (a PDF, docx or xlsx, another encoding). cli-core's RISK-4.
+- **The whole-Disk listing goes on across runs** (cli-core 0.720): the flat listing's `next` is its offset. A folder's
+  listing walks a queue of folders and keeps no place, so a stopped one still asks for a longer run.
+
 ## What is hand-written
 
 `src/yandex/` (transport, source, mirror target), `src/commands/{library,files,mirrors,mount}.ts`, `src/context.ts` and the tests with their fakes

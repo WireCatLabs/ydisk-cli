@@ -5,6 +5,7 @@ import { afterEach, expect, it } from "vitest"
 import { diskApi } from "./testing/disk-api.js"
 import { runCli } from "./testing/harness.js"
 
+const HASH = "a".repeat(64)
 const configFile = join(process.env.YDISK_CONFIG_DIR ?? "", "config.json")
 const withPermissions = (permissions: Record<string, string>) => {
   mkdirSync(join(configFile, ".."), { recursive: true })
@@ -154,6 +155,13 @@ it.each([
   [["publish", "/plan.txt"], { key: "files.share" }],
   [["unpublish", "/plan.txt"], { key: "files.share" }],
   [["upload", "./plan.txt"], { key: "files.delete", when: "with --replace" }],
+  [["update", "/plan.txt", "--text", "x"], { key: "files.delete", when: "with --expected-fingerprint" }],
+  [
+    ["restore", "/plan.txt", HASH, "--expected-fingerprint", HASH],
+    { key: "files.delete", when: "with --expected-fingerprint" },
+  ],
+  [["sheets", "update", "/b.xlsx", "B2", "--values", "[[1]]", "--expected-fingerprint", HASH], { key: "files.delete" }],
+  [["documents", "update", "/l.docx", "--payload", "[]", "--expected-fingerprint", HASH], { key: "files.delete" }],
   [["copy", "/plan.txt", "--folder", "/Archive"], { key: "files.delete", when: "with --replace" }],
   [["move", "/plan.txt", "--folder", "/Archive"], { key: "files.delete", when: "with --replace" }],
 ])("--dry-run of files %s shows %o, the key its run also checks", async (argv, also) => {

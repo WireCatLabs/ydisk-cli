@@ -754,18 +754,6 @@
     {
       "path": [
         "files",
-        "restore"
-      ],
-      "summary": "bring a file or folder back from the Disk's trash",
-      "effects": {
-        "remote": "write",
-        "local": "write"
-      },
-      "permission": "files.restore"
-    },
-    {
-      "path": [
-        "files",
         "publish"
       ],
       "summary": "open a file or folder to anyone with its public link; asks as files.share does",
@@ -798,6 +786,94 @@
         "local": "read"
       },
       "permission": "files.serve"
+    },
+    {
+      "path": [
+        "files",
+        "sheets",
+        "show"
+      ],
+      "summary": "show a workbook's cells and the sha256 to edit them at",
+      "effects": {
+        "remote": "read",
+        "local": "read"
+      },
+      "permission": "files.sheets.show"
+    },
+    {
+      "path": [
+        "files",
+        "sheets",
+        "update"
+      ],
+      "summary": "write values into a workbook's cells, at the sha256 it was read at",
+      "effects": {
+        "remote": "write",
+        "local": "write"
+      },
+      "permission": "files.sheets.update"
+    },
+    {
+      "path": [
+        "files",
+        "documents",
+        "show"
+      ],
+      "summary": "show a document's paragraphs and the sha256 to edit them at",
+      "effects": {
+        "remote": "read",
+        "local": "read"
+      },
+      "permission": "files.documents.show"
+    },
+    {
+      "path": [
+        "files",
+        "documents",
+        "update"
+      ],
+      "summary": "replace, insert or delete paragraphs, at the sha256 it was read at",
+      "effects": {
+        "remote": "write",
+        "local": "write"
+      },
+      "permission": "files.documents.update"
+    },
+    {
+      "path": [
+        "files",
+        "history"
+      ],
+      "summary": "list the earlier versions of a file kept on this computer",
+      "effects": {
+        "remote": "read",
+        "local": "read"
+      },
+      "permission": "files.history"
+    },
+    {
+      "path": [
+        "files",
+        "restore"
+      ],
+      "summary": "bring a file back from the trash, or put back a version kept here",
+      "effects": {
+        "remote": "write",
+        "local": "write"
+      },
+      "permission": "files.restore"
+    },
+    {
+      "path": [
+        "files",
+        "update"
+      ],
+      "summary": "replace a Yandex Disk file's text, or create a text file",
+      "effects": {
+        "remote": "write",
+        "local": "write"
+      },
+      "permission": "files.update"
     },
     {
       "path": [
@@ -920,6 +996,45 @@
         "local": "write"
       },
       "permission": "mirrors.versions.restore"
+    },
+    {
+      "path": [
+        "mirrors",
+        "conflicts",
+        "list"
+      ],
+      "summary": "list the conflicts the last sync left",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "mirrors.conflicts.list"
+    },
+    {
+      "path": [
+        "mirrors",
+        "conflicts",
+        "show"
+      ],
+      "summary": "show a conflict's three versions and the lines that conflict",
+      "effects": {
+        "remote": "none",
+        "local": "read"
+      },
+      "permission": "mirrors.conflicts.show"
+    },
+    {
+      "path": [
+        "mirrors",
+        "conflicts",
+        "resolve"
+      ],
+      "summary": "settle a conflict on both sides: keep a side, both, or the final file",
+      "effects": {
+        "remote": "write",
+        "local": "write"
+      },
+      "permission": "mirrors.conflicts.resolve"
     },
     {
       "path": [

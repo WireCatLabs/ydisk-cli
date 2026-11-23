@@ -268,8 +268,12 @@ describe("hashes and long texts", () => {
     const service = setup()
     service.put("disk:/long.txt", "x".repeat(200_010))
     const read = await runCli(["personal", "files", "download", "/long.txt", "--json"], { service })
-    const item = read.json().item as { text: string; truncated: boolean }
+    const item = read.json().item as { text: string; truncated: boolean; sha256: string | null }
     expect(item.truncated).toBe(true)
     expect(item.text).toHaveLength(200_000)
+    // A cut text gives nothing to write it back with; files show still gives the file's own hash.
+    expect(item.sha256).toBeNull()
+    const shown = await runCli(["personal", "files", "show", "/long.txt", "--json"], { service })
+    expect(shown.json().item).toMatchObject({ sha256: sha256("x".repeat(200_010)) })
   })
 })

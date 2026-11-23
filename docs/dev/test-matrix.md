@@ -7,7 +7,7 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**179 ✅ · 168 ⛔ · 0 ❌** — 122 commands, 225 options.
+**199 ✅ · 168 ⛔ · 0 ❌** — 131 commands, 236 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
@@ -132,11 +132,25 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `files move` | `--replace` | ✅ |  |
 | `files create` |  | ✅ |  |
 | `files delete` |  | ✅ |  |
-| `files restore` |  | ✅ |  |
 | `files publish` |  | ✅ |  |
 | `files unpublish` |  | ✅ |  |
 | `files serve` |  | ✅ |  |
 | `files serve` | `--port` | ✅ |  |
+| `files sheets show` |  | ✅ |  |
+| `files sheets update` |  | ✅ |  |
+| `files sheets update` | `--values` | ✅ |  |
+| `files sheets update` | `--expected-fingerprint` | ✅ |  |
+| `files sheets update` | `--replace` | ✅ |  |
+| `files documents show` |  | ✅ |  |
+| `files documents update` |  | ✅ |  |
+| `files documents update` | `--payload` | ✅ |  |
+| `files documents update` | `--expected-fingerprint` | ✅ |  |
+| `files history` |  | ✅ |  |
+| `files restore` |  | ✅ |  |
+| `files restore` | `--expected-fingerprint` | ✅ |  |
+| `files update` |  | ✅ |  |
+| `files update` | `--text` | ✅ |  |
+| `files update` | `--expected-fingerprint` | ✅ |  |
 | `mirrors add` |  | ✅ |  |
 | `mirrors add` | `--ignore` | ✅ |  |
 | `mirrors list` |  | ✅ |  |
@@ -146,6 +160,7 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `mirrors sync` |  | ✅ |  |
 | `mirrors sync` | `--keep` | ✅ |  |
 | `mirrors sync` | `--allow-deletions` | ✅ |  |
+| `mirrors sync` | `--allow-replacements` | ✅ |  |
 | `mirrors sync` | `--replace` | ✅ |  |
 | `mirrors sync` | `--repin` | ✅ |  |
 | `mirrors watch` |  | ✅ |  |
@@ -156,6 +171,11 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `mirrors remove` |  | ✅ |  |
 | `mirrors versions list` |  | ✅ |  |
 | `mirrors versions restore` |  | ✅ |  |
+| `mirrors conflicts list` |  | ✅ |  |
+| `mirrors conflicts show` |  | ✅ |  |
+| `mirrors conflicts resolve` |  | ✅ |  |
+| `mirrors conflicts resolve` | `--keep` | ✅ |  |
+| `mirrors conflicts resolve` | `--file` | ✅ |  |
 | `store info` |  | ✅ |  |
 | `api list` |  | ✅ |  |
 | `api show` |  | ⛔ | generated from Yandex Disk's Swagger 1.2; src/api.test.ts sends every operation through cli-base's strict fake, and pnpm generate:check checks the generation |

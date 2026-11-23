@@ -40,14 +40,32 @@ which answers its text. `folders add <path>` changes what the owner's sync copie
 `--dry-run` first when unsure. `api list` lists the raw API, one command per operation:
 [references/api.md](references/api.md).
 
+## Edit a file in place
+
+Read first, then write back at the `sha256` you read, as `--expected-fingerprint`:
+
+- A text file (`.md`, `.txt`, `.csv`): `files download <path> --json` gives the whole text and its `sha256`; write the
+  new whole text with `files update <path> --expected-fingerprint <sha256>` and the text on stdin or in `--text`. A
+  download with `truncated: true` or `sha256: null` cannot be written back.
+- An `.xlsx`: `files sheets show <path> [range] --json`, then `files sheets update <path> <range> --values <json rows>
+  --expected-fingerprint <sha256>`. A formula cell is refused unless `--replace`: ask the owner first.
+- A `.docx`: `files documents show <path> --json`, then `files documents update <path> --payload <json edits>
+  --expected-fingerprint <sha256>`, by the paragraph indexes `show` gave.
+
+A `conflict` (`mirror.remote-changed`) means the file changed since you read it: read it again and redo the edit,
+never retry with the old hash. Each edit asks as `files.delete` does. `files history <path>` lists what edits
+replaced; `files restore <path> <version> --expected-fingerprint <sha256 now>` puts one back.
+
 ## Mirrored folders
 
 The owner may mirror a local folder with a Disk folder. `mirrors list` shows the pairs, `mirrors status` what the next
 sync would send, and `mirrors preview <id> --json` the plan without changing anything. `mirrors sync <id>`
-copies changes both ways; a file changed on both sides comes back under `conflicts` and stays as it is: ask the owner
-which side to keep, then run `mirrors sync <id> --keep local|disk|both`. A sync stops before 45 s with
-`meta.complete: false` and `stopped: true`; follow its `next`. When `next` asks for a longer `--timeout`, the listing
-does not fit an agent's run: ask the owner to run it in a terminal. Adding or removing a mirror is the owner's.
+copies changes both ways; a text file edited on both sides in different places is merged (`merged`). Any other file
+changed on both sides comes back under `conflicts` and stays as it is: `mirrors conflicts show <id> <path> --json`
+gives the three versions and the conflicting lines; ask the owner which to keep, then run
+`mirrors conflicts resolve <id> <path> --keep local|disk|both`. A sync stops before 45 s with `meta.complete: false`
+and `stopped: true`; follow its `next`: a whole-Disk listing goes on where it stopped, so run it again. When `next`
+asks for a longer `--timeout`, the listing does not fit an agent's run: ask the owner to run it in a terminal. Adding or removing a mirror is the owner's.
 
 ## Rules
 

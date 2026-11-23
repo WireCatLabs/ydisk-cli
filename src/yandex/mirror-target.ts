@@ -165,14 +165,23 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
 
   /**
    * Every file on the Disk from its flat, alphabetical listing: one request per thousand files instead of one per
-   * folder. A file met twice, as a page shifts while the Disk changes, is kept once.
+   * folder. A file met twice, as a page shifts while the Disk changes, is kept once. A listing a stop or a failed page
+   * cut short answers `next`, its offset, and the next run goes on from there (`from`); one past the cap answers none,
+   * since the engine starts such a listing over.
    */
-  const flat = async (excluded: (path: string) => boolean, stop?: AbortSignal) => {
+  const flat = async (excluded: (path: string) => boolean, stop?: AbortSignal, from?: string) => {
     const found = new Map<string, RemoteFile>()
     let counted = 0
-    const listing = (complete: boolean) => ({ files: [...found.values()], complete })
-    for (let offset = 0; ; ) {
-      if (stop?.aborted) return listing(false)
+    let offset = from === undefined ? 0 : Number(from)
+    // A saved position this code did not write lists from the start rather than from a guess.
+    if (!Number.isSafeInteger(offset) || offset < 0) offset = 0
+    const listing = (complete: boolean, next?: number) => ({
+      files: [...found.values()],
+      complete,
+      ...(next === undefined ? {} : { next: String(next) }),
+    })
+    for (;;) {
+      if (stop?.aborted) return listing(false, offset)
       let items: Resource[]
       try {
         const page = {
@@ -184,9 +193,9 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
         }
         items = (await api.send(page, FlatList)).items
       } catch (error) {
-        if (stop?.aborted) return listing(false)
+        if (stop?.aborted) return listing(false, offset)
         if (fatal(error)) throw error
-        return listing(false)
+        return listing(false, offset)
       }
       if (!items.length) return listing(true)
       offset += items.length
@@ -241,7 +250,8 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
           reason: "mirror.not-folder",
         })
       const excluded = options?.excluded ?? (() => false)
-      const listed = top.path === ROOT ? await flat(excluded, stop) : await walk(top, excluded, stop)
+      // A folder's own listing keeps no position: it walks a queue of folders, and starts again each run.
+      const listed = top.path === ROOT ? await flat(excluded, stop, options?.from) : await walk(top, excluded, stop)
       return { rootId: top.resource_id, ...listed }
     },
 
