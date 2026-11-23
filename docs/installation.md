@@ -90,7 +90,10 @@ Yandex keeps a token valid for months and extends it while it is used
 ([Yandex ID](https://yandex.ru/dev/id/doc/en/concepts/ya-oauth-intro)). When Yandex stops accepting it, the commands
 fail with exit code 4: get a new token the same way and run `session start` again.
 
-`ydisk personal session end` removes the token from this computer.
+`ydisk personal session end` removes the token from this computer. The token itself stays valid at Yandex: to revoke
+it, open [Data access](https://id.yandex.ru/personal/data-access) in Yandex ID and remove the app the token was issued for. Changing your Yandex password
+or "Log out on all devices" also revokes it, together with every other token of the account
+([Yandex ID](https://yandex.ru/dev/id/doc/en/tokens/token-invalidate)).
 
 ## A computer with no keyring
 
@@ -112,7 +115,8 @@ your agent's instructions match the new version.
 
 ## Remove
 
-`ydisk personal session end` forgets the profile's token on this computer. Then remove the tool:
+`ydisk personal session end` forgets the profile's token on this computer, and [Data access](https://id.yandex.ru/personal/data-access) in Yandex ID
+revokes it at Yandex. Then remove the tool:
 
 ```sh
 npm uninstall -g @wirecat/yandex-disk-cli
