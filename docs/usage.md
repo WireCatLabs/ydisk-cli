@@ -73,11 +73,27 @@ again under its new path.
 | On the Disk | In the copy |
 | --- | --- |
 | PDF with a text layer, Word `.docx` and `.doc`, Excel `.xlsx`, PowerPoint `.pptx`, OpenDocument `.odt`, `.ods` and `.odp`, RTF, HTML, EPUB, CSV, TSV, plain text, Markdown | The text, the name, the path, the size and the dates |
-| A scanned PDF or a picture | The name, the path and the dates. There is no text to read |
+| A scanned PDF (no text layer), a JPEG, PNG or WebP picture | The text read by OCR, as `read_scans` says: on your computer by default. A scan over 20 pages, a picture over 25 MB, or any of them with `read_scans` set to `off`: the name, the path and the dates. See [scans and pictures](#scans-and-pictures) |
 | Any other file, and any file over 50 MB | The name, the path and the dates |
 
 `status` lists each file kept by name only, with the reason. The files themselves stay on the Disk. The copy holds
 their text. Times are kept and shown in UTC.
+
+### Scans and pictures
+
+A sync reads the text of a scanned PDF and of a JPEG, PNG or WebP picture by OCR. The profile's `read_scans` setting
+chooses who reads it:
+
+| `read_scans` | Who reads the text | What it needs |
+| --- | --- | --- |
+| `local` (default) | The `tesseract` program on your computer, in Russian and English. Nothing leaves the computer and nothing is downloaded | `tesseract` installed, for example `sudo apt install tesseract-ocr tesseract-ocr-rus` on Debian or Ubuntu, `brew install tesseract tesseract-lang` on macOS |
+| `anthropic` or `openai` | The model chosen with `ydisk ai set`, at that provider's own address. Each page is sent to the provider as a picture, and the provider charges for every page | `ydisk ai set` with that provider, and pictures allowed (`ydisk ai set --images`) |
+| `off` | No one | Scans and pictures are kept by name only |
+
+`ydisk personal config set read_scans '"anthropic"'` switches one profile. One file is read up to 20 pages, and one
+sync reads at most 100 pages. The pages over that wait for the next sync. A scan an older ydisk kept by name is read
+on the next sync. When `tesseract` is missing, the sync still finishes, and each scan's reason in `status` says how
+to install it.
 
 ## Read a synced document
 

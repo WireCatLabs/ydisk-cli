@@ -55,6 +55,14 @@ it("config set and unset change one setting and put it back", async () => {
   }
 })
 
+it("config set takes who reads scans, and refuses a reader cli-core does not know", async () => {
+  expect((await ran(["personal", "config", "set", "read_scans", '"off"', "--json"])).code).toBe(0)
+  const { out } = await ran(["personal", "config", "show", "--json"])
+  expect(JSON.parse(out).item.settings).toContainEqual(expect.objectContaining({ setting: "read_scans", value: "off" }))
+  expect((await ran(["personal", "config", "set", "read_scans", '"gemini"', "--json"])).code).not.toBe(0)
+  expect((await ran(["personal", "config", "unset", "read_scans", "--json"])).code).toBe(0)
+})
+
 it("config show --bot shows what a bot command would get", async () => {
   const { code, out } = await ran(["personal", "config", "show", "--bot", "--json"])
   expect(code).toBe(0)
