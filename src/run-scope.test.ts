@@ -72,10 +72,14 @@ describe("each remote command runs inside cli-core's run", () => {
       "files documents show":
         "reads a .docx, which the spec's fake has none of; src/edit.test.ts runs it against fake-disk",
       "files documents update": "edits a .docx; src/edit.test.ts runs it against fake-disk",
+      "files sheets create":
+        "checks the Disk for the path first, and the spec's fake answers every path as a file; src/edit.test.ts runs it against fake-disk",
+      "files documents create":
+        "checks the Disk for the path first, and the spec's fake answers every path as a file; src/edit.test.ts runs it against fake-disk",
       "files history":
         "reads only the versions kept on this computer, so a silent service cannot stop it; src/edit.test.ts runs it",
       "mirrors conflicts resolve":
-        "needs a conflict a sync recorded; src/mirrors.test.ts resolves one against fake-disk. cli-core connects it outside the command's run (WireCatLabs/cli-core#3230)",
+        "needs a conflict a sync recorded; src/mirrors.test.ts resolves one against fake-disk",
       "files serve": "serves until stopped; src/mount.test.ts reads through it against fake-disk and stops it",
       "memories extract": "asks the configured model, not Yandex Disk; cli-core's shared command",
       doctor:

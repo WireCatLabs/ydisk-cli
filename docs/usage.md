@@ -158,12 +158,16 @@ moment between that last check and the upload is not caught; the replaced conten
 | `files update <path> --text <text>` (or the text on stdin) | the whole text of a plain-text file, such as `.md`, `.txt` or `.csv`; a new file needs no fingerprint |
 | `files sheets update <path> <range> --values <json>` | cells of an `.xlsx`, from `files sheets show`; the rest of the workbook stays as it is |
 | `files documents update <path> --payload <json>` | paragraphs of a `.docx`, by the indexes `files documents show` gives |
+| `files sheets create <path> --values <json>` | a new `.xlsx` with one sheet of these rows from A1; `--name` names the sheet |
+| `files documents create <path> --payload <json>` | a new `.docx` from paragraphs, each with an optional style such as `Title` or `Heading1` |
 | `files restore <path> <version>` | puts back a version `files history` lists |
 
 `files update` refuses a `.pdf`, `.docx` or `.xlsx`: their text is extracted, and writing it back would replace the
 document. `sheets update` writes a text as text, even one that starts with `=`, and refuses to overwrite a formula
 unless `--replace`. `documents update` refuses a paragraph with a tracked change, a field, an image, a comment, a
-link or a footnote, and says why. Every edit asks as `files.delete` does. `files history` lists what this profile's
+link or a footnote, and says why. `sheets create` and `documents create` write a new file only and refuse a path
+that is already there; they answer the `sha256` that `update` takes next. Every edit of an existing file asks as
+`files.delete` does. `files history` lists what this profile's
 edits replaced, newest last; each `version` is the sha256 of the replaced content, and `available` says whether it is
 still kept. See [edit a file with your agent](recipes.md#edit-a-file-with-your-agent).
 

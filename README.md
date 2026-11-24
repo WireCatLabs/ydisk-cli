@@ -40,8 +40,9 @@
   and answers from it.
 - **Change a note, a spreadsheet or a letter in place.** `files update` writes a text file, `files sheets update`
   writes cells and keeps the workbook's formatting and formulas, `files documents update` replaces paragraphs and
-  keeps their style. Each takes the file's `sha256` from when it was read and is refused when someone changed the
-  file since; `files history` and `files restore` put an earlier version back.
+  keeps their style; `files sheets create` and `files documents create` make a new one. Each edit takes the file's
+  `sha256` from when it was read and is refused when someone changed the file since; `files history` and
+  `files restore` put an earlier version back.
 - **Keep the Disk tidy.** Move, copy, rename into a folder, and delete to the trash, where `files restore` brings a
   file back.
 - **Share on request.** A public link for a file or folder, and close it again when you are done.

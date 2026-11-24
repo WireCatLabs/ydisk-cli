@@ -36,7 +36,7 @@ import {
   syncFileMirrors,
   watchMirrors,
 } from "@wirecat/cli-core/documents"
-import { fileConflictsCommand } from "@wirecat/cli-core/documents/cli"
+import { fileConflictsCommand, keepVersionsForDays } from "@wirecat/cli-core/documents/cli"
 import { acquireLock, writeFileAtomic } from "@wirecat/cli-core/files"
 import { type Asker, guardedWrite, type KeyedGuard, newOperationId, refusedPlace } from "@wirecat/cli-core/sends"
 import { Command, Option } from "commander"
@@ -106,7 +106,8 @@ const mirrorsHome = (command: Command) => {
     save: (list: SavedMirror[]) => writeFileAtomic(listPath, JSON.stringify(list, null, 2), { mode: 0o600 }),
     statePath: (mirror: Mirror) => join(states, `${mirror.id}.json`),
     stateOf: (mirror: SavedMirror) => fileSyncState(states, mirror, mirror.account),
-    versionsOf: (mirror: Mirror) => fileVersions(join(states, `${mirror.id}.versions`)),
+    versionsOf: (mirror: Mirror) =>
+      fileVersions(join(states, `${mirror.id}.versions`), Date.now, keepVersionsForDays(contextOf(command).settings)),
     lock: () =>
       acquireLock(join(states, "sync.lock")).catch((error: unknown) => {
         throw new CliError("provider_unavailable", "another mirrors sync or watch holds this profile; retry later", {
@@ -932,13 +933,16 @@ const conflictsCommand = () =>
     pathOf: (mirror, input) => insideOf(mirror.path, input),
     stateOf: (command, mirror) => mirrorsHome(command).stateOf(mirror as SavedMirror),
     versionsOf: (command, mirror) => mirrorsHome(command).versionsOf(mirror),
-    connect: async (command, mirror) => {
-      const { target, principal, guard, operationId, lock, signal } = engineOf(
-        command,
-        diskFor(command, undefined, tokenOf(command)),
-        [mirror as SavedMirror],
-      )
-      return { target, principal, guard, operationId, lock, ...(signal ? { signal } : {}) }
+    connect: (command, mirror, body) => {
+      const token = tokenOf(command)
+      return contextOf(command).run((events) => {
+        const { target, principal, guard, operationId, lock, signal } = engineOf(
+          command,
+          diskFor(command, events, token),
+          [mirror as SavedMirror],
+        )
+        return body({ target, principal, guard, operationId, lock, ...(signal ? { signal } : {}) })
+      })
     },
   })
 

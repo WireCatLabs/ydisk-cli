@@ -51,6 +51,8 @@ Read first, then write back at the `sha256` you read, as `--expected-fingerprint
   --expected-fingerprint <sha256>`. A formula cell is refused unless `--replace`: ask the owner first.
 - A `.docx`: `files documents show <path> --json`, then `files documents update <path> --payload <json edits>
   --expected-fingerprint <sha256>`, by the paragraph indexes `show` gave.
+- A new `.xlsx` or `.docx`: `files sheets create <path> --values <json rows>` or `files documents create <path>
+  --payload <json paragraphs>`. Either refuses a path that is already there (`office.file-exists`).
 
 A `conflict` (`mirror.remote-changed`) means the file changed since you read it: read it again and redo the edit,
 never retry with the old hash. Each edit asks as `files.delete` does. `files history <path>` lists what edits

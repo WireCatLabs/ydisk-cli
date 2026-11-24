@@ -7,7 +7,7 @@ ran it · ⛔ not tested offline, with the reason and where it is checked instea
 Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 [TESTING.md](TESTING.md) for how, and for the states and failures that cut across commands.
 
-**199 ✅ · 168 ⛔ · 0 ❌** — 131 commands, 236 options.
+**204 ✅ · 168 ⛔ · 0 ❌** — 133 commands, 239 options.
 
 | Command | Option | | Note |
 |---|---|---|---|
@@ -141,10 +141,15 @@ Measured from the test run (`coverage/argv.jsonl`), not searched for — see
 | `files sheets update` | `--values` | ✅ |  |
 | `files sheets update` | `--expected-fingerprint` | ✅ |  |
 | `files sheets update` | `--replace` | ✅ |  |
+| `files sheets create` |  | ✅ |  |
+| `files sheets create` | `--values` | ✅ |  |
+| `files sheets create` | `--name` | ✅ |  |
 | `files documents show` |  | ✅ |  |
 | `files documents update` |  | ✅ |  |
 | `files documents update` | `--payload` | ✅ |  |
 | `files documents update` | `--expected-fingerprint` | ✅ |  |
+| `files documents create` |  | ✅ |  |
+| `files documents create` | `--payload` | ✅ |  |
 | `files history` |  | ✅ |  |
 | `files restore` |  | ✅ |  |
 | `files restore` | `--expected-fingerprint` | ✅ |  |
