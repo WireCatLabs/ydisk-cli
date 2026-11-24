@@ -158,7 +158,7 @@ How the file is checked depends on whether it has a public link:
   that when the file's content is not the one read. Then the hidden file takes the file's name. The file gets a new
   id (Yandex's `resource_id`), and the Disk's own version history of it starts over; the trash holds the old file.
   If the file changed, the hidden file is removed and nothing is replaced. If a new file appeared at the path in the
-  moment between the two steps, the answer is a `conflict` that names the hidden file, which keeps your new content.
+  moment between the two steps, the answer is a `conflict`, and the hidden file next to it keeps your new content.
 - **A file with a public link is checked just before the write**, and what it replaced is kept on your computer. It
   is overwritten in place, so its id and its link stay. The Disk has no conditional upload, so a change that lands in
   the moment between that check and the upload is not caught; the replaced content is still kept.

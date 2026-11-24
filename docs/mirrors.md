@@ -215,7 +215,7 @@ to a hidden file next to it, moves the old file to the Disk's trash at the conte
 file changed since), and gives the hidden file its name. The file gets a new id (Yandex's `resource_id`), and the
 Disk's own version history of it starts over; its old content is in the Disk's trash and in the mirror's versions. A
 file changed on the Disk meanwhile is a conflict, and nothing is replaced. A new file put at the path in the moment
-between the two steps is a conflict too: the hidden file keeps your content, and the error names it.
+between the two steps is a conflict too, and the hidden file next to it (`.name.ext.ydisk-…`) keeps your content.
 
 A file with a public link keeps its link, so it is overwritten in place: it is checked just before the write, and
 what it replaced is kept on your computer.
