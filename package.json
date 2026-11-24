@@ -1,6 +1,6 @@
 {
   "name": "@wirecat/yandex-disk-cli",
-  "version": "0.8.0",
+  "version": "0.7.0",
   "description": "Yandex Disk for your AI agents: search the folders you choose, and work with the files live",
   "license": "Apache-2.0",
   "author": "Viacheslav Ptsarev",
@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@wirecat/cli-base": "0.132.0",
-    "@wirecat/cli-core": "0.740.0",
+    "@wirecat/cli-core": "0.742.0",
     "commander": "15.0.0",
     "valibot": "1.5.0"
   },

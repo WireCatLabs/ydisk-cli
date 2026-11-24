@@ -2,21 +2,16 @@
 
 Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest first.
 
-## 0.8.0 — 24.11.2026
+## 0.7.0 — 24.11.2026
 
 ### Added
 
-- **A sync reads the text of scans and pictures** (cli-core 0.740.0, was 0.739.0). A PDF with no text layer and a
+- **A sync reads the text of scans and pictures** (cli-core 0.742.0, was 0.739.0). A PDF with no text layer and a
   JPEG, PNG or WebP picture are read by OCR, chosen by the profile's `read_scans`: `local` by default (the
   `tesseract` program on your computer, Russian and English, nothing downloaded), `anthropic` or `openai` (the
   `ai set` model at that provider's own address, with pictures allowed, each page sent to it and paid per page), or
   `off`. At most 20 pages a file and 100 a sync. A scan an older ydisk kept by name is read on the next sync, and a
   sync with no `tesseract` says how to install it ([scans and pictures](docs/usage.md#scans-and-pictures)).
-
-## 0.7.0 — 24.11.2026
-
-### Added
-
 - **More formats are read** (cli-core 0.739.0, was 0.737.0): Word 97–2003 `.doc`, PowerPoint `.pptx`, OpenDocument
   `.odt`, `.ods` and `.odp`, RTF, HTML and EPUB, beside PDF, `.docx`, `.xlsx`, CSV, TSV, plain text and Markdown. A
   file an earlier version kept by name only is read on the next sync ([usage](docs/usage.md#what-the-copy-holds)).
@@ -52,7 +47,7 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
   conflicts show`) already marked theirs. Outside such a run no answer changes. A marked path is passed back to a
   `files` command without the markers. Not marked yet: `mirrors conflicts list` (cli-core's), and `files serve`,
   which shows the Disk as a folder rather than an answer.
-- Requires `@wirecat/cli-core` 0.739.0 and `@wirecat/cli-base` 0.132.0.
+- Requires `@wirecat/cli-core` 0.742.0 and `@wirecat/cli-base` 0.132.0.
 
 ## 0.6.0 — 24.11.2026
 
