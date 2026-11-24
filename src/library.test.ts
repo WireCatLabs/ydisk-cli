@@ -142,6 +142,36 @@ describe("the Yandex Disk source", () => {
       "budget",
     ])
   })
+  // Nine runs of the CLI, more than the default time allows on a busy runner.
+  it("a file files update replaces under the Disk's check gets a new id, and its tags and notes go with it", async () => {
+    const disk = tree()
+    const env = sandbox()
+    const run = (...argv: string[]) => runCli(["personal", ...argv, "--json"], { service: disk, env })
+    await run("folders", "add", "/Work")
+    await run("sync")
+    const old = disk.nodes.get("disk:/Work/plan.txt")
+    expect((await run("tags", "add", old?.resource_id as string, "budget")).code).toBe(0)
+    expect((await run("notes", "add", old?.resource_id as string, "check the totals")).code).toBe(0)
+    const edited = await run(
+      "files",
+      "update",
+      "/Work/plan.txt",
+      "--text",
+      "the budget was cut in half",
+      "--expected-fingerprint",
+      old?.sha256 as string,
+      "--yes",
+    )
+    expect(edited.code, edited.err).toBe(0)
+    const id = disk.nodes.get("disk:/Work/plan.txt")?.resource_id as string
+    expect(id).not.toBe(old?.resource_id)
+    const tags = async () => ((await run("tags", "list", id)).json().items as { tag: string }[]).map((tag) => tag.tag)
+    const notes = async () => JSON.stringify((await run("notes", "list", id)).json())
+    await run("sync")
+    expect(await tags()).toEqual(["budget"])
+    expect(await notes()).toContain("check the totals")
+    expect(JSON.stringify((await run("documents", "show", id)).json())).toContain("cut in half")
+  }, 30_000)
 })
 
 describe("the history of synced files", () => {

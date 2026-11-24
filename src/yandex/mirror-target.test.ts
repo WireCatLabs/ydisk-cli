@@ -234,7 +234,7 @@ it("a file created at the path between the delete and the move keeps the new con
     if (method === "POST" && path === "disk:/a.txt") disk.put("disk:/a.txt", "someone else's")
   }
   const refused = target.upload("disk:/a.txt", local("two"), listed)
-  await expect(refused).rejects.toMatchObject({ code: "conflict", details: { reason: "mirror.remote-changed" } })
+  await expect(refused).rejects.toMatchObject({ code: "conflict", details: { reason: "upload.replace-interrupted" } })
   const [temporary] = hidden(disk)
   await expect(refused).rejects.toThrow(`kept at ${temporary}`)
   expect(disk.nodes.get(temporary as string)?.text).toBe("two")

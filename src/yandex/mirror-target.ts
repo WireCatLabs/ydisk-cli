@@ -78,7 +78,13 @@ const unproven = (path: string) =>
  * then has a new `resource_id`. A file with a public link keeps it only when the upload overwrites it (a replacing
  * upload keeps the `resource_id`, checked live), so it is read just before the write instead.
  */
-export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSignal): FileTarget => {
+export const diskTarget = (
+  api: Transport,
+  links: FetchLike,
+  signal?: AbortSignal,
+  /** Told the old and the new `resource_id` after a replace gave the file a new one. */
+  replaced?: (from: string, to: string) => Promise<void>,
+): FileTarget => {
   const writes = diskWrites(api, links, signal)
   const read = async (path: string) => {
     try {
@@ -283,7 +289,7 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
       const kept = `the old file is in the ${SERVICE} trash and the new content is kept at ${temporary}`
       if (statusOf(error) === 409)
         throw new CliError("conflict", `a new file appeared at ${path} while it was replaced; ${kept}`, {
-          reason: "mirror.remote-changed",
+          reason: "upload.replace-interrupted",
         })
       throw new CliError("outcome_unknown", `${SERVICE} did not confirm the move into ${path}; ${kept}`, {
         retryable: false,
@@ -344,7 +350,9 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
       if ("absent" in expect) return put(path, from, false)
       const now = await check(path, expect)
       if (now.public_key !== undefined || now.md5 === undefined) return put(path, from, true)
-      return swap(path, from, now.md5)
+      const done = await swap(path, from, now.md5)
+      await replaced?.(now.resource_id, done.id)
+      return done
     },
 
     trash: async (path, expect) => {

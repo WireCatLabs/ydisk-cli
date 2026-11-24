@@ -10,7 +10,7 @@ import { documentProfile } from "@wirecat/cli-core/documents/cli"
 import { Command } from "commander"
 import { configuration } from "../config.js"
 import { IDENTITY, SERVICE } from "../identity.js"
-import { PROVIDER } from "./library.js"
+import { PROVIDER } from "../ingestion.js"
 
 const removal: AccountRemoval = {
   // The token is an OAuth token the owner made; only Yandex's own page revokes it, so nothing is revoked here.

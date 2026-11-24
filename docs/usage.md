@@ -72,7 +72,7 @@ again under its new path.
 
 | On the Disk | In the copy |
 | --- | --- |
-| PDF with a text layer, Word `.docx`, Excel `.xlsx`, CSV, TSV, plain text, Markdown | The text, the name, the path, the size and the dates |
+| PDF with a text layer, Word `.docx` and `.doc`, Excel `.xlsx`, PowerPoint `.pptx`, OpenDocument `.odt`, `.ods` and `.odp`, RTF, HTML, EPUB, CSV, TSV, plain text, Markdown | The text, the name, the path, the size and the dates |
 | A scanned PDF or a picture | The name, the path and the dates. There is no text to read |
 | Any other file, and any file over 50 MB | The name, the path and the dates |
 
@@ -160,7 +160,8 @@ How the file is checked depends on whether it has a public link:
   and [Yandex's help](https://yandex.ru/support/yandex-360/customers/disk/web/ru/actions-files/spec-folders/trash)
   says files there still take up space on the Disk and are deleted automatically after 30 days.
   If the file changed, the hidden file is removed and nothing is replaced. If a new file appeared at the path in the
-  moment between the two steps, the answer is a `conflict`, and the hidden file next to it keeps your new content.
+  moment between the two steps, the answer is a `conflict` (`upload.replace-interrupted`) that names the hidden file,
+  which keeps your new content.
 - **A file with a public link is checked just before the write**, and what it replaced is kept on your computer. It
   is overwritten in place, so its id and its link stay. The Disk has no conditional upload, so a change that lands in
   the moment between that check and the upload is not caught; the replaced content is still kept.

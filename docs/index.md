@@ -23,8 +23,8 @@ minutes, once.
 
 ## What you get
 
-- **Search inside your files, not only their names.** The text of PDF, Word (`.docx`), Excel (`.xlsx`), CSV, TSV,
-  plain text and Markdown files is searchable. Search finds other forms of a word in Russian and English, and finds a
+- **Search inside your files, not only their names.** The text of PDF, Word (`.docx`, `.doc`), Excel (`.xlsx`),
+  PowerPoint (`.pptx`), OpenDocument, RTF, HTML, EPUB, CSV, TSV, plain text and Markdown files is searchable. Search finds other forms of a word in Russian and English, and finds a
   document by meaning once its text is indexed.
 - **Search without the internet.** Search reads the copy on your computer, so it is fast and costs no request to
   Yandex.

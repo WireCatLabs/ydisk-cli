@@ -188,6 +188,8 @@ export const diskSource = (
   }
   const user = async () => (await api.send({ method: "GET", path: "disk", query: { fields: "user" } }, Disk)).user
   return {
+    // One folder's listing can take seconds; four at a time stay inside the transport's pace of 120 requests a minute.
+    parallelListings: 4,
     download,
     account: async () => {
       const { uid, login, display_name } = await user()

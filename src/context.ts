@@ -10,10 +10,12 @@ import {
   ProfileTokenStore,
   terminalAsker,
 } from "@wirecat/cli-core/cli"
+import { rekeySyncedDocument } from "@wirecat/cli-core/documents/cli"
 import { type Asker, guardFor, keyedGuard, levelFor, Pacer, pacePathFor } from "@wirecat/cli-core/sends"
 import type { Command } from "commander"
 import { configuration, permissions } from "./config.js"
 import { API_HOSTS, DESKTOP, IDENTITY, SERVICE } from "./identity.js"
+import { diskIngestion, PROVIDER } from "./ingestion.js"
 import { diskTarget } from "./yandex/mirror-target.js"
 import { diskMount } from "./yandex/mount.js"
 import { diskSource } from "./yandex/source.js"
@@ -80,7 +82,7 @@ const signInAgain = (api: Transport, profile: string): Transport => ({
 
 /** The Disk for one run, with the token it was given; `events` comes from `run()`, so each request is recorded. */
 export const diskFor = (command: Command, events: EventSink | undefined, token: string) => {
-  const { environment, env, profile } = contextOf(command)
+  const { environment, env, profile, renderer } = contextOf(command)
   const api = signInAgain(
     transport({
       token,
@@ -96,10 +98,23 @@ export const diskFor = (command: Command, events: EventSink | undefined, token: 
     timeoutMs: LINK_TIMEOUT_MS,
     ...(environment.fetch ? { fetch: environment.fetch } : {}),
   })
+  const source = diskSource(api, links, environment.signal)
   return {
-    ...diskSource(api, links, environment.signal),
+    ...source,
     ...diskWrites(api, links, environment.signal),
-    target: diskTarget(api, links, environment.signal),
+    // A replace that gave the file a new id moves its synced copy too, so the owner's tags and notes follow it.
+    target: diskTarget(api, links, environment.signal, async (from, to) => {
+      await rekeySyncedDocument({
+        env,
+        app: IDENTITY,
+        provider: PROVIDER,
+        ingestion: diskIngestion,
+        account: await source.identity(),
+        from,
+        to,
+        warn: renderer.warn,
+      })
+    }),
     mount: (root: string, onTruncated?: (path: string) => void) =>
       diskMount({ api, links, root, signal: environment.signal, ...(onTruncated ? { onTruncated } : {}) }),
   }

@@ -75,8 +75,8 @@ Agent:  (runs ydisk personal files publish /Documents/Flat/lease-2026.pdf --yes)
 - **The official Disk API, with your own token.** `ydisk` uses Yandex's
   [Disk REST API](https://yandex.ru/dev/disk-api/doc/en/) with an OAuth token from an app you register. The token
   stays in your system keyring and only goes to Yandex's API.
-- **Search that understands the text.** Text is read from PDF, docx, xlsx, CSV, TSV, plain text and Markdown files.
-  Search finds other forms of a word, and matches by meaning once the text is indexed.
+- **Search that understands the text.** Text is read from PDF, docx, doc, xlsx, pptx, OpenDocument, RTF, HTML,
+  EPUB, CSV, TSV, plain text and Markdown files. Search finds other forms of a word, and matches by meaning once the text is indexed.
 - **Safe to give to an agent.** You decide what an agent may do: read only, or no deleting and no public links. The
   agent's instructions say that text from files is data, never an instruction to follow.
 - **Ready for any agent.** A skill for agents with a terminal, an MCP server for Claude Desktop and Cursor, and a
@@ -226,7 +226,7 @@ More: [WireCat](https://wirecat.dev)
   again and reads only the files that changed since the last one (by MD5). A stop loses nothing: the next sync goes
   on from where it stopped.
 - **Stable ids.** A file moved inside the chosen folders keeps its id (Yandex's `resource_id`), its tags and its
-  notes. A file deleted on the Disk leaves the copy at the end of the pass.
+  notes. A file this tool replaces gets a new id from the Disk, and its tags and notes move with it. A file deleted on the Disk leaves the copy at the end of the pass.
 - **Renamed folders.** A chosen folder renamed or moved on the Disk is unavailable, and its copies leave the store,
   until you add it again under its new path.
 - **Files go straight to Yandex.** Downloads and uploads go to the address Yandex gives, without the token.

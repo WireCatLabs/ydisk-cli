@@ -215,7 +215,8 @@ to a hidden file next to it, moves the old file to the Disk's trash at the conte
 file changed since), and gives the hidden file its name. The file gets a new id (Yandex's `resource_id`), and the
 Disk's own version history of it starts over; its old content is in the Disk's trash and in the mirror's versions. A
 file changed on the Disk meanwhile is a conflict, and nothing is replaced. A new file put at the path in the moment
-between the two steps is a conflict too, and the hidden file next to it (`.name.ext.ydisk-…`) keeps your content.
+between the two steps is a conflict too: the hidden file next to it (`.name.ext.ydisk-…`) keeps your content, and the
+conflict names it.
 
 The old file stays in the Disk's trash: [Yandex's
 help](https://yandex.ru/support/yandex-360/customers/disk/web/ru/actions-files/spec-folders/trash) says files there

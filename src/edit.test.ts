@@ -74,6 +74,19 @@ describe("files update", () => {
     expect(service.trash.size).toBe(0)
   })
 
+  it("a file put at the path while it is replaced is a conflict that names where the new content is", async () => {
+    withPermissions({ "files.delete": "allow" })
+    const { service, cli } = setup()
+    service.beforeWrite = (method, path) => {
+      if (method === "POST" && path === "disk:/notes.md") service.put("disk:/notes.md", "someone else's")
+    }
+    const refused = await cli(["update", "/notes.md", "--text", NEW, "--expected-fingerprint", sha256(OLD), "--json"])
+    const [temporary] = [...service.nodes.keys()].filter((path) => path.includes("/."))
+    expect(service.nodes.get(temporary as string)?.text).toBe(NEW)
+    expect(refused.json()).toMatchObject({ error: { code: "conflict", reason: "upload.replace-interrupted" } })
+    expect(JSON.stringify(refused.json())).toContain(temporary)
+  })
+
   it("a fingerprint the file no longer has is a conflict that says to read it again, and nothing is uploaded", async () => {
     withPermissions({ "files.delete": "allow" })
     const { service, uploads, cli } = setup()
