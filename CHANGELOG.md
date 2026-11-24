@@ -11,6 +11,13 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
   file an earlier version kept by name only is read on the next sync ([usage](docs/usage.md#what-the-copy-holds)).
 - **A sync lists four Disk folders at once**, so a sync of many folders takes less time. It stays within the 120
   requests a minute ydisk sends to Yandex.
+- **`files sheets create` makes several sheets, formulas and bold cells.** `--values` also takes
+  `[{"name": "Budget", "header": true, "rows": [...]}]`, and a cell may be `{"formula": "SUM(B2:B3)"}` or
+  `{"value": "Total", "bold": true}`. A text that starts with `=` stays text. Rows as before keep working
+  ([commands](docs/commands.md)).
+- **`files documents create` makes bold and italic text and tables.** `--payload` also takes
+  `{"text", "bold", "italic"}`, `{"runs": [...]}` and `{"table": [["Item", "Cost"], ["Rent", "950"]], "header": true}`.
+  `[{"text", "style"}]` keeps working ([commands](docs/commands.md)).
 
 ### Changed — may break callers
 
