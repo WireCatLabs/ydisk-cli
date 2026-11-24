@@ -15,7 +15,7 @@ if (!process.env.WIRECAT_CONTRACT_DENIED) throw new Error("requires the isolated
 const [{ IDENTITY }, { PROVIDER }, { openAppStore, rememberAccount }, { documentIngestion }, { documentProfile }] =
   await Promise.all([
     previous("identity.js"),
-    previous("commands/library.js"),
+    previous("ingestion.js"),
     core("cli"),
     core("documents"),
     core("documents/cli"),
