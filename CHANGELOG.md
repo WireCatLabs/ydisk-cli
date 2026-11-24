@@ -4,6 +4,34 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
 
 ## 0.6.0 — 24.11.2026
 
+### Added
+
+- **New Excel and Word files** (cli-core 0.737.0, was 0.724.0). `files sheets create <path> --values <json rows>`
+  makes a new `.xlsx`, and `files documents create <path> --payload <json paragraphs>` a new `.docx`. Each writes a new
+  file only, refuses a path that is already there (`office.file-exists`), and answers the `sha256` that `update` takes
+  next ([usage](docs/usage.md#edit-a-file-on-the-disk)).
+
+### Fixed
+
+- **`mirrors conflicts resolve` runs inside the command's run.** `--timeout` now bounds it, `--record` keeps a run for
+  it, and its Disk requests are in that run. Before, it reached the Disk outside any run.
+- **Synced and edited files keep their earlier versions for `keep_versions_for_days`.** The mirrors' version stores,
+  and the one `files update`, `history` and `restore` use, dropped versions after 30 days, whatever the setting said.
+  They now keep them for the profile's `keep_versions_for_days`, one year by default, as
+  [configuration](docs/configuration.md#other-settings) says.
+- **An Office edit that is refused says why.** A formula cell, a wrong format or a missing sheet now answers its own
+  reason, such as `office.formula-cell`, in place of `input.invalid`.
+- **The docs say where to revoke the Yandex token.** `session end` removes the token from this computer only, and it
+  stays valid at Yandex. [Security](docs/security.md#revoke-the-token-at-yandex), the
+  [installation guide](docs/installation.md) and [troubleshooting](docs/troubleshooting.md) now name Yandex ID's
+  [Data access](https://id.yandex.ru/personal/data-access) page, where you remove the app to revoke it.
+- **`changes --since <time>` and `--until <time>` in help** (cli-core 0.724.0, was 0.722.0, and cli-base 0.130.0, was
+  0.128.0). `--until` said `<when>`. The flags take the same values as before. The vocabulary now knows `changes`,
+  `--since` and `--event`, so the command lint needs no exceptions for them.
+- **`session end` says where to revoke the token.** Its help said the token stays valid at Yandex but not where to
+  revoke it. It now names Yandex ID's [Data access](https://id.yandex.ru/personal/data-access) page, where you remove
+  the app the token was issued for.
+
 ## 0.5.0 — 23.11.2026
 
 ### Added
