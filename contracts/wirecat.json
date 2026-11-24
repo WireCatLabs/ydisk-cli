@@ -819,7 +819,7 @@
         "sheets",
         "create"
       ],
-      "summary": "create a new workbook from rows of values",
+      "summary": "create a new workbook from rows of values and formulas",
       "effects": {
         "remote": "write",
         "local": "write"
@@ -858,7 +858,7 @@
         "documents",
         "create"
       ],
-      "summary": "create a new Word document from paragraphs",
+      "summary": "create a new Word document from paragraphs and tables",
       "effects": {
         "remote": "write",
         "local": "write"

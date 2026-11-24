@@ -208,6 +208,24 @@ covers another mirror. A stopped mirror does not hold up the others: they sync
 as usual. `mirrors watch` reports the stop again at every cycle that syncs the mirror, until you allow the run or put
 the files back.
 
+## How a file on the Disk is replaced
+
+A file without a public link is checked by the Disk itself at the moment of the write. The sync sends the new content
+to a hidden file next to it, moves the old file to the Disk's trash at the content it listed (the Disk refuses when the
+file changed since), and gives the hidden file its name. The file gets a new id (Yandex's `resource_id`), and the
+Disk's own version history of it starts over; its old content is in the Disk's trash and in the mirror's versions. A
+file changed on the Disk meanwhile is a conflict, and nothing is replaced. A new file put at the path in the moment
+between the two steps is a conflict too: the hidden file next to it (`.name.ext.ydisk-…`) keeps your content, and the
+conflict names it.
+
+The old file stays in the Disk's trash: [Yandex's
+help](https://yandex.ru/support/yandex-360/customers/disk/web/ru/actions-files/spec-folders/trash) says files there
+still take up space on the Disk and are deleted automatically after 30 days, so each push of a changed file takes
+its old size from your space for that time.
+
+A file with a public link keeps its link, so it is overwritten in place: it is checked just before the write, and
+what it replaced is kept on your computer.
+
 ## Where deleted files go
 
 | Deleted on | The sync moves the other side's copy to | How to get it back |

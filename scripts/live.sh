@@ -7,7 +7,8 @@
 # uploads one temporary file into /ydisk-live, moves it and deletes it to the trash: the download and
 # upload confirm the hosts the docs name, and the move confirms that a file keeps its resource_id. A mirror step
 # syncs a fresh folder /ydisk-live/mirror-<time> both ways and deletes it to the trash at the end. An edit step works in
-# a fresh folder /ydisk-live/edit-<time>: files update at a wrong and the right sha256, history and restore, sheets
+# a fresh folder /ydisk-live/edit-<time>: files update at a wrong and the right sha256, history and restore, a replace
+# of an unshared file (new resource_id, the trash grows) and of a published one (same resource_id and link), sheets
 # update of a small .xlsx, documents update of a small .docx (src/testing/fixtures), and a mirror merge of a Markdown
 # file edited in two sections, one here and one on the Disk; the folder goes to the trash at the end.
 # Needs: a token for a test Yandex account, never one that matters (cloud_api:disk.read, disk.write, disk.info)
@@ -235,6 +236,42 @@ node -e '
   if (!history.item.versions.some((one) => one.version === old && one.available)) fail("history does not list the old version")
   if (restore.item?.restored !== old) fail("files restore did not put the old version back")' \
   "$work/e-wrong.json" "$work/e-right.json" "$work/e-history.json" "$work/e-restore.json" "$old" "$new"
+# A file without a public link is replaced under the Disk's own md5 check, so it gets a new resource_id and its old
+# content goes to the trash; a shared one is overwritten in place and keeps its resource_id and its public link.
+"${cli[@]}" live files show "$edit/notes.md" --json >"$work/u-before.json"
+trash_size() {
+  raw disk-get --fields trash_size | node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf8")).item?.trash_size ?? 0)'
+}
+trash_before=$(trash_size)
+"${cli[@]}" live files update "$edit/notes.md" --expected-fingerprint "$old" --yes --json <"$work/notes-2.md" >/dev/null
+wait_sha "$edit/notes.md" "$new"
+# Yandex's help says the trash takes up Disk space; the replace's old file should show in trash_size.
+for _ in $(seq 10); do
+  trash_after=$(trash_size)
+  [ "$trash_after" -gt "$trash_before" ] && break
+  sleep 1
+done
+[ "$trash_after" -gt "$trash_before" ] || { echo "trash_size did not grow with the replaced file" >&2; exit 1; }
+"${cli[@]}" live files show "$edit/notes.md" --json >"$work/u-after.json"
+"${cli[@]}" live files list --folder "$edit" --json >"$work/u-list.json"
+"${cli[@]}" live files publish "$edit/notes.md" --yes --json >/dev/null
+raw resources-list --path "disk:$edit/notes.md" >"$work/p-before.json"
+"${cli[@]}" live files update "$edit/notes.md" --expected-fingerprint "$new" --yes --json <"$work/notes.md" >/dev/null
+wait_sha "$edit/notes.md" "$old"
+raw resources-list --path "disk:$edit/notes.md" >"$work/p-after.json"
+"${cli[@]}" live files unpublish "$edit/notes.md" --yes --json >/dev/null
+node -e '
+  const fs = require("fs")
+  const read = (f) => JSON.parse(fs.readFileSync(f, "utf8")).item
+  const [before, after, shared, sharedAfter] = [1, 2, 4, 5].map((n) => read(process.argv[n]))
+  const items = JSON.parse(fs.readFileSync(process.argv[3], "utf8")).items
+  const fail = (message) => { throw new Error(message) }
+  if (before.id === after.id) fail("an unshared file replaced under the Disk check kept its resource_id")
+  if (items.some((item) => item.name.startsWith(".notes.md.ydisk-"))) fail("the replace left its temporary file")
+  if (!shared.public_key || !shared.public_url) fail(`a published file lists no public_key: ${JSON.stringify(shared)}`)
+  if (sharedAfter.resource_id !== shared.resource_id) fail("a shared file got a new resource_id")
+  if (sharedAfter.public_url !== shared.public_url) fail("a shared file lost its public link")' \
+  "$work/u-before.json" "$work/u-after.json" "$work/u-list.json" "$work/p-before.json" "$work/p-after.json"
 
 fixtures="$root/src/testing/fixtures"
 "${cli[@]}" live files upload "$fixtures/budget.xlsx" --folder "$edit" --json >/dev/null
@@ -297,4 +334,4 @@ trap '"${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work
 "${cli[@]}" live doctor --json >/dev/null
 
 "${cli[@]}" live session end --json >/dev/null
-echo "live check passed: describe format 2, sign-in, files list, folders browse, download, upload, move and delete, the sync facts, sync, search, the flat listing, a two-way mirror with an exclusion, files update at a wrong and the right sha256, history and restore, sheets update, documents update, a mirror merge, doctor, sign-out"
+echo "live check passed: describe format 2, sign-in, files list, folders browse, download, upload, move and delete, the sync facts, sync, search, the flat listing, a two-way mirror with an exclusion, files update at a wrong and the right sha256, history and restore, a Disk-checked replace of an unshared file (new resource_id, the trash grows) and an in-place one of a shared file (same resource_id and link), sheets update, documents update, a mirror merge, doctor, sign-out"

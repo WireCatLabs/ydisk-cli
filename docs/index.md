@@ -23,16 +23,17 @@ minutes, once.
 
 ## What you get
 
-- **Search inside your files, not only their names.** The text of PDF, Word (`.docx`), Excel (`.xlsx`), CSV, TSV,
-  plain text and Markdown files is searchable. Search finds other forms of a word in Russian and English, and finds a
+- **Search inside your files, not only their names.** The text of PDF, Word (`.docx`, `.doc`), Excel (`.xlsx`),
+  PowerPoint (`.pptx`), OpenDocument, RTF, HTML, EPUB, CSV, TSV, plain text and Markdown files is searchable. Search finds other forms of a word in Russian and English, and finds a
   document by meaning once its text is indexed.
 - **Search without the internet.** Search reads the copy on your computer, so it is fast and costs no request to
   Yandex.
 - **The whole Disk, live.** List, read, download, upload, copy, move, delete to the trash, restore and share files
   without opening a browser.
 - **Edit a file where it is.** You or your agent change a note, Excel cells or Word paragraphs on the Disk without
-  downloading by hand. The rest of the file stays as it is, the file is checked just before the write, and what the
-  edit replaced is kept on your computer. See [edit a file on the Disk](usage.md#edit-a-file-on-the-disk).
+  downloading by hand. The rest of the file stays as it is, and what the edit replaced is kept on your computer. A
+  file without a public link is checked by the Disk itself at the moment of the write; a shared one is checked just
+  before it. See [edit a file on the Disk](usage.md#edit-a-file-on-the-disk).
 - **A folder that keeps up with the Disk.** A mirror keeps a folder on your computer and one on the Disk the same both
   ways. A text file edited on both sides is merged; a real conflict waits for you with a diff. It stops before many
   deletions or replacements. See [mirrors](mirrors.md).

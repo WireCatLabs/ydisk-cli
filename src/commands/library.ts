@@ -1,21 +1,13 @@
 import { CliError, isCliError } from "@wirecat/cli-base"
 import { annotate } from "@wirecat/cli-base/commands"
 import { listOf, nextUsually, REMOTE_READ } from "@wirecat/cli-core/cli"
-import { documentIngestion } from "@wirecat/cli-core/documents"
 import { type DocumentWords, documentLibraryCommands } from "@wirecat/cli-core/documents/cli"
 import type { Command } from "commander"
 import { configuration } from "../config.js"
 import { type Disk, diskFor, PACE, tokenOf } from "../context.js"
 import { IDENTITY, SERVICE } from "../identity.js"
+import { diskIngestion, PROVIDER } from "../ingestion.js"
 import { type DiskFile, diskPath, isFolder, PAGE, skipReason } from "../yandex/source.js"
-
-export const PROVIDER = {
-  name: "yandex-disk",
-  kind: "documents",
-  aliases: [],
-  command: IDENTITY.command,
-  opens: { document: "documents show" },
-} as const
 
 export const WORDS: DocumentWords = {
   app: IDENTITY.command,
@@ -45,8 +37,6 @@ const hasFolders = async (disk: Disk, folder: DiskFile) => {
   }
 }
 
-const external = (id: string) => `${id}.md`
-
 /** cli-core's shared documents set over Yandex Disk: folders, sync, status, documents, search, catalog, knowledge. */
 export const libraryCommands = (): Command[] =>
   documentLibraryCommands<DiskFile>({
@@ -59,29 +49,7 @@ export const libraryCommands = (): Command[] =>
     // cli-core hands back the source that `source` above built, typed only as its documents part.
     folder: (source, input) => (source as Disk).byPath(diskPath(input)),
     folderPath: (file) => file.providerMetadata.path,
-    ingestion: (store) =>
-      documentIngestion<DiskFile>(store, {
-        provider: PROVIDER.name,
-        externalId: external,
-        catalogInput: (file) => ({
-          externalId: external(file.id),
-          kind: isFolder(file) ? "folder" : "file",
-          name: file.name,
-          parents: file.parents.map(external),
-          url: file.url,
-          mime: file.mime,
-          ...(file.createdAt ? { createdAt: file.createdAt } : {}),
-          ...(file.modifiedAt ? { modifiedAt: file.modifiedAt } : {}),
-          metadata: { path: file.providerMetadata.path },
-        }),
-        frontMatter: ({ metadata }) => ({
-          source: PROVIDER.name,
-          sourceUrl: metadata.url,
-          resourceId: metadata.id,
-          path: metadata.providerMetadata.path,
-          modifiedAt: metadata.modifiedAt ?? null,
-        }),
-      }),
+    ingestion: diskIngestion,
     idOf: (input) => input.trim(),
     isFolder,
     skipReason,

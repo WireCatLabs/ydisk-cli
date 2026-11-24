@@ -69,8 +69,8 @@ it("uploads a new file only where none is, and replaces one only while it has th
   await expect(target.upload("disk:/Notes/a.txt", local("two"), listed)).rejects.toMatchObject({ code: "conflict" })
   disk.put("disk:/Notes/a.txt", "one")
   const replaced = await target.upload("disk:/Notes/a.txt", local("two"), listed)
-  expect(replaced.id).toBe(sent.id)
   expect(disk.nodes.get("disk:/Notes/a.txt")?.text).toBe("two")
+  expect(replaced).toMatchObject({ path: "a.txt", id: disk.nodes.get("disk:/Notes/a.txt")?.resource_id })
   await expect(target.upload("disk:/Notes/gone.txt", local("x"), listed)).rejects.toMatchObject({ code: "conflict" })
 })
 
@@ -191,4 +191,64 @@ it("waits for an upload the Disk answered 202 to land before it reads the file b
   const sent = await target.upload("disk:/Notes/a.txt", local("late"), { absent: true })
   expect(sent).toMatchObject({ path: "a.txt", sha256: disk.nodes.get("disk:/Notes/a.txt")?.sha256 })
   expect(disk.calls.filter((call) => call.url.pathname.startsWith("/v1/disk/operations/"))).toHaveLength(3)
+})
+
+const hidden = (disk: ReturnType<typeof fakeDisk>) => [...disk.nodes.keys()].filter((path) => path.includes("/."))
+
+it("replaces an unshared file through a hidden temporary file, the old one to the trash at its md5", async () => {
+  const { disk, target, local } = over()
+  const id = disk.put("disk:/Notes/a.txt", "one")
+  const old = disk.nodes.get("disk:/Notes/a.txt")
+  const replaced = await target.upload("disk:/Notes/a.txt", local("two"), { sha256: old?.sha256 as string })
+  expect(disk.nodes.get("disk:/Notes/a.txt")?.text).toBe("two")
+  expect(replaced.id).not.toBe(id)
+  expect(disk.trash.get("disk:/Notes/a.txt")?.text).toBe("one")
+  expect(hidden(disk)).toEqual([])
+  const deleted = disk.calls.find((call) => call.method === "DELETE")
+  expect(deleted?.url.searchParams.get("md5")).toBe(old?.md5)
+  const moved = disk.calls.find((call) => call.url.pathname === "/v1/disk/resources/move")
+  expect(moved?.url.searchParams.get("from")).toMatch(/^disk:\/Notes\/\.a\.txt\.ydisk-[0-9a-f]{8}$/u)
+  expect(moved?.url.searchParams.get("overwrite")).toBe("false")
+})
+
+it("a file changed between the read and the delete is refused by the Disk, and the temporary file goes", async () => {
+  const { disk, target, local } = over()
+  disk.put("disk:/a.txt", "one")
+  const listed = { sha256: disk.nodes.get("disk:/a.txt")?.sha256 as string }
+  disk.beforeWrite = (method, path) => {
+    if (method === "DELETE" && path === "disk:/a.txt") disk.put("disk:/a.txt", "changed elsewhere")
+  }
+  await expect(target.upload("disk:/a.txt", local("two"), listed)).rejects.toMatchObject({
+    code: "conflict",
+    details: { reason: "mirror.remote-changed" },
+  })
+  expect(disk.nodes.get("disk:/a.txt")?.text).toBe("changed elsewhere")
+  expect(hidden(disk)).toEqual([])
+})
+
+it("a file created at the path between the delete and the move keeps the new content in the temporary file", async () => {
+  const { disk, target, local } = over()
+  disk.put("disk:/a.txt", "one")
+  const listed = { sha256: disk.nodes.get("disk:/a.txt")?.sha256 as string }
+  disk.beforeWrite = (method, path) => {
+    if (method === "POST" && path === "disk:/a.txt") disk.put("disk:/a.txt", "someone else's")
+  }
+  const refused = target.upload("disk:/a.txt", local("two"), listed)
+  await expect(refused).rejects.toMatchObject({ code: "conflict", details: { reason: "upload.replace-interrupted" } })
+  const [temporary] = hidden(disk)
+  await expect(refused).rejects.toThrow(`kept at ${temporary}`)
+  expect(disk.nodes.get(temporary as string)?.text).toBe("two")
+  expect(disk.nodes.get("disk:/a.txt")?.text).toBe("someone else's")
+  expect(disk.trash.get("disk:/a.txt")?.text).toBe("one")
+})
+
+it("a file with a public link is overwritten in place, so it keeps its resource_id and its link", async () => {
+  const { disk, target, local } = over()
+  const id = disk.put("disk:/shared.txt", "one")
+  disk.publish("disk:/shared.txt")
+  const listed = { sha256: disk.nodes.get("disk:/shared.txt")?.sha256 as string }
+  const replaced = await target.upload("disk:/shared.txt", local("two"), listed)
+  expect(replaced.id).toBe(id)
+  expect(disk.nodes.get("disk:/shared.txt")).toMatchObject({ text: "two", public_key: `fakepublic${id}` })
+  expect(disk.calls.filter((call) => call.method === "DELETE" || call.method === "POST")).toEqual([])
 })

@@ -1259,7 +1259,7 @@ ydisk files sheets update <path> <range> [options]
 
 #### `ydisk files sheets create`
 
-create a new .xlsx on Yandex Disk with one sheet holding these rows from A1. Numbers and booleans are typed, a text stays text, even one that starts with =. A file already there is refused: change it with sheets update
+create a new .xlsx on Yandex Disk from rows from A1: one sheet, or several given as [{name, rows, header?}]. Numbers and booleans are typed, a text stays text, even one that starts with =. A formula is only {"formula": "SUM(B2:B3)"}, computed when the file opens; {"value": "Total", "bold": true} is a bold cell and header: true makes a sheet's first row bold. A file already there is refused: change it with sheets update
 
 **Changes something in the service.**
 
@@ -1273,10 +1273,10 @@ ydisk files sheets create <path> [options]
 
 | Option | What it does |
 |---|---|
-| `--values <json>` | the rows as JSON; null leaves a cell empty. |
-| `--name <name>` | the sheet's name; Sheet1 without it. |
+| `--values <json>` | the rows as JSON, or [{"name", "rows", "header"?}] for several sheets; a cell is a text, number, boolean, null (empty), {"formula": "…", "bold"?} or {"value": …, "bold"?}. |
+| `--name <name>` | the sheet's name when --values is rows; Sheet1 without it. |
 
-**Example:** `ydisk personal files sheets create /budget.xlsx --values '[["Item", "Cost"], ["Rent", 950]]' --name Budget`
+**Example:** `ydisk personal files sheets create /budget.xlsx --values '[["Item", "Cost"], ["Rent", 950]]' --name Budget`, `ydisk personal files sheets create /budget.xlsx --values '[{"name": "Budget", "header": true, "rows": [["Item", "Cost"], ["Rent", 950], ["Food", 300], [{"value": "Total", "bold": true}, {"formula": "SUM(B2:B3)"}]]}]'`
 
 ### `ydisk files documents`
 
@@ -1319,7 +1319,7 @@ ydisk files documents update <path> [options]
 
 #### `ydisk files documents create`
 
-create a new .docx on Yandex Disk with these paragraphs, each in a style: Title, Heading1, Heading2, Heading3, Normal, ListBullet (Normal without one; ListBullet is a bullet list). A file already there is refused: change it with documents update
+create a new .docx on Yandex Disk with these paragraphs, each in a style: Title, Heading1, Heading2, Heading3, Normal, ListBullet (Normal without one; ListBullet is a bullet list), and tables. A paragraph is bold or italic as a whole, or made of runs that each are; a table is rows of cell texts, its first row bold with header: true. A file already there is refused: change it with documents update
 
 **Changes something in the service.**
 
@@ -1333,9 +1333,9 @@ ydisk files documents create <path> [options]
 
 | Option | What it does |
 |---|---|
-| `--payload <json>` | the paragraphs as JSON: [{text, style?}]. |
+| `--payload <json>` | the body as JSON, in order: [{text, style?, bold?, italic?}, {runs: [{text, bold?, italic?}], style?}, {table: [[cell, …], …], header?}]. |
 
-**Example:** `ydisk personal files documents create /report.docx --payload '[{"text": "Report", "style": "Title"}, {"text": "Revenue grew 12%."}]'`
+**Example:** `ydisk personal files documents create /report.docx --payload '[{"text": "Report", "style": "Title"}, {"text": "Revenue grew 12%."}]'`, `ydisk personal files documents create /report.docx --payload '[{"runs": [{"text": "Revenue "}, {"text": "grew 12%", "bold": true}]}, {"table": [["Item", "Cost"], ["Rent", "950"]], "header": true}]'`
 
 ### `ydisk files history`
 

@@ -2,8 +2,8 @@ import { createHash } from "node:crypto"
 import { posix } from "node:path"
 
 // A strict fake of the Yandex Disk REST API, from https://yandex.ru/dev/disk-api/doc/en/reference/meta (listing),
-// …/content (download link), …/upload (upload link), …/delete, …/create-folder, …/capacity (the disk's revision) and
-// …/all-files (the flat listing: every file, alphabetical, `items` with `limit` and `offset`, no total).
+// …/content (download link), …/upload (upload link), …/delete, …/move, …/create-folder, …/capacity (the disk's
+// revision) and …/all-files (the flat listing: every file, alphabetical, `items` with `limit` and `offset`, no total).
 // It refuses an unknown path, method or parameter, a call without `OAuth <token>`, and a download or upload that
 // carries the token. Visibly fake data only (WC-TEST-8).
 
@@ -24,6 +24,8 @@ interface Node {
   mime_type?: string
   md5?: string
   sha256?: string
+  /** Set while the file has a public link; the listing carries it only then. */
+  public_key?: string
   modified: string
 }
 
@@ -37,6 +39,8 @@ export interface FakeDisk {
   put(path: string, text?: string | Uint8Array, mime?: string): string
   remove(path: string): void
   move(from: string, to: string): void
+  /** Gives the file a public link, as files publish does. */
+  publish(path: string): void
   /** Makes a file answer this status from now on. */
   deny(path: string, status: 403 | 404): void
   /** Runs before each write reaches the fake, as another device's change between a sync's listing and its write. */
@@ -63,6 +67,7 @@ const ALLOWED: Record<string, readonly string[]> = {
   "GET /v1/disk/resources/upload": ["path", "overwrite"],
   "PUT /v1/disk/resources": ["path"],
   "DELETE /v1/disk/resources": ["path", "permanently", "md5"],
+  "POST /v1/disk/resources/move": ["from", "path", "overwrite"],
 }
 
 const hash = (algorithm: "md5" | "sha256", bytes: Buffer) => createHash(algorithm).update(bytes).digest("hex")
@@ -86,6 +91,7 @@ export const fakeDisk = (): FakeDisk => {
       path,
       type,
       resource_id: known?.resource_id ?? `fake-${++ids}`,
+      ...(known?.public_key ? { public_key: known.public_key } : {}),
       modified: `2026-01-0${(ids % 9) + 1}T00:00:00+00:00`,
       ...(type === "file"
         ? {
@@ -108,6 +114,9 @@ export const fakeDisk = (): FakeDisk => {
     resource_id: node.resource_id,
     created: "2026-01-01T00:00:00+00:00",
     modified: node.modified,
+    ...(node.public_key
+      ? { public_key: node.public_key, public_url: `https://yadi.sk/d/${node.public_key.slice(0, 8)}` }
+      : {}),
     ...(node.type === "file"
       ? {
           size: node.bytes?.length ?? 0,
@@ -209,6 +218,16 @@ export const fakeDisk = (): FakeDisk => {
         at(path, "dir")
         return json(201, { href: `https://${API}/v1/disk/resources?path=${encodeURIComponent(path)}`, method: "GET" })
       }
+      if (url.pathname === "/v1/disk/resources/move") {
+        const from = url.searchParams.get("from") ?? ""
+        if (!nodes.has(from)) return json(404, { error: "DiskNotFoundError" })
+        if (node && url.searchParams.get("overwrite") !== "true")
+          return json(409, { error: "DiskResourceAlreadyExistsError" })
+        if (nodes.get(parentOf(path))?.type !== "dir") return json(409, { error: "DiskPathDoesntExistsError" })
+        if (node) remove(path)
+        disk.move(from, path)
+        return json(201, { href: `https://${API}/v1/disk/resources?path=${encodeURIComponent(path)}`, method: "GET" })
+      }
       if (!node) return json(404, { error: "DiskNotFoundError" })
       if (method === "DELETE") {
         if (url.searchParams.get("permanently") !== "false") return refuse("a test deletes only into the trash")
@@ -260,6 +279,10 @@ export const fakeDisk = (): FakeDisk => {
           nodes.set(moved, { ...node, path: moved })
         }
       revision++
+    },
+    publish: (path) => {
+      const node = nodes.get(path)
+      if (node) node.public_key = `fakepublic${node.resource_id}`
     },
     deny: (path, status) => {
       denied.set(path, status)
