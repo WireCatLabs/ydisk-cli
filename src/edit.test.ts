@@ -47,6 +47,9 @@ describe("files update", () => {
     expect(readFileSync(item.replaced.kept_at, "utf8")).toBe(OLD)
     expect(uploads()).toHaveLength(1)
     expect(service.refusals).toEqual([])
+    // No public link: the Disk itself checked the old file as it went to the trash.
+    expect(service.trash.get("disk:/notes.md")?.text).toBe(OLD)
+    expect([...service.nodes.keys()].filter((path) => path.includes("/."))).toEqual([])
 
     const history = await cli(["history", "/notes.md", "--json"])
     expect(history.code, history.err).toBe(0)
@@ -54,6 +57,21 @@ describe("files update", () => {
       path: "disk:/notes.md",
       versions: [{ event: "changed", version: sha256(OLD), available: true, new: sha256(NEW) }],
     })
+  })
+
+  it("a file with a public link is overwritten in place, keeping its id and its link", async () => {
+    withPermissions({ "files.delete": "allow" })
+    const { service, cli } = setup()
+    service.publish("disk:/notes.md")
+    const before = service.nodes.get("disk:/notes.md")
+    const done = await cli(["update", "/notes.md", "--text", NEW, "--expected-fingerprint", sha256(OLD), "--json"])
+    expect(done.code, done.err).toBe(0)
+    expect(service.nodes.get("disk:/notes.md")).toMatchObject({
+      text: NEW,
+      resource_id: before?.resource_id,
+      public_key: before?.public_key,
+    })
+    expect(service.trash.size).toBe(0)
   })
 
   it("a fingerprint the file no longer has is a conflict that says to read it again, and nothing is uploaded", async () => {

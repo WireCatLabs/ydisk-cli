@@ -27,8 +27,8 @@
 - **The whole Disk, live.** List, read, download, upload, copy, move, delete to the trash, restore and share files
   without opening a browser.
 - **Edit a file where it is.** An agent changes a Markdown note, cells of an Excel workbook or paragraphs of a Word
-  document on the Disk, at the content it read. The file is checked just before the write, and what it replaced is
-  kept on your computer.
+  document on the Disk, at the content it read. A file without a public link is checked by the Disk itself at the
+  moment of the write; a shared one is checked just before it. What the edit replaced is kept on your computer.
 - **Safe to give to an agent.** Deleting and public links ask first at a terminal, and one setting turns either off
   for an agent.
 

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto"
 import { createWriteStream, openAsBlob } from "node:fs"
 import { posix } from "node:path"
 import { Readable } from "node:stream"
@@ -11,7 +12,7 @@ import * as v from "valibot"
 import { SERVICE } from "../identity.js"
 import { PAGE } from "./source.js"
 import type { Transport } from "./transport.js"
-import { diskWrites } from "./writes.js"
+import { diskWrites, type Outcome } from "./writes.js"
 
 // The fields a mirror reads; Yandex sends them on every file by default
 // (https://yandex.ru/dev/disk-api/doc/en/reference/response-objects). No `fields` filter: one spelled wrong would
@@ -24,6 +25,8 @@ const Resource = v.object({
   size: v.optional(v.number()),
   md5: v.optional(v.string()),
   sha256: v.optional(v.string()),
+  // Present only while the file has a public link (https://yandex.ru/dev/disk-api/doc/en/reference/response-objects).
+  public_key: v.optional(v.string()),
 })
 type Resource = v.InferOutput<typeof Resource>
 const Listing = v.object({
@@ -69,8 +72,11 @@ const unproven = (path: string) =>
 
 /**
  * Yandex Disk as the file mirror's remote (cli-core `FileTarget`). Paths are the API's own, `disk:/Notes/a.md`. The
- * API has no conditional write, so a replace reads the file just before it and an upload keeps the `resource_id`
- * (checked live, scripts/live.sh); a delete passes the expected md5, which the Disk itself checks (HTTP 409).
+ * upload has no conditional write, but a delete passes the expected md5 and the Disk itself refuses another (HTTP
+ * 409, checked live in scripts/live.sh). So a file without a public link is replaced through a temporary file: the new
+ * bytes go next to it, the old file goes to the trash at its md5, and the temporary one moves into its place. The file
+ * then has a new `resource_id`. A file with a public link keeps it only when the upload overwrites it (a replacing
+ * upload keeps the `resource_id`, checked live), so it is read just before the write instead.
  */
 export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSignal): FileTarget => {
   const writes = diskWrites(api, links, signal)
@@ -208,19 +214,82 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
     }
   }
 
-  /** Waits for an upload the Disk took with 202 to land, so the read after it sees the new file. */
+  /** Waits for a write the Disk took with 202 to land, so the step after it sees what it did. */
   const landed = async (path: string, operation: string) => {
     const until = Date.now() + UPLOAD_WAIT_MS
     for (let pause = 250; ; pause = Math.min(pause * 2, 5_000)) {
       const { status } = await api.send({ method: "GET", path: `disk/operations/${operation}` }, Operation)
       if (status === "success") return
-      if (status === "failed") throw new CliError("provider_error", `${SERVICE} could not store the upload of ${path}`)
+      if (status === "failed") throw new CliError("provider_error", `${SERVICE} could not finish the write of ${path}`)
       if (Date.now() + pause > until)
         throw new CliError("outcome_unknown", `${SERVICE} is still storing ${path}; the next sync checks it`, {
           retryable: false,
         })
       await sleep(pause, undefined, signal ? { signal } : {})
     }
+  }
+
+  const settled = async (path: string, outcome: Outcome) => {
+    if (outcome.status === "in-progress") await landed(path, outcome.disk_operation)
+  }
+
+  const readBack = async (path: string) => {
+    const now = await read(path)
+    if (!now) throw new CliError("outcome_unknown", `${SERVICE} does not list the file it took`)
+    return remoteFile(now, prefixOf(posix.dirname(now.path)))
+  }
+
+  /**
+   * Sends the bytes to `path`. A new file asks for its upload link with overwrite=false, and the Disk refuses the link
+   * (409) when a file is there by then; nothing checks one created between the link and the bytes.
+   */
+  const put = async (path: string, from: string, replace: boolean) => {
+    let sent: Outcome
+    try {
+      sent = await writes.upload(path, await openAsBlob(from), replace)
+    } catch (error) {
+      if (statusOf(error) === 409) throw changed(path)
+      throw error
+    }
+    await settled(path, sent)
+    return readBack(path)
+  }
+
+  /** Replaces the file at `path` only while it has `md5`, which the Disk checks at the moment of the delete. */
+  const swap = async (path: string, from: string, md5: string) => {
+    // Hidden, so a mirror never syncs one a failed swap leaves; random, so it is no file of the owner's.
+    const temporary = `${posix.dirname(path)}/.${posix.basename(path)}.ydisk-${randomBytes(4).toString("hex")}`
+    const sent = await put(temporary, from, false)
+    // One that cannot be removed stays hidden next to the file; the answer is the conflict either way.
+    const dropTemporary = () =>
+      writes
+        .trash(temporary, sent.md5)
+        .then((outcome) => settled(temporary, outcome))
+        .catch(() => undefined)
+    try {
+      await settled(path, await writes.trash(path, md5))
+    } catch (error) {
+      const status = statusOf(error)
+      if (status === 409 || status === 404) {
+        await dropTemporary()
+        throw changed(path)
+      }
+      if (isCliError(error) && error.code !== "outcome_unknown") await dropTemporary()
+      throw error
+    }
+    try {
+      await settled(path, await writes.transfer("move", temporary, path, false))
+    } catch (error) {
+      const kept = `the old file is in the ${SERVICE} trash and the new content is kept at ${temporary}`
+      if (statusOf(error) === 409)
+        throw new CliError("conflict", `a new file appeared at ${path} while it was replaced; ${kept}`, {
+          reason: "mirror.remote-changed",
+        })
+      throw new CliError("outcome_unknown", `${SERVICE} did not confirm the move into ${path}; ${kept}`, {
+        retryable: false,
+      })
+    }
+    return readBack(path)
   }
 
   const ensureFolder = async (path: string): Promise<void> => {
@@ -272,21 +341,10 @@ export const diskTarget = (api: Transport, links: FetchLike, signal?: AbortSigna
     },
 
     upload: async (path, from, expect) => {
-      // A new file asks for its upload link with overwrite=false, and the Disk refuses the link (409) when a file is
-      // there by then; nothing checks one created between the link and the bytes. A replace is checked by the read
-      // just before it.
-      if (!("absent" in expect)) await check(path, expect)
-      let sent: Awaited<ReturnType<typeof writes.upload>>
-      try {
-        sent = await writes.upload(path, await openAsBlob(from), !("absent" in expect))
-      } catch (error) {
-        if (statusOf(error) === 409) throw changed(path)
-        throw error
-      }
-      if (sent.status === "in-progress") await landed(path, sent.disk_operation)
-      const now = await read(path)
-      if (!now) throw new CliError("outcome_unknown", `${SERVICE} does not list the file it took`)
-      return remoteFile(now, prefixOf(posix.dirname(now.path)))
+      if ("absent" in expect) return put(path, from, false)
+      const now = await check(path, expect)
+      if (now.public_key !== undefined || now.md5 === undefined) return put(path, from, true)
+      return swap(path, from, now.md5)
     },
 
     trash: async (path, expect) => {
