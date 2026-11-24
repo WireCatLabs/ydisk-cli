@@ -22,9 +22,11 @@ import {
 import { fileText, fileVersions } from "@wirecat/cli-core/documents"
 import {
   addFileEditCommands,
+  DOCUMENT_UNTRUSTED,
   type FileEditCommands,
   type FileUpdatePort,
   keepVersionsForDays,
+  marksUntrusted,
 } from "@wirecat/cli-core/documents/cli"
 import { guardedWrite, newOperationId, readUpload, uploadBlob } from "@wirecat/cli-core/sends"
 import { Command } from "commander"
@@ -365,9 +367,9 @@ const editHelpers = (files: Command): FileEditCommands => ({
 export const filesCommand = (): Command => {
   const files = annotate(new Command("files"), { effects: REMOTE_READ })
     .description("the files on Yandex Disk, live: list, read, download, upload, change, serve")
-    .addCommand(listCommand())
-    .addCommand(showCommand())
-    .addCommand(downloadCommand())
+    .addCommand(marksUntrusted(listCommand(), DOCUMENT_UNTRUSTED))
+    .addCommand(marksUntrusted(showCommand(), DOCUMENT_UNTRUSTED))
+    .addCommand(marksUntrusted(downloadCommand(), DOCUMENT_UNTRUSTED))
     .addCommand(uploadCommand())
     .addCommand(transfer("copy"))
     .addCommand(transfer("move"))

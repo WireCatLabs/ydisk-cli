@@ -1,5 +1,6 @@
 import { type FetchLike, hostFetch, retrying } from "@wirecat/cli-base/http"
 import { serviceApiCommand } from "@wirecat/cli-core/cli"
+import { DOCUMENT_UNTRUSTED, marksUntrusted } from "@wirecat/cli-core/documents/cli"
 import { Pacer, pacePathFor } from "@wirecat/cli-core/sends"
 import type { Command } from "commander"
 import { API, configuration, LINK_OPERATIONS } from "../config.js"
@@ -49,8 +50,8 @@ const withoutLinks =
  * refuses by `api.<operation>`, a delete or a share also by its key. The requests keep the profile's pace, and the
  * token is the profile's own, read by `tokenOf` like every other command's.
  */
-export const apiCommand = (): Command =>
-  serviceApiCommand({
+export const apiCommand = (): Command => {
+  const group = serviceApiCommand({
     ...API,
     app: IDENTITY,
     configuration,
@@ -67,3 +68,8 @@ export const apiCommand = (): Command =>
     schemas: () => import("../generated/schemas.js").then((module) => module.schemas),
     definitions: () => import("../generated/definitions.js").then((module) => module.definitions),
   })
+  // A raw answer holds the names and paths whoever shares a folder chose; list and show describe only the spec.
+  for (const operation of group.commands)
+    if (operation.name() !== "list" && operation.name() !== "show") marksUntrusted(operation, DOCUMENT_UNTRUSTED)
+  return group
+}

@@ -292,6 +292,19 @@ describe("folders browse", () => {
     })
   })
 
+  it("marks the folder names and paths in a scheduled agent's run", async () => {
+    const MARK = "0123456789abcdef"
+    const marked = (text: string) => new RegExp(`^⟦untrusted:${MARK} source=[^⟧]+⟧${text}⟦/untrusted:${MARK}⟧$`)
+    const answer = await runCli(["personal", "folders", "browse", "--folder", "/Work", "--json"], {
+      service: tree(),
+      env: { ...sandbox(), YDISK_READ_ONLY: "1", YDISK_UNTRUSTED_MARK: MARK },
+    })
+    expect(answer.code, answer.err).toBe(0)
+    const notes = (answer.json().items as Record<string, unknown>[]).find((item) => String(item.name).includes("Notes"))
+    expect(notes?.name).toMatch(marked("Notes"))
+    expect(notes?.path).toMatch(marked("disk:/Work/Notes"))
+  })
+
   it("leaves has_children null for a folder it cannot list, and keeps the others", async () => {
     const disk = tree()
     disk.put("disk:/Work/Deep/Inner/old.txt", "two folders down")

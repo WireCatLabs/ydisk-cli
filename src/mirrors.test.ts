@@ -267,6 +267,17 @@ it("preview lists the Disk and shows the plan; sync --dry-run shows the keys; ne
   expect(disk.calls.filter((call) => call.method !== "GET")).toEqual([])
 })
 
+it("preview marks each planned path in a scheduled agent's run", async () => {
+  const { cli, root } = setup({ "there.txt": "t" })
+  const id = await added(cli, root)
+  const MARK = "0123456789abcdef"
+  const preview = await cli(["preview", id], { env: { YDISK_READ_ONLY: "1", YDISK_UNTRUSTED_MARK: MARK } })
+  expect(preview.code, preview.err).toBe(0)
+  expect((preview.json().items as Synced[])[0]?.plan).toEqual([
+    { kind: "download", path: expect.stringMatching(new RegExp(`^⟦untrusted:${MARK} source=path[^⟧]*⟧there.txt⟦/`)) },
+  ])
+})
+
 it("files.delete at deny lets a sync add files and stops only what replaces or deletes", async () => {
   const { cli, root, disk, permit } = setup({ "a.txt": "a1", "gone.txt": "g" })
   const id = await added(cli, root)

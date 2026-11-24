@@ -36,7 +36,7 @@ import {
   syncFileMirrors,
   watchMirrors,
 } from "@wirecat/cli-core/documents"
-import { fileConflictsCommand, keepVersionsForDays } from "@wirecat/cli-core/documents/cli"
+import { fileConflictsCommand, keepVersionsForDays, marksUntrusted } from "@wirecat/cli-core/documents/cli"
 import { acquireLock, writeFileAtomic } from "@wirecat/cli-core/files"
 import { type Asker, guardedWrite, type KeyedGuard, newOperationId, refusedPlace } from "@wirecat/cli-core/sends"
 import { Command, Option } from "commander"
@@ -952,7 +952,8 @@ export const mirrorsCommand = (): Command =>
     .addCommand(addCommand())
     .addCommand(listCommand())
     .addCommand(statusCommand())
-    .addCommand(previewCommand())
+    // A shared folder's files are named by whoever shares it.
+    .addCommand(marksUntrusted(previewCommand(), ["path", "to"]))
     .addCommand(syncCommand())
     .addCommand(watchCommand())
     .addCommand(updateCommand())
