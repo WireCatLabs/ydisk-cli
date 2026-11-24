@@ -35,7 +35,7 @@
 ## What you get
 
 - **Find a document by what is in it.** "Where is the lease for the flat?" finds the PDF by its text, not by its
-  file name.
+  file name. Scans and photos are read by OCR on your computer.
 - **Read a file without saving it.** An agent reads the text of a PDF, docx, xlsx, CSV or Markdown file on the Disk
   and answers from it.
 - **Change a note, a spreadsheet or a letter in place.** `files update` writes a text file, `files sheets update`
