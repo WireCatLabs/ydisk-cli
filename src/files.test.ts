@@ -111,7 +111,7 @@ describe("files in a scheduled agent's run", () => {
     for (const field of ["id", "kind", "md5", "sha256", "url"]) expect(String(shown[field])).not.toContain("⟦")
   })
 
-  it("marks the names and paths in a raw api answer", async () => {
+  it("marks every string in a raw api answer, ids too", async () => {
     const raw = (await read(["api", "resources-list", "--path", "/Work"])).item as {
       name: string
       _embedded: { items: { name: string; path: string; resource_id: string }[] }
@@ -120,7 +120,7 @@ describe("files in a scheduled agent's run", () => {
     const [inside] = raw._embedded.items
     expect(inside?.name).toMatch(marked("plan.txt"))
     expect(inside?.path).toMatch(marked("/Work/plan.txt"))
-    expect(inside?.resource_id).toBe("fake-/Work/plan.txt")
+    expect(inside?.resource_id).toMatch(marked("fake-/Work/plan.txt"))
   })
 })
 

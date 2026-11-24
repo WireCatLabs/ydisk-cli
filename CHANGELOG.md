@@ -11,6 +11,9 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
   Without tesseract's orientation data (`apt install tesseract-ocr-osd`) a scan reads as before, and the sync warns
   with `document.scan-unturned` (cli-core 0.750.0, was 0.742.0, see
   [scans and pictures](docs/usage.md#scans-and-pictures)).
+- **In a scheduled agent's run, every text of an `api` answer is marked untrusted**, ids included, not only names and
+  paths (cli-core 0.746.0). A marked id an agent copies into its next command still works: the run takes the mark
+  off.
 
 ## 0.7.0 — 24.11.2026
 
