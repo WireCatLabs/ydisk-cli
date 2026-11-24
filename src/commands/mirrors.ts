@@ -12,6 +12,7 @@ import {
   LOCAL_READ,
   LOCAL_WRITE,
   listOf,
+  notLocalPaths,
   outputFor,
   ownerOnlyOption,
   parseDuration,
@@ -869,7 +870,7 @@ const insideOf = (root: string, input: string) => {
 }
 
 const versionsCommand = () =>
-  annotate(new Command("versions"), { effects: LOCAL_READ, mcp: false })
+  notLocalPaths(annotate(new Command("versions"), { effects: LOCAL_READ, mcp: false }), "path")
     .summary("versions of mirrored files that syncs replaced or deleted")
     .description("the versions of a mirrored file that syncs replaced or deleted, kept on this computer")
     .addCommand(
@@ -946,8 +947,9 @@ const conflictsCommand = () =>
     },
   })
 
+// Not against the working folder: --ignore and versions' <path> are inside the mirror, add's <folder> is on Disk.
 export const mirrorsCommand = (): Command =>
-  annotate(new Command("mirrors"), { effects: LOCAL_READ })
+  notLocalPaths(annotate(new Command("mirrors"), { effects: LOCAL_READ }), "ignore", "folder")
     .description(`keep local folders and ${SERVICE} folders the same, both ways, file by file`)
     .addCommand(addCommand())
     .addCommand(listCommand())

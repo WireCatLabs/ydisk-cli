@@ -2,7 +2,12 @@
 // Source: spec/ydisk/, checked against provenance.json
 // Run: pnpm generate
 
-import type { ApiServer, ManifestOperation, SecurityRequirement, SecurityScheme } from "@wirecat/cli-base/codegen"
+import type {
+  ApiServer,
+  ManifestOperation,
+  SecurityRequirement,
+  SecurityScheme,
+} from "@wirecat/cli-base/codegen/runtime"
 
 export const operations: readonly ManifestOperation[] = [
   {
