@@ -217,6 +217,11 @@ Disk's own version history of it starts over; its old content is in the Disk's t
 file changed on the Disk meanwhile is a conflict, and nothing is replaced. A new file put at the path in the moment
 between the two steps is a conflict too, and the hidden file next to it (`.name.ext.ydisk-…`) keeps your content.
 
+The old file stays in the Disk's trash: [Yandex's
+help](https://yandex.ru/support/yandex-360/customers/disk/web/ru/actions-files/spec-folders/trash) says files there
+still take up space on the Disk and are deleted automatically after 30 days, so each push of a changed file takes
+its old size from your space for that time.
+
 A file with a public link keeps its link, so it is overwritten in place: it is checked just before the write, and
 what it replaced is kept on your computer.
 

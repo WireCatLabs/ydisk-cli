@@ -156,7 +156,9 @@ How the file is checked depends on whether it has a public link:
 - **A file without a public link is checked by the Disk itself at the moment of the write.** The new content goes to
   a hidden file next to it (`.name.ext.ydisk-…`). Then the old file goes to the Disk's trash, and the Disk refuses
   that when the file's content is not the one read. Then the hidden file takes the file's name. The file gets a new
-  id (Yandex's `resource_id`), and the Disk's own version history of it starts over; the trash holds the old file.
+  id (Yandex's `resource_id`), and the Disk's own version history of it starts over. The old file is in the trash,
+  and [Yandex's help](https://yandex.ru/support/yandex-360/customers/disk/web/ru/actions-files/spec-folders/trash)
+  says files there still take up space on the Disk and are deleted automatically after 30 days.
   If the file changed, the hidden file is removed and nothing is replaced. If a new file appeared at the path in the
   moment between the two steps, the answer is a `conflict`, and the hidden file next to it keeps your new content.
 - **A file with a public link is checked just before the write**, and what it replaced is kept on your computer. It
