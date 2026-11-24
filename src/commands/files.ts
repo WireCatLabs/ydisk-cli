@@ -20,7 +20,12 @@ import {
   writesFileOnlyWith,
 } from "@wirecat/cli-core/cli"
 import { fileText, fileVersions } from "@wirecat/cli-core/documents"
-import { addFileEditCommands, type FileEditCommands, type FileUpdatePort } from "@wirecat/cli-core/documents/cli"
+import {
+  addFileEditCommands,
+  type FileEditCommands,
+  type FileUpdatePort,
+  keepVersionsForDays,
+} from "@wirecat/cli-core/documents/cli"
 import { guardedWrite, newOperationId, readUpload, uploadBlob } from "@wirecat/cli-core/sends"
 import { Command } from "commander"
 import { DELETE_KEY, SHARE_KEY } from "../config.js"
@@ -328,7 +333,12 @@ const simple = (
     })
 
 /** What `files update`, `sheets`, `documents`, `history` and `restore` keep: one store, so history lists every edit. */
-const versionsOf = (command: Command) => fileVersions(join(profileStateDir(command), "files.versions"))
+const versionsOf = (command: Command) =>
+  fileVersions(
+    join(profileStateDir(command), "files.versions"),
+    Date.now,
+    keepVersionsForDays(contextOf(command).settings),
+  )
 
 /** The port cli-core's file edits write and read through, for the run `disk` was built in. */
 const portOf = (command: Command, disk: Disk): FileUpdatePort => {

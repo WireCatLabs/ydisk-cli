@@ -207,7 +207,7 @@ describe("Office files edited in place", () => {
       fingerprint(),
       "--json",
     ])
-    expect(refused.json()).toMatchObject({ error: { code: "validation_error" } })
+    expect(refused.json()).toMatchObject({ error: { code: "validation_error", reason: "office.formula-cell" } })
     expect(JSON.stringify(refused.json())).toContain("--replace")
     const replaced = await cli([
       "sheets",
@@ -259,6 +259,41 @@ describe("Office files edited in place", () => {
     ])
     const history = (await cli(["history", "/letter.docx", "--json"])).json().item as { versions: object[] }
     expect(history.versions).toEqual([expect.objectContaining({ version: item.sha256, available: true })])
+  })
+
+  it("sheets create and documents create write new files on the Disk and refuse one that is there", async () => {
+    const { service, cli } = setup()
+    const sheet = await cli([
+      "sheets",
+      "create",
+      "/costs.xlsx",
+      "--values",
+      '[["Item", "Cost"], ["Rent", 950]]',
+      "--name",
+      "Costs",
+      "--json",
+    ])
+    expect(sheet.code, sheet.err).toBe(0)
+    const workbook = new Uint8Array(service.nodes.get("disk:/costs.xlsx")?.bytes ?? [])
+    expect(sheet.json().item).toMatchObject({ path: "disk:/costs.xlsx", sha256: sha256(workbook) })
+    const [costs] = await readXlsxCells(workbook, {})
+    expect(costs?.name).toBe("Costs")
+    expect(costs?.cells.find((cell) => cell.address === "B2")?.value).toBe(950)
+
+    const document = await cli([
+      "documents",
+      "create",
+      "/report.docx",
+      "--payload",
+      '[{"text": "Report", "style": "Title"}, {"text": "The pond is ready."}]',
+      "--json",
+    ])
+    expect(document.code, document.err).toBe(0)
+    const docx = new Uint8Array(service.nodes.get("disk:/report.docx")?.bytes ?? [])
+    expect((await readDocxParagraphs(docx)).map((one) => one.text)).toEqual(["Report", "The pond is ready."])
+
+    const there = await cli(["sheets", "create", "/budget.xlsx", "--values", "[[1]]", "--json"])
+    expect(there.json()).toMatchObject({ error: { code: "conflict", reason: "office.file-exists" } })
   })
 
   it("a download of a .docx or .xlsx answers its text without a sha256 to write it back with", async () => {

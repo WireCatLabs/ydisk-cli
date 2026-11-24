@@ -1257,6 +1257,27 @@ ydisk files sheets update <path> <range> [options]
 
 **Example:** `ydisk personal files sheets update /budget.xlsx "Sheet1!B2:C2" --values '[[120, "paid"]]' --expected-fingerprint 9f86d081…`
 
+#### `ydisk files sheets create`
+
+create a new .xlsx on Yandex Disk with one sheet holding these rows from A1. Numbers and booleans are typed, a text stays text, even one that starts with =. A file already there is refused: change it with sheets update
+
+**Changes something in the service.**
+
+```sh
+ydisk files sheets create <path> [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `path` | required | the new .xlsx file on Yandex Disk. |
+
+| Option | What it does |
+|---|---|
+| `--values <json>` | the rows as JSON; null leaves a cell empty. |
+| `--name <name>` | the sheet's name; Sheet1 without it. |
+
+**Example:** `ydisk personal files sheets create /budget.xlsx --values '[["Item", "Cost"], ["Rent", 950]]' --name Budget`
+
 ### `ydisk files documents`
 
 the paragraphs of a Word document (.docx) on Yandex Disk, read and changed in place
@@ -1295,6 +1316,26 @@ ydisk files documents update <path> [options]
 | `--expected-fingerprint <hash>` | the sha256 documents show gave for the file. |
 
 **Example:** `ydisk personal files documents update /report.docx --payload '[{"index": 2, "text": "Revenue grew 12%."}]' --expected-fingerprint 9f86d081…`
+
+#### `ydisk files documents create`
+
+create a new .docx on Yandex Disk with these paragraphs, each in a style: Title, Heading1, Heading2, Heading3, Normal, ListBullet (Normal without one; ListBullet is a bullet list). A file already there is refused: change it with documents update
+
+**Changes something in the service.**
+
+```sh
+ydisk files documents create <path> [options]
+```
+
+| Argument | | What it is |
+|---|---|---|
+| `path` | required | the new .docx file on Yandex Disk. |
+
+| Option | What it does |
+|---|---|
+| `--payload <json>` | the paragraphs as JSON: [{text, style?}]. |
+
+**Example:** `ydisk personal files documents create /report.docx --payload '[{"text": "Report", "style": "Title"}, {"text": "Revenue grew 12%."}]'`
 
 ### `ydisk files history`
 
