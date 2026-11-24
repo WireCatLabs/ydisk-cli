@@ -93,7 +93,9 @@ chooses who reads it:
 `ydisk personal config set read_scans '"anthropic"'` switches one profile. One file is read up to 20 pages, and one
 sync reads at most 100 pages. The pages over that wait for the next sync. A scan an older ydisk kept by name is read
 on the next sync. When `tesseract` is missing, the sync still finishes, and each scan's reason in `status` says how
-to install it.
+to install it. `local` turns a page lying on its side before it reads it, with `tesseract`'s orientation data
+(`sudo apt install tesseract-ocr-osd` where it is not installed with `tesseract`). Without that data such a page reads
+as garbled text, and the sync's `warnings` say `document.scan-unturned`.
 
 ## Read a synced document
 
