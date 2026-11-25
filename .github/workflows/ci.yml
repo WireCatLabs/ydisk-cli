@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   ci:
-    uses: WireCatLabs/cli-base/.github/workflows/node-ci.yml@ea16e6b6b800332d39c71e7b74a4ccc2cf548a60 # v0.109.0
+    uses: WireCatLabs/cli-base/.github/workflows/node-ci.yml@21b2f80c76fb46cf433deba6edb59cfbeb4b6676 # v0.112.0
     with:
       pack: ${{ inputs.pack || false }}
       bun-run: pnpm build && pnpm smoke:bun
@@ -73,6 +73,12 @@ jobs:
         run: pnpm build
       - if: steps.scope.outputs.quick != 'true'
         run: pnpm test
+      # Reads the argv log the tests just wrote; bin/release leaves it here with the tests. Node 22.16 loads the
+      # matrix's .ts program only with the flag.
+      - if: steps.scope.outputs.quick != 'true'
+        env:
+          NODE_OPTIONS: --experimental-strip-types
+        run: pnpm run --if-present test:matrix:check
       - if: steps.scope.outputs.quick != 'true'
         run: pnpm smoke:node
 
