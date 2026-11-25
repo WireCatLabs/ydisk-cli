@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@wirecat/previous-cli':
-        specifier: npm:@wirecat/yandex-disk-cli@0.6.0
-        version: '@wirecat/yandex-disk-cli@0.6.0(zod@4.6.7)'
+        specifier: npm:@wirecat/yandex-disk-cli@0.7.1
+        version: '@wirecat/yandex-disk-cli@0.7.1(zod@4.6.7)'
 
 packages:
 
@@ -269,8 +269,8 @@ packages:
   '@wasm-audio-decoders/opus-ml@0.0.3':
     resolution: {integrity: sha512-SEeTmk0eb3q5etJA/NHCRWW6BivTx9tqvNTmG0kg2ynuATEQRUZnwQE6Ibvl1BBvqIGHqI57+qyJMWmJBwb5XQ==}
 
-  '@wirecat/cli-base@0.130.0':
-    resolution: {integrity: sha512-N9eBVkxOvORol8PWdMZh7u3TVl2KGSWOePqduJRvCcZSw72CXgOYBSpRyfC6ZFmPmZyx0/N93HNVZ/C+DuLYtw==}
+  '@wirecat/cli-base@0.132.0':
+    resolution: {integrity: sha512-y43hIGVFDUgVFTksTFnlK0KdLuROBDcv0smqme4/WSjkUS3PaGQnuAvu09G2VvW0zmvM2+OHFuQaZEN3Hir8nQ==}
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
@@ -297,8 +297,8 @@ packages:
   '@wirecat/cli-core-sqlite@1.1.0':
     resolution: {integrity: sha512-GpGlh/dAIX/nblBYCdT6DfWSLFxav9mxxeELQAfEuw+QZdT9unKxbi5xa02s/s4JS1P7n0PQx2sCABj4FlMRNw==}
 
-  '@wirecat/cli-core@0.737.0':
-    resolution: {integrity: sha512-4zPtvf8qEZ0UCYV2WGgCkPRZsj3mFVMPpnnVFAa0IhYzkNSzMqv8FvAJ8JZY1ByeknaGA2UQ2zSkJFQA/Pgqlw==}
+  '@wirecat/cli-core@0.750.0':
+    resolution: {integrity: sha512-9xUOyRg8cAmb64EJ37thM6AbNNy3xbgVRMhCjTjKU9xN0osUWO1euXB8IN+qmgn1W7aQU2tuXP4XcsuJUY2Evw==}
     engines: {node: ^22.16.0 || >=24}
     hasBin: true
     peerDependencies:
@@ -318,8 +318,8 @@ packages:
       ssh2:
         optional: true
 
-  '@wirecat/yandex-disk-cli@0.6.0':
-    resolution: {integrity: sha512-ZNJfjDlZA1lqMbbGAacU07mevxQpSVq7tB0CgOKXq2ljuEzZ07JFmG+3IjVbHb3RssT50ubBAWfuhx7GXCm2Iw==}
+  '@wirecat/yandex-disk-cli@0.7.1':
+    resolution: {integrity: sha512-J0mOuoP+QhaPpSiwMOy/DjuEFVeLs7tcMc60X9WUqwDxzlOt4NXFjwzSP014G/7u9R11e3gp3usaaz7+lqyl7A==}
     engines: {node: ^22.16.0 || >=24}
     hasBin: true
 
@@ -1186,7 +1186,7 @@ snapshots:
     dependencies:
       '@wasm-audio-decoders/common': 9.0.7
 
-  '@wirecat/cli-base@0.130.0(commander@15.0.0)':
+  '@wirecat/cli-base@0.132.0(commander@15.0.0)':
     dependencies:
       '@valibot/to-json-schema': 1.8.0(valibot@1.5.0)
       cli-table3: 0.6.5
@@ -1205,7 +1205,7 @@ snapshots:
 
   '@wirecat/cli-core-sqlite@1.1.0': {}
 
-  '@wirecat/cli-core@0.737.0(@wirecat/cli-base@0.130.0(commander@15.0.0))(commander@15.0.0)(zod@4.6.7)':
+  '@wirecat/cli-core@0.750.0(@wirecat/cli-base@0.132.0(commander@15.0.0))(commander@15.0.0)(zod@4.6.7)':
     dependencies:
       '@anthropic-ai/sdk': 1.3.0(zod@4.6.7)
       '@bomb.sh/tab': 0.0.22(commander@15.0.0)
@@ -1215,7 +1215,7 @@ snapshots:
       '@valibot/to-json-schema': 1.8.0(valibot@1.5.0)
       '@wasm-audio-decoders/flac': 0.2.11
       '@wasm-audio-decoders/ogg-vorbis': 0.1.20
-      '@wirecat/cli-base': 0.130.0(commander@15.0.0)
+      '@wirecat/cli-base': 0.132.0(commander@15.0.0)
       '@wirecat/cli-core-onnx': 1.2.0
       '@wirecat/cli-core-sqlite': 1.1.0
       '@xmldom/xmldom': 0.9.12
@@ -1263,10 +1263,10 @@ snapshots:
       - typescript
       - zod
 
-  '@wirecat/yandex-disk-cli@0.6.0(zod@4.6.7)':
+  '@wirecat/yandex-disk-cli@0.7.1(zod@4.6.7)':
     dependencies:
-      '@wirecat/cli-base': 0.130.0(commander@15.0.0)
-      '@wirecat/cli-core': 0.737.0(@wirecat/cli-base@0.130.0(commander@15.0.0))(commander@15.0.0)(zod@4.6.7)
+      '@wirecat/cli-base': 0.132.0(commander@15.0.0)
+      '@wirecat/cli-core': 0.750.0(@wirecat/cli-base@0.132.0(commander@15.0.0))(commander@15.0.0)(zod@4.6.7)
       commander: 15.0.0
       valibot: 1.5.0
     transitivePeerDependencies:

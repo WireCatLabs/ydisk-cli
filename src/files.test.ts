@@ -88,6 +88,42 @@ describe("files", () => {
   })
 })
 
+describe("files in a scheduled agent's run", () => {
+  const MARK = "0123456789abcdef"
+  const locked = { YDISK_READ_ONLY: "1", YDISK_UNTRUSTED_MARK: MARK }
+  const marked = (text: string) => new RegExp(`^⟦untrusted:${MARK} source=[^⟧]+⟧${text}⟦/untrusted:${MARK}⟧$`)
+  const read = async (argv: string[]) => {
+    const answer = await runCli(["personal", ...argv, "--json"], { service: diskApi(), env: locked })
+    expect(answer.code, answer.err).toBe(0)
+    return answer.json() as { item: Record<string, unknown>; items: Record<string, unknown>[] }
+  }
+
+  it("marks the names, paths and text other people chose in each live read", async () => {
+    const [listed] = (await read(["files", "list", "--folder", "/Work"])).items
+    expect(listed?.name).toMatch(marked("plan.txt"))
+    expect(listed?.path).toMatch(marked("disk:/Work/plan.txt"))
+    expect(listed?.kind).toBe("file")
+    const shown = (await read(["files", "show", "/Work/plan.txt"])).item
+    expect(shown.name).toMatch(marked("plan.txt"))
+    const downloaded = (await read(["files", "download", "/Work/plan.txt"])).item
+    expect(downloaded.text).toMatch(marked("hello"))
+    expect(downloaded.path).toMatch(marked("disk:/Work/plan.txt"))
+    for (const field of ["id", "kind", "md5", "sha256", "url"]) expect(String(shown[field])).not.toContain("⟦")
+  })
+
+  it("marks every string in a raw api answer, ids too", async () => {
+    const raw = (await read(["api", "resources-list", "--path", "/Work"])).item as {
+      name: string
+      _embedded: { items: { name: string; path: string; resource_id: string }[] }
+    }
+    expect(raw.name).toMatch(marked("Work"))
+    const [inside] = raw._embedded.items
+    expect(inside?.name).toMatch(marked("plan.txt"))
+    expect(inside?.path).toMatch(marked("/Work/plan.txt"))
+    expect(inside?.resource_id).toMatch(marked("fake-/Work/plan.txt"))
+  })
+})
+
 describe("files, what an agent may not do and what may not be lost", () => {
   it("an upload whose answer is lost is outcome_unknown, never a plain network error", async () => {
     const service = diskApi({ loseNextWriteAnswer: true })

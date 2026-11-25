@@ -25,7 +25,7 @@ How the tests run, and what they never touch. The rules are the handbook's
   cli-core release does not rewrite the file. Pin a shared command here only when this CLI changes it on purpose.
 - `pnpm contracts:upgrade` checks that this build reads what the previous release wrote
   ([WC-TEST-14](../../node_modules/@wirecat/cli-base/docs/standards/testing.md)). `contracts/previous/` installs that
-  release from npm (`@wirecat/previous-cli`, now `@wirecat/yandex-disk-cli@0.6.0`). `contracts/seed.mjs` loads its own
+  release from npm (`@wirecat/previous-cli`, now `@wirecat/yandex-disk-cli@0.7.1`). `contracts/seed.mjs` loads its own
   modules and its own cli-core, signs nobody in, and saves one synced file and a note into the synthetic store, as
   `ydisk <profile> sync` would, with the profile's folder choice and sync state. `contracts/upgrade.json` then lists
   the documents, reads one, the status, search and notes with that release and with this build. After a release, move

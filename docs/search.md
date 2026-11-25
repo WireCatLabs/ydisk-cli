@@ -94,4 +94,6 @@ Empty results mean nothing matched in the copy, not that the Disk has no such fi
 3. Run `ydisk personal sync` if the file is new.
 4. Search the name with `catalog search`, or list the folder live with `files list`.
 
-A scanned PDF has no text layer, so only its name is searchable.
+A scanned PDF or a picture is searched by the text OCR read from it. With `read_scans` set to `off`, or with no
+`tesseract` installed for the default `local`, only its name is searchable. See
+[scans and pictures](usage.md#scans-and-pictures).

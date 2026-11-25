@@ -2,10 +2,29 @@
 
 Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest first.
 
+## 0.7.1 — 25.11.2026
+
+### Fixed
+
+- **A scan of a page lying on its side is now read.** Local OCR (`read_scans: local`) turns the page first, so its
+  text is found by search instead of coming out garbled. Scans read before are read again once, at the next sync.
+  Without tesseract's orientation data (`apt install tesseract-ocr-osd`) a scan reads as before, and the sync warns
+  with `document.scan-unturned` (cli-core 0.750.0, was 0.742.0, see
+  [scans and pictures](docs/usage.md#scans-and-pictures)).
+- **In a scheduled agent's run, every text of an `api` answer is marked untrusted**, ids included, not only names and
+  paths (cli-core 0.746.0). A marked id an agent copies into its next command still works: the run takes the mark
+  off.
+
 ## 0.7.0 — 24.11.2026
 
 ### Added
 
+- **A sync reads the text of scans and pictures** (cli-core 0.742.0, was 0.739.0). A PDF with no text layer and a
+  JPEG, PNG or WebP picture are read by OCR, chosen by the profile's `read_scans`: `local` by default (the
+  `tesseract` program on your computer, Russian and English, nothing downloaded), `anthropic` or `openai` (the
+  `ai set` model at that provider's own address, with pictures allowed, each page sent to it and paid per page), or
+  `off`. At most 20 pages a file and 100 a sync. A scan an older ydisk kept by name is read on the next sync, and a
+  sync with no `tesseract` says how to install it ([scans and pictures](docs/usage.md#scans-and-pictures)).
 - **More formats are read** (cli-core 0.739.0, was 0.737.0): Word 97–2003 `.doc`, PowerPoint `.pptx`, OpenDocument
   `.odt`, `.ods` and `.odp`, RTF, HTML and EPUB, beside PDF, `.docx`, `.xlsx`, CSV, TSV, plain text and Markdown. A
   file an earlier version kept by name only is read on the next sync ([usage](docs/usage.md#what-the-copy-holds)).
@@ -30,6 +49,18 @@ Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest f
   for 30 days. Its synced copy moves to the new id, so its tags, the notes about it and its links follow it; when the
   local store cannot be reached the write still happens, with a warning. A file with a public link is still
   overwritten in place after the read, so its link stays ([usage](docs/usage.md#edit-a-file-on-the-disk), [mirrors](docs/mirrors.md#how-a-file-on-the-disk-is-replaced)).
+
+### Fixed
+
+- **A scheduled agent reads other people's Disk names, paths and text marked.** In a run locked read-only with a mark
+  (`YDISK_READ_ONLY=1` and `YDISK_UNTRUSTED_MARK`), `files list`, `files show` and `files download` mark each name,
+  path and read text, `mirrors preview` each planned path and rename target, and the `api` group's operations the
+  names and paths in the raw answer. A shared folder's files are named and written by whoever shares it. cli-core's
+  shared commands (`documents`, `search`, `folders list|browse`, `catalog`, `files sheets|documents show`, `mirrors
+  conflicts show`) already marked theirs. Outside such a run no answer changes. A marked path is passed back to a
+  `files` command without the markers. Not marked yet: `mirrors conflicts list` (cli-core's), and `files serve`,
+  which shows the Disk as a folder rather than an answer.
+- Requires `@wirecat/cli-core` 0.742.0 and `@wirecat/cli-base` 0.132.0.
 
 ## 0.6.0 — 24.11.2026
 
