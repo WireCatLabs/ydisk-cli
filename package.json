@@ -61,8 +61,8 @@
     "spec:sync": "node --experimental-strip-types scripts/sync-spec.ts"
   },
   "dependencies": {
-    "@wirecat/cli-base": "1.0.0-rc.0",
-    "@wirecat/cli-core": "0.739.0",
+    "@wirecat/cli-base": "1.0.0-rc.1",
+    "@wirecat/cli-core": "1.0.0-rc.0",
     "commander": "15.0.0",
     "valibot": "1.5.0"
   },
