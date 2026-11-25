@@ -3,7 +3,7 @@
   "args": ["../dist/bin/ydisk.js"],
   "previous": {
     "entry": "./previous/node_modules/@wirecat/previous-cli/dist/bin/ydisk.js",
-    "version": "0.7.0"
+    "version": "0.7.1"
   },
   "canaries": ["wirecat-synthetic-document-canary"],
   "cases": [

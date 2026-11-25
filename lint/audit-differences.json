@@ -1,9 +1,1 @@
-[
-  {
-    "group": "ydisk",
-    "rule": "same-entity-schema",
-    "target": "entity selected_folder",
-    "reason": "cli-core #3105 (0.700.0) adds a folder's name and Disk path to the shared folders list row; drive prints its own folders list and has not adopted name/path yet, and the entry goes once it does.",
-    "review_after": "2026-12-03"
-  }
-]
+[]
