@@ -98,7 +98,7 @@ it("a server failure is outcome_unknown for a write and retryable for a read", a
   expect(write.json()).toMatchObject({ error: { code: "outcome_unknown" } })
   const read = await runCli(LIST, { service })
   expect(read.json()).toMatchObject({ error: { code: "provider_unavailable", retry: { safe: true } } })
-  expect(service.calls).toHaveLength(2)
+  expect(service.calls.map((call) => call.method)).toEqual(["PUT", "GET", "GET"])
 })
 
 it.each([

@@ -32,7 +32,7 @@
         "session",
         "start"
       ],
-      "summary": "sign in to Yandex Disk with an API token",
+      "summary": "sign in to Yandex Disk with its OAuth token",
       "effects": {
         "remote": "read",
         "local": "write"
@@ -942,7 +942,7 @@
         "mirrors",
         "preview"
       ],
-      "summary": "list the Disk and show what mirrors sync would do",
+      "summary": "list Yandex Disk and show what mirrors sync would do",
       "effects": {
         "remote": "read",
         "local": "read"

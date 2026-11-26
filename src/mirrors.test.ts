@@ -274,7 +274,10 @@ it("preview marks each planned path in a scheduled agent's run", async () => {
   const preview = await cli(["preview", id], { env: { YDISK_READ_ONLY: "1", YDISK_UNTRUSTED_MARK: MARK } })
   expect(preview.code, preview.err).toBe(0)
   expect((preview.json().items as Synced[])[0]?.plan).toEqual([
-    { kind: "download", path: expect.stringMatching(new RegExp(`^⟦untrusted:${MARK} source=path[^⟧]*⟧there.txt⟦/`)) },
+    {
+      kind: "download",
+      path: expect.stringMatching(new RegExp(`^⟦untrusted:${MARK} source=plan\\.path[^⟧]*⟧there.txt⟦/`)),
+    },
   ])
 })
 

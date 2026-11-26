@@ -20,6 +20,7 @@ Works with:
   wordpress               WordPress posts and pages, searchable with your other WireCat data
   linear                  Linear issues and projects, searchable with your other WireCat data
 
+              ydisk session list  your profiles and their logged-in accounts
 Next:         ydisk commands      every command, by section
               ydisk help options  output, offline, timeouts, dry run
 For agents:   ydisk skill show    rules and the discovery loop

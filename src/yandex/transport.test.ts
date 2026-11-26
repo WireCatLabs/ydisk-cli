@@ -75,7 +75,10 @@ it('refuses an id of "." or ".." before any request, since it would reach anothe
 
 it("a read that got no answer is a retryable timeout or network error; a write is outcome_unknown", async () => {
   const send = (fetch: typeof globalThis.fetch, method: "GET" | "POST") =>
-    transport({ token: FAKE_TOKEN, fetch, timeoutMs: 5 }).send({ method, path: "disk/resources", body: {} }, anything)
+    transport({ token: FAKE_TOKEN, fetch, timeoutMs: 5, sleep: async () => {} }).send(
+      { method, path: "disk/resources", body: {} },
+      anything,
+    )
   await expect(send(silent, "GET")).rejects.toMatchObject({ code: "timeout", details: { retryable: true } })
   await expect(send(failing(new TypeError("fetch failed")), "GET")).rejects.toMatchObject({
     code: "network_error",
@@ -85,6 +88,23 @@ it("a read that got no answer is a retryable timeout or network error; a write i
     code: "outcome_unknown",
     details: { retryable: false },
   })
+})
+
+it("sends a read again after a 503 and a write again only after a 429", async () => {
+  const statuses = [503, 200, 503, 429, 200]
+  const calls: string[] = []
+  const fetch = async (_input: string | URL | Request, init?: RequestInit) => {
+    calls.push(init?.method ?? "GET")
+    const status = statuses.shift() ?? 200
+    return new Response(status === 200 ? "{}" : null, { status })
+  }
+  const api = transport({ token: FAKE_TOKEN, fetch, sleep: async () => {} })
+  await api.send({ method: "GET", path: "disk" }, anything)
+  await expect(api.send({ method: "POST", path: "disk/resources/copy" }, anything)).rejects.toMatchObject({
+    code: "outcome_unknown",
+  })
+  await api.send({ method: "POST", path: "disk/resources/copy" }, anything)
+  expect(calls).toEqual(["GET", "GET", "POST", "POST", "POST"])
 })
 
 it("a stop during a read cancels it; during a write it stays outcome_unknown", async () => {
