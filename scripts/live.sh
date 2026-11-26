@@ -11,7 +11,8 @@
 # of an unshared file (new resource_id, the trash grows) and of a published one (same resource_id and link), sheets
 # update of a small .xlsx, documents update of a small .docx (src/testing/fixtures), and a mirror merge of a Markdown
 # file edited in two sections, one here and one on the Disk; the folder goes to the trash at the end.
-# Needs: a token for a test Yandex account, never one that matters (cloud_api:disk.read, disk.write, disk.info)
+# Needs: a token for a Yandex account whose other files the check never touches: it writes only under /ydisk-live
+# Needs: the scopes cloud_api:disk.read, disk.write and disk.info
 set -euo pipefail
 root=$(cd -- "$(dirname -- "$0")/.." && pwd)
 work=$(mktemp -d)
@@ -69,19 +70,26 @@ node -e '
 stamp=$(date +%s)
 echo "ydisk live check $stamp" >"$work/upload.txt"
 "${cli[@]}" live files upload "$work/upload.txt" --folder /ydisk-live --name "upload-$stamp.txt" --json >/dev/null
+trap '"${cli[@]}" live files delete "/ydisk-live/upload-$stamp.txt" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 "${cli[@]}" live files show "/ydisk-live/upload-$stamp.txt" --json >"$work/before.json"
 "${cli[@]}" live files move "/ydisk-live/upload-$stamp.txt" --folder /ydisk-live --name "moved-$stamp.txt" --json >/dev/null
+trap '"${cli[@]}" live files delete "/ydisk-live/moved-$stamp.txt" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 "${cli[@]}" live files show "/ydisk-live/moved-$stamp.txt" --json >"$work/after.json"
 node -e '
   const read = (file) => JSON.parse(require("fs").readFileSync(file, "utf8")).item.id
   if (read(process.argv[1]) !== read(process.argv[2])) throw new Error("a moved file got a new resource_id")' \
   "$work/before.json" "$work/after.json"
 "${cli[@]}" live files delete "/ydisk-live/moved-$stamp.txt" --yes --json >/dev/null
+trap '"${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 # Facts a two-way sync builds on that Yandex's docs leave open (seen on 2026-11-18): the Disk's sha256 is the content's,
 # a replacing upload keeps the resource_id, the Disk revision moves with a write, a delete with a wrong md5 gets 409.
 raw() { "${cli[@]}" live api "$@" 2>&1 || true; }
 echo "probe one $stamp" >"$work/probe.txt"
 "${cli[@]}" live files upload "$work/probe.txt" --folder /ydisk-live --name "probe-$stamp.txt" --json >/dev/null
+trap '"${cli[@]}" live files delete "/ydisk-live/probe-$stamp.txt" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 raw resources-list --path "disk:/ydisk-live/probe-$stamp.txt" >"$work/probe-1.json"
 raw disk-get --fields revision >"$work/rev-1.json"
 echo "probe two, longer $stamp" >"$work/probe.txt"
@@ -128,6 +136,7 @@ node -e '
     fail("the flat listing does not honour limit and offset")' \
   "$work/flat-all.json" "$work/flat-one.json"
 "${cli[@]}" live files delete "/ydisk-live/probe-$stamp.txt" --yes --json >/dev/null
+trap '"${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 # A two-way mirror of a fresh folder under /ydisk-live: sync up, edit on the Disk, sync down, delete on each side, and
 # find each deletion in the other side's trash. Its folder skip/ is excluded: the exact lists below show that nothing in
 # it is sent, brought down or trashed on either side.
@@ -138,12 +147,12 @@ echo "mirror b $stamp" >"$work/mirror/b.txt"
 mkdir -p "$work/mirror/skip"
 echo "excluded here $stamp" >"$work/mirror/skip/c.txt"
 "${cli[@]}" live files create "$mirror" --json >/dev/null
-"${cli[@]}" live files create "$mirror/skip" --json >/dev/null
-echo "excluded there $stamp" >"$work/d.txt"
-"${cli[@]}" live files upload "$work/d.txt" --folder "$mirror/skip" --name d.txt --json >/dev/null
 # A failed run leaves no mirror folder behind: it goes to the trash like the rest.
 trap '"${cli[@]}" live files delete "$mirror" --yes --json >/dev/null 2>&1 || true
   "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
+"${cli[@]}" live files create "$mirror/skip" --json >/dev/null
+echo "excluded there $stamp" >"$work/d.txt"
+"${cli[@]}" live files upload "$work/d.txt" --folder "$mirror/skip" --name d.txt --json >/dev/null
 "${cli[@]}" live mirrors add "$mirror" "$work/mirror" --ignore skip --json >"$work/m-add.json"
 id=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).item.id)' "$work/m-add.json")
 "${cli[@]}" live mirrors sync "$id" --json >"$work/m-up.json"
@@ -255,11 +264,16 @@ done
 "${cli[@]}" live files show "$edit/notes.md" --json >"$work/u-after.json"
 "${cli[@]}" live files list --folder "$edit" --json >"$work/u-list.json"
 "${cli[@]}" live files publish "$edit/notes.md" --yes --json >/dev/null
+trap '"${cli[@]}" live files unpublish "$edit/notes.md" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live files delete "$edit" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 raw resources-list --path "disk:$edit/notes.md" >"$work/p-before.json"
 "${cli[@]}" live files update "$edit/notes.md" --expected-fingerprint "$new" --yes --json <"$work/notes.md" >/dev/null
 wait_sha "$edit/notes.md" "$old"
 raw resources-list --path "disk:$edit/notes.md" >"$work/p-after.json"
 "${cli[@]}" live files unpublish "$edit/notes.md" --yes --json >/dev/null
+trap '"${cli[@]}" live files delete "$edit" --yes --json >/dev/null 2>&1 || true
+  "${cli[@]}" live session end --json >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 node -e '
   const fs = require("fs")
   const read = (f) => JSON.parse(fs.readFileSync(f, "utf8")).item

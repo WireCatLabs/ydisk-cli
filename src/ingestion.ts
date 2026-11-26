@@ -13,7 +13,9 @@ export const PROVIDER = {
 const external = (id: string) => `${id}.md`
 
 /** How the Disk's files are filed in the shared store; the documents commands and a replace's rekey share it. */
-export const diskIngestion = (store: Parameters<typeof documentIngestion>[0]) =>
+export const diskIngestion = (
+  store: Parameters<typeof documentIngestion>[0],
+): ReturnType<typeof documentIngestion<DiskFile>> =>
   documentIngestion<DiskFile>(store, {
     provider: PROVIDER.name,
     externalId: external,

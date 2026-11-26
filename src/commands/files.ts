@@ -12,6 +12,7 @@ import {
   itemOf,
   listOf,
   nextUsually,
+  notLocalPaths,
   outputFor,
   ownerOnlyOption,
   REMOTE_READ,
@@ -407,5 +408,6 @@ export const filesCommand = (): Command => {
     )
     .addCommand(serveCommand())
   addFileEditCommands(files, editHelpers(files))
-  return files
+  // A <path> and --folder here name the Disk, so serve must not make them absolute on this computer.
+  return notLocalPaths(files, "path", "folder")
 }

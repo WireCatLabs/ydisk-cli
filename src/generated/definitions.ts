@@ -2,7 +2,7 @@
 // Source: spec/ydisk/, checked against provenance.json
 // Run: pnpm generate
 
-import type { SchemaNode } from "@wirecat/cli-base/codegen"
+import type { SchemaNode } from "@wirecat/cli-base/codegen/runtime"
 
 export const definitions: Readonly<Record<string, SchemaNode>> = {
   AiPhotoEditorCounter: {
