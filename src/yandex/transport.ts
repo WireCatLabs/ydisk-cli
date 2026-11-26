@@ -1,5 +1,5 @@
 import { CliError, isCliError, realSleep, type SleepLike, wallClock } from "@wirecat/cli-base"
-import { hostFetch, providerWaitMs, readJsonResponse, statusToCode } from "@wirecat/cli-base/http"
+import { hostFetch, providerWaitMs, readJsonResponse, retrying, statusToCode } from "@wirecat/cli-base/http"
 import { type EventSink, providerRequest } from "@wirecat/cli-core/cli"
 import type { Pacer } from "@wirecat/cli-core/sends"
 import * as v from "valibot"
@@ -9,8 +9,8 @@ export const SERVICE_URL = "https://cloud-api.yandex.net/v1/"
 
 const TIMEOUT_MS = 30_000
 const LARGEST_ANSWER = 8 * 1024 * 1024
-/** A pace wait longer than this ends the run with `rate_limited` instead of sitting in it. */
-const LONGEST_PACE_WAIT_MS = 60_000
+/** A pace or retry wait longer than this, in all, ends the request instead of sitting in it. */
+const LONGEST_WAIT_MS = 60_000
 
 export interface Request {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
@@ -82,24 +82,17 @@ export const failureOf = (status: number, writes: boolean, retryAfterMs?: number
 
 /**
  * The only code that holds the token: it goes in the Authorization header, never in an address, an error or a run
- * record (WC-SECR-7). Nothing here retries. A read the caller may run again; a write is never sent twice, since the
- * first may have landed (WC-OUT-20).
+ * record (WC-SECR-7). cli-base's `retrying` waits the profile's pace and sends a read again after a retryable failure;
+ * a write is sent again only after a 429, which refused it, since any other failure may have landed (WC-OUT-20).
  */
 export const transport = (options: TransportOptions) => {
-  const fetchOf = hostFetch({ hosts: API_HOSTS, ...(options.fetch ? { fetch: options.fetch } : {}) })
-  const sleep = options.sleep ?? realSleep
   const now = options.now ?? Date.now
-
-  const turn = async () => {
-    if (!options.pacer) return
-    const wait = (await options.pacer.reserve()) - now()
-    if (wait <= 0) return
-    if (wait > LONGEST_PACE_WAIT_MS)
-      throw new CliError("rate_limited", `this profile must wait ${Math.ceil(wait / 1000)} s before its next request`, {
-        retry_after_ms: wait,
-      })
-    await sleep(wait, options.signal, "retry")
-  }
+  const fetchOf = retrying(hostFetch({ hosts: API_HOSTS, ...(options.fetch ? { fetch: options.fetch } : {}) }), {
+    ...(options.pacer ? { pacer: options.pacer } : {}),
+    budget: LONGEST_WAIT_MS,
+    sleep: options.sleep ?? realSleep,
+    now: () => new Date(now()),
+  })
 
   const unanswered = (writes: boolean, error: unknown, stop?: AbortSignal): CliError => {
     // Before the stop check: a write stopped in flight may still have landed (WC-LIFE-9).
@@ -117,7 +110,6 @@ export const transport = (options: TransportOptions) => {
   const send = async <T>(request: Request, answer: v.GenericSchema<unknown, T>): Promise<T> => {
     const writes = request.method !== "GET"
     const url = urlOf(request)
-    await turn()
     // Not AbortSignal.timeout: its timer keeps the run's async context alive until it fires.
     const deadline = new AbortController()
     const timer = setTimeout(
@@ -149,7 +141,11 @@ export const transport = (options: TransportOptions) => {
           signal,
         })
       } catch (error) {
-        const failure = unanswered(writes, deadline.signal.reason ?? error, request.signal)
+        // The pace refused to wait that long, so nothing was sent, not even a write.
+        const failure =
+          isCliError(error) && error.code === "rate_limited"
+            ? error
+            : unanswered(writes, deadline.signal.reason ?? error, request.signal)
         end({ errorCode: failure.code })
         throw failure
       }

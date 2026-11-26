@@ -67,7 +67,8 @@ it("session start reads the token from stdin and checks it before keeping it; st
   expect(started.json().item).toMatchObject({
     verified: true,
     stored_in: "keyring",
-    user: { id: "1000", login: "test-person" },
+    id: "1000",
+    login: "test-person",
   })
   expect(service.calls.map((call) => call.url.pathname)).toEqual(["/v1/disk"])
   const status = await runCli(["personal", "session", "status", "--check", "--json"], { keyring, service })
@@ -81,6 +82,12 @@ it("session start reads the token from stdin and checks it before keeping it; st
   expect((await runCli(["personal", "session", "end", "--json"], { keyring })).code).toBe(0)
   const ended = await runCli(["personal", "session", "status", "--json"], { keyring })
   expect(ended.json().item).toMatchObject({ state: "missing", token_from: null })
+})
+
+it("a token kept by an earlier version's session start still signs the profile in, with no new sign-in", async () => {
+  const service = fakeDisk()
+  const status = await runCli(["personal", "session", "status", "--check", "--json"], { keyring: signedIn(), service })
+  expect(status.json().item).toMatchObject({ state: "saved", token_from: "keyring", verified: true, id: "1000" })
 })
 
 it("session start --credential-storage file keeps the token in a private file instead of the keyring", async () => {
