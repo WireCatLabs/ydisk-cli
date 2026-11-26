@@ -174,6 +174,20 @@ describe("the Yandex Disk source", () => {
   }, 30_000)
 })
 
+describe("the file-size budget", () => {
+  const file = (size: number) => ({ id: "f", name: "big.pdf", mime: "application/pdf", size }) as DiskFile
+
+  it("reads a file up to 10 GiB by default and follows MESSAGING_ATTACHMENT_MAX_MIB", () => {
+    expect(skipReason(file(10 * 1024 ** 3), {})).toBeUndefined()
+    expect(skipReason(file(10 * 1024 ** 3 + 1), {})).toBe(
+      "file is larger than 10 GiB; configure MESSAGING_ATTACHMENT_MAX_MIB",
+    )
+    expect(skipReason(file(2 * 1024 ** 2), { MESSAGING_ATTACHMENT_MAX_MIB: "1" })).toBe(
+      "file is larger than 1 MiB; configure MESSAGING_ATTACHMENT_MAX_MIB",
+    )
+  })
+})
+
 describe("the history of synced files", () => {
   it("keeps a changed file's earlier text, and a file gone from the Disk as no longer visible, not deleted", async () => {
     const disk = tree()

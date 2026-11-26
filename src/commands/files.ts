@@ -176,7 +176,7 @@ const downloadCommand = () =>
       const file = await disk.byPath(diskPath(path))
       if (file.mime === "inode/directory") throw new CliError("validation_error", "a folder cannot be downloaded")
       if (output === undefined) {
-        const reason = skipReason(file)
+        const reason = skipReason(file, env)
         if (reason) return { ...row(file), text: null, not_read: reason }
         const bytes = await disk.bytes(file.id, file)
         const text = await fileText(bytes, file, CLI, env)
