@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "group": "ydisk",
+    "rule": "same-entity-schema",
+    "target": "entity fact",
+    "reason": "cli-core 2.0.0 gives `fact` another schema than cli-core 1.x; the published drive and memo are on cli-core 1.x, and the entry goes once they publish on 2.0.0.",
+    "review_after": "2026-12-04"
+  },
+  {
+    "group": "ydisk",
+    "rule": "same-entity-schema",
+    "target": "entity memory",
+    "reason": "cli-core 2.0.0 gives `memory` another schema than cli-core 1.x; the published drive and memo are on cli-core 1.x, and the entry goes once they publish on 2.0.0.",
+    "review_after": "2026-12-04"
+  }
+]
