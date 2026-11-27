@@ -35,7 +35,7 @@ ydisk personal doctor --online
 | A sync stops before the end | One sync reads up to 200 files. Run `sync` again until `status` shows no pending work. |
 | A chosen folder's documents are gone | The folder was renamed or moved on the Disk. Add it again under its new path with `folders add`. |
 | Search does not find a file you know is there | See [when search finds nothing](search.md#when-search-finds-nothing). |
-| A PDF or a picture is found by name but not by its text | It is larger than 50 MB, a scan over 20 pages, or a scan that OCR did not read: `read_scans` is `off`, or `tesseract` is not installed for the default `local` (`sudo apt install tesseract-ocr tesseract-ocr-rus`). `status` lists such files with the reason. See [scans and pictures](usage.md#scans-and-pictures). |
+| A PDF or a picture is found by name but not by its text | It is larger than 10 GB (`MESSAGING_ATTACHMENT_MAX_MIB` raises it), a scan over 20 pages, or a scan that OCR did not read: `read_scans` is `off`, or `tesseract` is not installed for the default `local` (`sudo apt install tesseract-ocr tesseract-ocr-rus`). `status` lists such files with the reason. See [scans and pictures](usage.md#scans-and-pictures). |
 | An upload fails because the Disk is full | Free space on the Disk or empty its trash. A retry does not help until there is room. |
 | A large upload is refused | Yandex limits one file's size by plan: 1 GB without a Yandex 360 plan, more with one ([Yandex's limits](https://yandex.ru/support/yandex-360/customers/disk/web/ru/uploading)). |
 | A change ended with "outcome_unknown", exit code 14 | Yandex failed during the change, so it may or may not have happened. Check with `files show` before you run it again. |

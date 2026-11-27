@@ -3,12 +3,13 @@ import { posix } from "node:path"
 import { CliError } from "@wirecat/cli-base"
 import type { FetchLike } from "@wirecat/cli-base/http"
 import {
+  attachmentMaxBytes,
   type FeedlessDocumentSource,
   fileText,
-  MAX_FILE_BYTES,
   readableFile,
   type SourceContent,
   type SourceFile,
+  sizeText,
 } from "@wirecat/cli-core/documents"
 import * as v from "valibot"
 import { IDENTITY } from "../identity.js"
@@ -104,12 +105,14 @@ const fileOf = (resource: Resource, parents: string[]): DiskFile => {
 export const isFolder = (file: SourceFile) => file.mime === FOLDER
 
 /** Why a file is kept by name only; undefined when its text is read. */
-export const skipReason = (file: SourceFile) =>
-  !readableFile(file)
+export const skipReason = (file: SourceFile, env: NodeJS.ProcessEnv = process.env) => {
+  const max = attachmentMaxBytes(env)
+  return !readableFile(file)
     ? `unsupported type: ${file.mime}`
-    : (file.size ?? 0) > MAX_FILE_BYTES
-      ? `file is larger than ${Math.round(MAX_FILE_BYTES / 1024 / 1024)} MB`
+    : (file.size ?? 0) > max
+      ? `file is larger than ${sizeText(max)}; configure MESSAGING_ATTACHMENT_MAX_MIB`
       : undefined
+}
 
 const pathOf = (id: string, known?: DiskFile) => {
   const path = known?.providerMetadata.path
