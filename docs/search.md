@@ -42,10 +42,10 @@ ydisk personal search "budget date>=30d"
 Search by meaning finds a document that answers a question in other words, such as "what did we agree to spend?"
 for a text that says "the budget is approved at 2 million". It uses a text model on your computer, shared by every
 WireCat tool. Download the model once with a WireCat tool that has the `models` command, such as
-[Memo](https://wirecat.dev/en/docs/memo), then index the copy:
+[`wcat`](https://wirecat.dev/en/docs/wcat), then index the copy:
 
 ```sh
-memo models download embeddinggemma
+wcat models download embeddinggemma
 ydisk personal sync --embed
 ydisk personal search "what did we agree to spend?"
 ```
@@ -82,7 +82,7 @@ with its tags, notes and memories.
 
 ## Across your other sources
 
-The copy lives in the local store that the other WireCat tools share. With [Memo](https://wirecat.dev/en/docs/memo),
+The copy lives in the local store that the other WireCat tools share. With [`wcat`](https://wirecat.dev/en/docs/wcat),
 one search finds a Disk document next to the Telegram chat or the email where it was discussed.
 
 ## When search finds nothing

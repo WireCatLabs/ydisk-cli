@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { linkFetch } from "@wirecat/cli-core/cli"
+import { linkFetch } from "@wirecat/cli-core"
 import { expect, it } from "vitest"
 import { LINK_HOSTS } from "../context.js"
 import { FAKE_TOKEN, fakeDisk } from "../testing/fake-disk.js"

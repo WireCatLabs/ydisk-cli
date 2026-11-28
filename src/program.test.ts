@@ -1,7 +1,7 @@
 import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { annotate } from "@wirecat/cli-base/commands"
-import { REMOTE_READ, run as runShared } from "@wirecat/cli-core/cli"
+import { REMOTE_READ, run as runShared } from "@wirecat/cli-core"
 import { Command } from "commander"
 import { expect, it } from "vitest"
 import { IDENTITY } from "./identity.js"

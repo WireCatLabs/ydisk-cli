@@ -5,8 +5,8 @@ import {
   LOCAL_READ,
   LOCAL_WRITE,
   ProfileTokenStore,
-} from "@wirecat/cli-core/cli"
-import { documentProfile } from "@wirecat/cli-core/documents/cli"
+} from "@wirecat/cli-core"
+import { documentProfile } from "@wirecat/cli-core/documents"
 import { Command } from "commander"
 import { configuration } from "../config.js"
 import { IDENTITY, SERVICE } from "../identity.js"

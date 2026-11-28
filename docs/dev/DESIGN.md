@@ -101,7 +101,7 @@ the commands. Settled on 2026-11-18 by live probes, asserted by `scripts/live.sh
 - **A local WebDAV bridge over the REST API, not Yandex's WebDAV.** `webdav.yandex.ru` works only on a Yandex 360
   plan, and an OS client signs in to it with an app password, which can also write
   ([docs](https://yandex.ru/dev/disk/doc/ru/concepts/quickstart)). The bridge uses the profile's OAuth token, any plan,
-  and cannot write. The shared server is cli-core's `@wirecat/cli-core/mount`, so drive and notion can mount the same
+  and cannot write. The shared server is cli-core's `@wirecat/cli-core`, so drive and notion can mount the same
   way.
 - **`files serve`, not `mount`.** A new root word needs a vocabulary change the owner approves first (WC-CMD-2,
   WC-CMD-4); `serve` is in the vocabulary. It is `lifetime: "persistent"` (WC-CMD-18), so it is never offered over MCP.

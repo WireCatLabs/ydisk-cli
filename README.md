@@ -216,7 +216,7 @@ More: [commands](https://github.com/WireCatLabs/ydisk-cli/blob/main/docs/command
 ### With your other sources
 
 `ydisk` keeps what it reads in the same local store as the other WireCat tools, such as Telegram, WhatsApp, mail,
-Google Drive and Notion. `memo context` shows one person across all of them.
+Google Drive and Notion. `wcat context` shows one person across all of them.
 
 More: [WireCat](https://wirecat.dev)
 

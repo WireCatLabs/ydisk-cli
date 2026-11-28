@@ -1,17 +1,22 @@
 import { join } from "node:path"
 import { CliError, resolvePaths } from "@wirecat/cli-base"
 import {
+  type Asker,
   type BaseEnvironment,
   baseContext,
   type EventSink,
   environmentOf,
   type GlobalFlags,
+  guardFor,
+  keyedGuard,
+  levelFor,
   linkFetch,
+  Pacer,
   ProfileTokenStore,
+  pacePathFor,
   terminalAsker,
-} from "@wirecat/cli-core/cli"
-import { rekeySyncedDocument } from "@wirecat/cli-core/documents/cli"
-import { type Asker, guardFor, keyedGuard, levelFor, Pacer, pacePathFor } from "@wirecat/cli-core/sends"
+} from "@wirecat/cli-core"
+import { rekeySyncedDocument } from "@wirecat/cli-core/documents"
 import type { Command } from "commander"
 import { configuration, permissions } from "./config.js"
 import { API_HOSTS, DESKTOP, IDENTITY, SERVICE } from "./identity.js"

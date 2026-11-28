@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import { fakeApi } from "@wirecat/cli-base/codegen"
-import { manifestBaseUrl } from "@wirecat/cli-core/cli"
+import { manifestBaseUrl } from "@wirecat/cli-core"
 import { API } from "../config.js"
 import { definitions } from "../generated/definitions.js"
 import * as manifest from "../generated/manifest.js"

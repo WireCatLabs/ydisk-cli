@@ -1,6 +1,5 @@
 import { setTimeout as sleep } from "node:timers/promises"
-import { linkFetch } from "@wirecat/cli-core/cli"
-import type { Pacer } from "@wirecat/cli-core/sends"
+import { linkFetch, type Pacer } from "@wirecat/cli-core"
 import * as v from "valibot"
 import { expect, it } from "vitest"
 import { FAKE_TOKEN, fakeDisk } from "../testing/fake-disk.js"

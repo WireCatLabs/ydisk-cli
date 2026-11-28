@@ -1,7 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { fakeApi, sampleOf } from "@wirecat/cli-base/codegen"
-import { apiFlagOf, manifestBaseUrl } from "@wirecat/cli-core/cli"
+import { apiFlagOf, manifestBaseUrl } from "@wirecat/cli-core"
 import { afterEach, expect, it } from "vitest"
 import { API } from "./config.js"
 import { definitions } from "./generated/definitions.js"

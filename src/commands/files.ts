@@ -9,27 +9,31 @@ import { annotate } from "@wirecat/cli-base/commands"
 import {
   commandPath,
   FETCH,
+  guardedWrite,
   itemOf,
   listOf,
+  newOperationId,
   nextUsually,
   notLocalPaths,
   outputFor,
   ownerOnlyOption,
   REMOTE_READ,
   REMOTE_WRITE,
+  readUpload,
   renderAnswer,
+  uploadBlob,
   writesFileOnlyWith,
-} from "@wirecat/cli-core/cli"
-import { fileText, fileVersions } from "@wirecat/cli-core/documents"
+} from "@wirecat/cli-core"
 import {
   addFileEditCommands,
   DOCUMENT_UNTRUSTED,
   type FileEditCommands,
   type FileUpdatePort,
+  fileText,
+  fileVersions,
   keepVersionsForDays,
   marksUntrusted,
-} from "@wirecat/cli-core/documents/cli"
-import { guardedWrite, newOperationId, readUpload, uploadBlob } from "@wirecat/cli-core/sends"
+} from "@wirecat/cli-core/documents"
 import { Command } from "commander"
 import { DELETE_KEY, SHARE_KEY } from "../config.js"
 import { contextOf, type Disk, diskFor, profileStateDir, tokenOf, withDisk, writeGuard } from "../context.js"

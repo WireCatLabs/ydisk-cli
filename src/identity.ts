@@ -1,5 +1,5 @@
 import type { ManifestIdentity } from "@wirecat/cli-base/wcat/manifest"
-import type { AppIdentity } from "@wirecat/cli-core/cli"
+import type { AppIdentity } from "@wirecat/cli-core"
 import { VERSION } from "./version.js"
 
 export const PACKAGE = "@wirecat/yandex-disk-cli"

@@ -1,7 +1,6 @@
 import { CliError, isCliError, realSleep, type SleepLike, wallClock } from "@wirecat/cli-base"
 import { hostFetch, providerWaitMs, readJsonResponse, retrying, statusToCode } from "@wirecat/cli-base/http"
-import { type EventSink, providerRequest } from "@wirecat/cli-core/cli"
-import type { Pacer } from "@wirecat/cli-core/sends"
+import { type EventSink, type Pacer, providerRequest } from "@wirecat/cli-core"
 import * as v from "valibot"
 import { API_HOSTS, SERVICE } from "../identity.js"
 
