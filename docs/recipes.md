@@ -71,8 +71,8 @@ ydisk personal files publish /Documents/Flat/lease-2026.pdf
 ydisk personal files unpublish /Documents/Flat/lease-2026.pdf
 ```
 
-Anyone who has a public link can open the file. At a terminal the tool asks first. Over MCP it follows the
-`files.share` permission, see [connect your agent](mcp.md#decide-what-the-agent-may-change).
+Anyone who has a public link can open the file. At a terminal the tool asks first. Over MCP the link is made without
+asking unless `files.share` is `deny`, see [connect your agent](mcp.md#decide-what-the-agent-may-change).
 
 ## Put a report the agent wrote on the Disk
 
@@ -91,7 +91,8 @@ Disk by mistake.
 
 The agent reads the file, edits it, and writes it back with the `sha256` it read. If someone changed the file in the
 meantime, the write is refused and nothing is uploaded: the agent reads it again and redoes the edit. What each edit
-replaced is kept on this computer.
+replaced is kept on this computer. In the commands here, `9f86d081…` stands for the real `sha256` that the download
+or `show` answers.
 
 A Markdown note:
 
@@ -102,10 +103,11 @@ Use ydisk CLI with profile personal. In /Notes/plan.md on my Disk, tick "send th
 
 ```sh
 ydisk personal files download /Notes/plan.md --json
-ydisk personal files update /Notes/plan.md --expected-fingerprint <sha256 from the download> < plan.md
+ydisk personal files update /Notes/plan.md --expected-fingerprint 9f86d081… < plan.md
 ```
 
-The download answers the whole text and its `sha256`. A text cut at 200,000 characters has no `sha256`, so it can
+The download answers the whole text and its `sha256`. The update reads the edited text on stdin, here from the local
+file `plan.md`. A text cut at 200,000 characters has no `sha256`, so it can
 never be written back.
 
 A spreadsheet:
@@ -116,7 +118,7 @@ Use ydisk CLI with profile personal. In /Work/budget.xlsx, set the March rent to
 
 ```sh
 ydisk personal files sheets show /Work/budget.xlsx "Sheet1!A1:D20" --json
-ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3:C3" --values '[[1300, "paid"]]' --expected-fingerprint <sha256>
+ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3:C3" --values '[[1300, "paid"]]' --expected-fingerprint 9f86d081…
 ```
 
 Only those cells change; the formatting, the other sheets and the formulas stay. A formula cell is refused unless the
@@ -131,17 +133,18 @@ Use ydisk CLI with profile personal. In /Work/letter.docx, replace the second pa
 
 ```sh
 ydisk personal files documents show /Work/letter.docx --json
-ydisk personal files documents update /Work/letter.docx --payload '[{"index": 1, "text": "The pond opens on Monday."}, {"insert_after": 5, "text": "Kind regards, Anna"}]' --expected-fingerprint <sha256>
+ydisk personal files documents update /Work/letter.docx --payload '[{"index": 1, "text": "The pond opens on Monday."}, {"insert_after": 5, "text": "Kind regards, Anna"}]' --expected-fingerprint 9f86d081…
 ```
 
 The paragraphs keep their style. A paragraph with a tracked change, an image, a comment or a link is refused with the
 reason, so the agent can tell you instead.
 
-To undo an edit:
+To undo an edit, take the `version` to put back from `files history` (here `5d41402a…`), and the `sha256` the file
+has now:
 
 ```sh
 ydisk personal files history /Work/letter.docx
-ydisk personal files restore /Work/letter.docx <version> --expected-fingerprint <sha256 the file has now>
+ydisk personal files restore /Work/letter.docx 5d41402a… --expected-fingerprint 9f86d081…
 ```
 
 ## Undo a delete

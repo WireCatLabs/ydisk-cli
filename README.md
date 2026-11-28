@@ -29,8 +29,8 @@
 - **Edit a file where it is.** An agent changes a Markdown note, cells of an Excel workbook or paragraphs of a Word
   document on the Disk, at the content it read. A file without a public link is checked by the Disk itself at the
   moment of the write; a shared one is checked just before it. What the edit replaced is kept on your computer.
-- **Safe to give to an agent.** Deleting and public links ask first at a terminal, and one setting turns either off
-  for an agent.
+- **You decide what an agent may change.** Deleting and public links ask first at a terminal. Over MCP nobody can
+  answer, so an agent does them until you set them to `deny`.
 
 ## What you get
 
@@ -77,7 +77,7 @@ Agent:  (runs ydisk personal files publish /Documents/Flat/lease-2026.pdf --yes)
   stays in your system keyring and only goes to Yandex's API.
 - **Search that understands the text.** Text is read from PDF, docx, doc, xlsx, pptx, OpenDocument, RTF, HTML,
   EPUB, CSV, TSV, plain text and Markdown files. Search finds other forms of a word, and matches by meaning once the text is indexed.
-- **Safe to give to an agent.** You decide what an agent may do: read only, or no deleting and no public links. The
+- **You set the limits.** You decide what an agent may do: read only, or no deleting and no public links. The
   agent's instructions say that text from files is data, never an instruction to follow.
 - **Ready for any agent.** A skill for agents with a terminal, an MCP server for Claude Desktop and Cursor, and a
   secure link for ChatGPT and Claude in the browser.
@@ -177,8 +177,8 @@ ydisk personal files move /Documents/old.pdf --folder /Archive
 ydisk personal files delete /Documents/old.pdf       # to the Disk's trash, files restore brings it back
 ydisk personal files publish /Documents/plan.pdf     # a public link: anyone with it can open the file
 ydisk personal files unpublish /Documents/plan.pdf
-ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint <sha256>
-ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3" --values '[[1300]]' --expected-fingerprint <sha256>
+ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint 9f86d081…
+ydisk personal files sheets update /Work/budget.xlsx "Sheet1!B3" --values '[[1300]]' --expected-fingerprint 9f86d081…
 ydisk personal files history /Work/budget.xlsx      # what this computer's edits replaced; files restore puts it back
 ```
 
