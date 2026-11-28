@@ -2,6 +2,19 @@
 
 Notable changes to `@wirecat/yandex-disk-cli`. One section per version, newest first.
 
+## 0.11.0 — 28.11.2026
+
+### Added
+
+- **WireCat Desktop reads the MCP port and the sign-in from ydisk itself.** The manifest (`ydisk --wcat-describe`)
+  now names the fixed MCP port 8760 and the OAuth token sign-in, with the token passed on stdin. Desktop reads them
+  from the tool and keeps its own list only as a fallback. Built on cli-base 1.2.0.
+
+### Fixed
+
+- ydisk's package is smaller: it no longer carries its own copy of cli-core. Built on @wirecat/cli-core 3.0.0 and
+  @wirecat/cli-base 2.1.1. Needed for the WireCat store version 79 (memo became wcat).
+
 ## 0.10.0 — 27.11.2026
 
 ### Changed — may break callers
