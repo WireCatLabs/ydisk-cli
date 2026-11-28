@@ -53,9 +53,10 @@ ydisk personal status
 `sync` downloads the files that are new or whose content changed since the last sync, and reads their text. A file
 moved inside the chosen folders keeps its tags and notes.
 
-A file sync no longer finds on the Disk leaves lists and search, but its text stays in the copy, marked no longer
-visible. The Disk does not tell sync whether the file was deleted, moved out or lost to a share, so sync never treats
-it as deleted. When the file shows again, it comes back as it was.
+When sync no longer finds a file on the Disk, the file leaves lists and search results, but its text stays in the
+copy, marked as no longer visible. The Disk does not say whether the file was deleted, moved out of the chosen folders
+or lost when someone stopped sharing it, so sync never treats it as deleted. When the file shows up again, it comes
+back as it was.
 
 One sync reads up to 200 files (`--limit`) and lists up to about 10,000 entries, then saves where it stopped. A large
 folder takes several runs: run `sync` again until `status` shows no pending work. A stop loses nothing, and the next
@@ -87,7 +88,7 @@ chooses who reads it:
 | `read_scans` | Who reads the text | What it needs |
 | --- | --- | --- |
 | `local` (default) | The `tesseract` program on your computer, in Russian and English. Nothing leaves the computer and nothing is downloaded | `tesseract` installed, for example `sudo apt install tesseract-ocr tesseract-ocr-rus` on Debian or Ubuntu, `brew install tesseract tesseract-lang` on macOS |
-| `anthropic` or `openai` | The model chosen with `ydisk ai set`, at that provider's own address. Each page is sent to the provider as a picture, and the provider charges for every page | `ydisk ai set` with that provider, and pictures allowed (`ydisk ai set --images`) |
+| `anthropic` or `openai` | The model chosen with `memo models ai set`, the one AI model all WireCat tools share, at that provider's own address. Each page is sent to the provider as a picture, and the provider charges for every page | `memo models ai set anthropic --allow-remote` (or `openai`), so pictures may go to that model |
 | `off` | No one | Scans and pictures are kept by name only |
 
 `ydisk personal config set read_scans '"anthropic"'` switches one profile. One file is read up to 20 pages, and one
@@ -138,7 +139,7 @@ ydisk personal files move /Documents/old.pdf --folder /Archive
 ydisk personal files create /Projects/2026
 ydisk personal files delete /Documents/old.pdf
 ydisk personal files restore trash:/old.pdf
-ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint <sha256>
+ydisk personal files update /Notes/plan.md --text "# Plan" --expected-fingerprint 9f86d081…
 ydisk personal files sheets show /Work/budget.xlsx "Sheet1!A1:C10"
 ydisk personal files documents show /Work/report.docx
 ydisk personal files history /Notes/plan.md
@@ -151,7 +152,8 @@ ydisk personal files unpublish /Documents/plan.pdf
   Never write a cut text back over the file: the rest of it would be lost.
 - `files show` and `files list` give each file's `md5` and `sha256`, so an agent can tell whether a file changed
   since it read it. `files download` gives the `sha256` only beside the file's whole text: a cut text, or the text
-  read out of a PDF, a .docx or an .xlsx, has `sha256: null`, so an agent has no hash to write it back with.
+  read out of a PDF, a .docx or an .xlsx, has `sha256: null`, so an agent has no hash to write it back with. In the
+  commands on this page, `9f86d081…` stands for such a `sha256`.
 - `files delete` moves a file to the Disk's trash, and `files restore` brings it back by its path in the trash.
 - `files publish` makes a public link that anyone who has it can open. `files unpublish` closes it.
 - `--replace` on an upload, a copy or a move overwrites a file already at that path.
@@ -197,9 +199,8 @@ How the file is checked depends on whether it has a public link:
 document. `sheets update` writes a text as text, even one that starts with `=`, and refuses to overwrite a formula
 unless `--replace`. `documents update` refuses a paragraph with a tracked change, a field, an image, a comment, a
 link or a footnote, and says why. `sheets create` and `documents create` write a new file only and refuse a path
-that is already there; they answer the `sha256` that `update` takes next. Every edit of an existing file asks as
-`files.delete` does. `files history` lists what this profile's
-edits replaced, newest last; each `version` is the sha256 of the replaced content, and `available` says whether it is
+that is already there; they answer the `sha256` that `update` takes next. Every edit of an existing file asks first,
+under the `files.delete` permission. `files history` lists what this profile's edits replaced, newest last; each `version` is the sha256 of the replaced content, and `available` says whether it is
 still kept. See [edit a file with your agent](recipes.md#edit-a-file-with-your-agent).
 
 ## Output for scripts

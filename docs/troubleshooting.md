@@ -33,15 +33,24 @@ ydisk personal doctor --online
 | "no such item, or this token cannot see it", exit code 6 | Check the path with `files list --folder` on its parent folder. A Disk path starts with `/`, as in `/Documents/plan.pdf`. |
 | "asked to slow down", exit code 8 | Yandex received too many requests from this account. Wait a minute and run the command again. |
 | A sync stops before the end | One sync reads up to 200 files. Run `sync` again until `status` shows no pending work. |
+| A mirror sync stops with `mirror.no-space` | The drive would be left too full. Free space, or leave big folders out with `mirrors update 1a2b3c4d --ignore Photos`. See [the whole Disk](mirrors.md#the-whole-disk). |
+| A mirror sync stops before many deletions or replacements | Check the list with `mirrors preview 1a2b3c4d`, then run the command the error gives (`--allow-deletions`, `--allow-replacements`). See [many changes at once](mirrors.md#many-changes-at-once). |
+| A mirror sync ends with conflicts | `mirrors conflicts list` shows them, and `mirrors conflicts resolve` settles each one. See [a file changed on both sides](mirrors.md#a-file-changed-on-both-sides). |
+| A mirror sync stops with `confirmation_required` and names `--repin` | The Disk folder or the local folder was replaced by another one. Once you know the new folder is the right one, run `mirrors sync 1a2b3c4d --repin`. See [a folder that was replaced](mirrors.md#a-folder-that-was-replaced). |
+| Exit code 7 in a script or in `mirrors watch` | A change needed your confirmation and there was no terminal to ask. Add `--yes`, or allow the permission for the profile ([settings](configuration.md#permissions)). |
 | A chosen folder's documents are gone | The folder was renamed or moved on the Disk. Add it again under its new path with `folders add`. |
 | Search does not find a file you know is there | See [when search finds nothing](search.md#when-search-finds-nothing). |
 | A PDF or a picture is found by name but not by its text | It is larger than 10 GB (`MESSAGING_ATTACHMENT_MAX_MIB` raises it), a scan over 20 pages, or a scan that OCR did not read: `read_scans` is `off`, or `tesseract` is not installed for the default `local` (`sudo apt install tesseract-ocr tesseract-ocr-rus`). `status` lists such files with the reason. See [scans and pictures](usage.md#scans-and-pictures). |
 | An upload fails because the Disk is full | Free space on the Disk or empty its trash. A retry does not help until there is room. |
 | A large upload is refused | Yandex limits one file's size by plan: 1 GB without a Yandex 360 plan, more with one ([Yandex's limits](https://yandex.ru/support/yandex-360/customers/disk/web/ru/uploading)). |
 | A change ended with "outcome_unknown", exit code 14 | Yandex failed during the change, so it may or may not have happened. Check with `files show` before you run it again. |
-| An agent changed a file you did not want changed | Over MCP the ask level lets a command run. Deny `files.delete` and `files.share`, or set `YDISK_READ_ONLY=1`. See [connect your agent](mcp.md#decide-what-the-agent-may-change). A deleted file is in the Disk's trash: `files restore`. An edited file's old content is kept here: `files history`, then `files restore <path> <version>`. |
-| The settings file does not read | `doctor` lists every problem in the file under `config.issues`. Run the `config unset` each one gives, `config repair`, or fix the file by hand. |
+| An agent changed a file you did not want changed | Over MCP the ask level lets a command run. Deny `files.delete` and `files.share`, or set `YDISK_READ_ONLY=1`. See [connect your agent](mcp.md#decide-what-the-agent-may-change). A deleted file is in the Disk's trash: `files restore`. An edited file's old content is kept here: `files history`, then `files restore` with the file's path and the `version` to put back. See [edit a file with your agent](recipes.md#edit-a-file-with-your-agent). |
+| The settings file cannot be read | `doctor` lists every problem in the file under `config.issues`. Run the `config unset` each one gives, `config repair`, or fix the file by hand. |
 | `doctor` lists `files.problems` | Other users of the computer can read `config.json` or enter its folder. Run each `chmod` that `doctor` prints after "to make it private:". |
+
+To check the fix, run the command again: it ends without an error, and `ydisk personal status` (or
+`ydisk personal mirrors status` for a mirror) shows no problem. If the error is still there, see
+[if it still fails](#if-it-still-fails).
 
 ## Exit codes
 

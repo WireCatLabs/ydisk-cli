@@ -16,7 +16,7 @@ such as the keyring, permissions, MCP and what never reaches a log, is on the
 
 | What | Where | How to remove it |
 | --- | --- | --- |
-| The Yandex token | The system keyring, or a private file where there is none | `ydisk personal session end`. The token stays valid at Yandex until you revoke it ([below](#revoke-the-token-at-yandex)) |
+| The Yandex token | The system keyring, or a private file where there is none | `ydisk personal session end`. The token stays valid at Yandex until you revoke it ([how to revoke it](#revoke-the-token-at-yandex)) |
 | The text of the files in the chosen folders, with their names, paths, sizes, dates and MD5 checksums | The local store, `wirecat.db`, shared with the other WireCat tools | `folders remove` with the folder's id from `folders list`, then `sync` |
 | Your tags, notes and memories about documents | The local store | `tags remove`, `notes remove` |
 | Each mirror's folder pair, its last sync and the versions a sync replaced or deleted here | `profiles/<profile>/mirrors.json` and `profiles/<profile>/mirrors/` in the state folder, readable by you only | `mirrors remove <id>` forgets the pair; the versions stay until they expire ([mirrors](mirrors.md#earlier-versions-of-a-file)) |
@@ -40,7 +40,7 @@ also revokes every token of the account when you change the password or choose "
 `ydisk` keeps its settings in `config.json` and its state in the folders `ydisk doctor` shows. It talks to one
 service, Yandex Disk's API at `cloud-api.yandex.net`. `session start` keeps the Yandex OAuth token in the OS keyring,
 or in a private file where no keyring works. The token goes only into the Authorization header of a request to
-`cloud-api.yandex.net`, never into an address, an answer, a run record or the send journal. Downloads and uploads go
+`cloud-api.yandex.net`, never into an address, an answer or a run record. Downloads and uploads go
 to the link Yandex gives (`downloader.disk.yandex.ru`, `*.disk.yandex.net`, `*.storage.yandex.net`) without the token, and those links are
 never printed.
 
@@ -65,19 +65,9 @@ folder, readable by you only. `ydisk personal mcp revoke` forgets every one of t
 ## Run records
 
 A run record keeps the command line as you typed it, so `ydisk runs show` tells you what was run. A secret is still
-stored as `[redacted]`: an option named like a token or password, a password in a link, a long opaque string. A
-phone number is replaced by `[redacted]` inside the word you typed, message text included: one written with its "+" and
-country code, or 11 to 15 digits in a row, so a long id of that length is hidden as well. To keep none of the words
-you type, run `ydisk personal config set record_input false`.
-
-A secret is also found by what it looks like, in a run record and in a kept error message: a token in a known
-format (GitHub, OpenAI, Slack, AWS, Stripe, npm and the like), a `Bearer` credential, a random-looking string of 20 or
-more characters, and a random-looking run of 20 or more lower-case hex characters, such as a hex key or a full commit
-hash. The value after a secret name is hidden too, whether it follows `=`, `:` or a space: `password=`, `API_TOKEN=`,
-`password hunter2`, `pin 1234`. Some secrets look like ordinary words and stay: a value of letters only after a
-secret name and a space (`pin this message` stays), a hex key in upper case, a short commit hash or a UUID, a short
-password typed without a secret name before it, and a secret inside a link or a file path unless it is in a known
-format or after a secret name.
+stored as `[redacted]`, by the rules every WireCat tool shares, on the
+[shared security page](https://wirecat.dev/en/docs/security). To keep none of the words you type, run
+`ydisk personal config set record_input false`.
 
 ## File permissions
 

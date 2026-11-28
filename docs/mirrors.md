@@ -58,7 +58,7 @@ ydisk personal mirrors sync
 ```
 
 The sync reads the whole Disk with Yandex's flat file list, about one request per thousand files. A whole-Disk mirror
-works like any other mirror: everything on this page holds for it. Two things matter more on a big Disk:
+works like any other mirror: everything on this page holds for it. On a big Disk, watch three things:
 
 - **Free space.** Every sync, of any mirror, first adds up what it will download and the earlier versions it will
   keep. It stops with `mirror.no-space` when that would leave too little free on the drive (a tenth of what it
@@ -71,8 +71,8 @@ works like any other mirror: everything on this page holds for it. Two things ma
   any length. Each mirror's `listed` shows how many Disk files this run listed (`files`), whether the listing is
   complete, whether it went on from an earlier run (`resumed`), and how many files all the runs have listed so far
   (`so_far`). The files listed so far sync at once; a deletion waits until the whole Disk is listed. A listing cut
-  short deletes nothing: the Disk files it did not reach yet are only counted, under `unlisted`. A place kept for more
-  than 7 days starts the listing over.
+  short deletes nothing: the Disk files it did not reach yet are only counted, under `unlisted`. If the next run comes
+  more than 7 days later, the listing starts from the beginning.
 
 ## Leave folders out
 
@@ -203,8 +203,8 @@ ydisk personal mirrors sync 1a2b3c4d --allow-deletions 40 --allow-replacements 1
 
 `--allow-deletions` allows up to that many deletions and `--allow-replacements` up to that many replacements, for that
 one run. `--replace` allows any number of replacements. A merge counts as a replacement. Each replaced file is kept
-as a version first. With more than one mirror, both need the mirror's id, so an approval never
-covers another mirror. A stopped mirror does not hold up the others: they sync
+as a version first. With more than one mirror, `--allow-deletions` and `--allow-replacements` need the
+mirror's id, so an approval never covers another mirror. A stopped mirror does not hold up the others: they sync
 as usual. `mirrors watch` reports the stop again at every cycle that syncs the mirror, until you allow the run or put
 the files back.
 
@@ -245,8 +245,11 @@ trash. The sync also logs every change it makes, both ways.
 
 ```sh
 ydisk personal mirrors versions list 1a2b3c4d notes/plan.md
-ydisk personal mirrors versions restore 1a2b3c4d notes/plan.md <sha256>
+ydisk personal mirrors versions restore 1a2b3c4d notes/plan.md 9f86d081…
 ```
+
+Give `versions restore` the hash of the content to put back, as `versions list` shows it; `9f86d081…` stands for it
+here.
 
 `versions list` shows each change, oldest first: when, which way, the content's hash before (`old`) and after
 (`new`), and which side the old content came from (`from`: `local`, or `remote` for the Disk). A merge, a conflict

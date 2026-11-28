@@ -134,10 +134,10 @@ To forget one account on this computer, remove its profile:
 ydisk personal account remove --keep-data
 ```
 
-It deletes the profile's token and its settings. Say what happens to the files it copied: `--keep-data` leaves them
-in the store, where search still finds them, and `--delete-data` deletes them, with the list of folders you chose to
-copy. Nothing on your Disk changes. At a terminal it asks first, `--yes` answers for a script, and `--dry-run` lists
-what it would remove without removing it. The token stays valid at Yandex: revoke it in
+It deletes the profile's token and its settings. Choose what happens to the text it copied: `--keep-data` leaves it
+in the store, where search still finds it, and `--delete-data` deletes it together with your list of chosen folders.
+Nothing on your Disk changes. At a terminal the command asks first. In a script, `--yes` answers for you, and
+`--dry-run` lists what would go without removing it. The token stays valid at Yandex: revoke it in
 [Data access](https://id.yandex.ru/personal/data-access) in Yandex ID.
 
 `ydisk personal session end` forgets only the token and keeps the profile. To remove the tool itself:

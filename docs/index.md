@@ -1,4 +1,4 @@
-# ydisk
+# Yandex Disk
 
 Find any document on your Yandex Disk by what it says, and let your AI agent read it, file it and share it for you.
 `ydisk` copies the text of the Disk folders you choose to your computer, so a search for "lease" or "договор аренды"
@@ -6,7 +6,7 @@ finds the PDF even when its file name is `scan_0042.pdf`, and even without the i
 itself, the same tool lists, downloads, uploads, moves and shares files there.
 
 An agent with `ydisk` answers "where is the contract with the printing house, and what are its payment terms?" with
-the quote and the file's path on the Disk. It works with Claude Code, Codex, Gemini CLI and other agents that run
+the quote and the file's path on the Disk. `ydisk` works with Claude Code, Codex, Gemini CLI and other agents that run
 commands, with Claude Desktop and Cursor through MCP, and with ChatGPT and Claude in the browser through your own
 tunnel.
 
@@ -23,14 +23,14 @@ minutes, once.
 
 ## What you get
 
-- **Search inside your files, not only their names.** The text of PDF, Word (`.docx`, `.doc`), Excel (`.xlsx`),
-  PowerPoint (`.pptx`), OpenDocument, RTF, HTML, EPUB, CSV, TSV, plain text and Markdown files is searchable. Scans and
-  JPEG, PNG and WebP pictures are read by [OCR](usage.md#scans-and-pictures), on your computer by default. Search finds other forms of a word in Russian and English, and finds a
-  document by meaning once its text is indexed.
+- **Search inside your files, not only their names.** Search finds text inside PDFs, Word, Excel and PowerPoint
+  files, and most other documents ([full list](usage.md#what-the-copy-holds)). Even scans and photos of paper are
+  searchable: their text is recognized ([OCR](usage.md#scans-and-pictures)) on your computer by default. Search finds
+  other forms of a word in Russian and English, and finds a document by meaning once its text is indexed.
 - **Search without the internet.** Search reads the copy on your computer, so it is fast and costs no request to
   Yandex.
-- **The whole Disk, live.** List, read, download, upload, copy, move, delete to the trash, restore and share files
-  without opening a browser.
+- **The whole Disk, live.** Find, move and share files on the Disk without a browser, and get a deleted one back from
+  the trash.
 - **Edit a file where it is.** You or your agent change a note, Excel cells or Word paragraphs on the Disk without
   downloading by hand. The rest of the file stays as it is, and what the edit replaced is kept on your computer. A
   file without a public link is checked by the Disk itself at the moment of the write; a shared one is checked just
@@ -38,8 +38,9 @@ minutes, once.
 - **A folder that keeps up with the Disk.** A mirror keeps a folder on your computer and one on the Disk the same both
   ways. A text file edited on both sides is merged; a real conflict waits for you with a diff. It stops before many
   deletions or replacements. See [mirrors](mirrors.md).
-- **Safe to give to an agent.** At a terminal the tool asks before it deletes, overwrites or makes a public link. For
-  an agent you can turn each of those off, or allow reading only.
+- **You decide what an agent may change.** At a terminal the tool asks before it deletes, overwrites or makes a
+  public link. Over MCP nobody can answer, so an agent does these without asking until you set them to `deny` or
+  allow reading only. See [connect your agent](mcp.md#decide-what-the-agent-may-change).
 - **One search across your sources.** The copy sits in the same local store as your Telegram, WhatsApp, mail, notes
   and meetings from the other WireCat tools, so one search covers them all.
 - **Free and open source.** Apache 2.0, on macOS, Linux and Windows. No WireCat account and no WireCat server: the
@@ -89,5 +90,7 @@ in [recipes](recipes.md).
 - [Install and sign in](installation.md): Node.js, the Yandex token step by step, and the first check.
 - [Folders and sync](usage.md): choose folders, keep the copy current, work with files live.
 - [Find a document](search.md): words, word forms, meaning, file names.
+- [Mirrors](mirrors.md): keep a folder on your computer and one on the Disk the same both ways.
+- [Open the Disk as a folder](mount.md): see the Disk in your file manager, read-only.
 - [Connect your agent](mcp.md): the skill, Claude Code, Codex, Claude Desktop, Cursor and browser apps.
 - [Compared with other tools](compare.md): rclone, Yandex's own client and the Yandex Disk MCP servers.
