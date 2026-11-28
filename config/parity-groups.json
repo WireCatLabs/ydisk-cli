@@ -1,7 +1,7 @@
 [
   {
     "name": "ydisk",
-    "members": ["ydisk", "tg", "max", "memo", "drive", "zm", "wa"],
+    "members": ["ydisk", "tg", "max", "wcat", "drive", "zm", "wa"],
     "covers": ["commands", "upgrade"],
     "differences": []
   }
