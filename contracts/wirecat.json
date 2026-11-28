@@ -1772,7 +1772,21 @@
     ],
     "signIn": {
       "gives": "Lets your agent read, search and change the files on your Yandex Disk through ydisk.",
-      "asks": "A Yandex OAuth token with Disk access, pasted once and kept in the system keyring."
+      "asks": "A Yandex OAuth token with Disk access, pasted once and kept in the system keyring.",
+      "methods": [
+        {
+          "id": "token",
+          "label": "Yandex OAuth token",
+          "words": [
+            "{profile}",
+            "session",
+            "start",
+            "--json"
+          ],
+          "stdin": true,
+          "password": "YDISK_TOKEN"
+        }
+      ]
     },
     "skill": {
       "status": [
@@ -1796,6 +1810,7 @@
       ]
     },
     "mcpServer": {
+      "port": 8760,
       "start": [
         "mcp",
         "server",
