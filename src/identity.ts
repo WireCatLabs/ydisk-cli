@@ -25,10 +25,20 @@ export const DESKTOP: ManifestIdentity = {
   // the first live check (2026-11-17) got a link on mds.storage.yandex.net, which the docs do not name.
   hosts: ["cloud-api.yandex.net", "downloader.disk.yandex.ru", "*.disk.yandex.net", "*.storage.yandex.net"],
   syncs: "files in the Disk folders you choose",
+  mcpPort: 8760,
   tagline: "Search your Yandex Disk folders and work with the files",
   signIn: {
     gives: "Lets your agent read, search and change the files on your Yandex Disk through ydisk.",
     asks: "A Yandex OAuth token with Disk access, pasted once and kept in the system keyring.",
+    methods: [
+      {
+        id: "token",
+        label: "Yandex OAuth token",
+        words: ["{profile}", "session", "start", "--json"],
+        password: "YDISK_TOKEN",
+        stdin: true,
+      },
+    ],
   },
 }
 
