@@ -1,8 +1,15 @@
 import { CliError } from "@wirecat/cli-base"
 import { annotate } from "@wirecat/cli-base/commands"
-import { itemOf, outputFor, parseDuration, REMOTE_READ, renderAnswer } from "@wirecat/cli-core/cli"
-import { type Mounted, serveMount } from "@wirecat/cli-core/mount"
-import { levelFor } from "@wirecat/cli-core/sends"
+import {
+  itemOf,
+  levelFor,
+  type Mounted,
+  outputFor,
+  parseDuration,
+  REMOTE_READ,
+  renderAnswer,
+  serveMount,
+} from "@wirecat/cli-core"
 import { Command } from "commander"
 import { permissions } from "../config.js"
 import { contextOf, diskFor, tokenOf } from "../context.js"

@@ -1,6 +1,6 @@
 import { Readable } from "node:stream"
 import { type KeyringStore, memoryKeyring } from "@wirecat/cli-base"
-import type { RunOptions } from "@wirecat/cli-core/cli"
+import type { RunOptions } from "@wirecat/cli-core"
 import type { ServiceEnvironment } from "../context.js"
 import { run } from "../program.js"
 import { FAKE_TOKEN, fakeDisk } from "./fake-disk.js"

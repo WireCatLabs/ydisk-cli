@@ -1,6 +1,6 @@
 import { CliError } from "@wirecat/cli-base"
-import { outputFor, renderAnswer } from "@wirecat/cli-core/cli"
-import { type FileMirrorWrite, fileMirrorsCommand, keepVersionsForDays } from "@wirecat/cli-core/documents/cli"
+import { outputFor, renderAnswer } from "@wirecat/cli-core"
+import { type FileMirrorWrite, fileMirrorsCommand, keepVersionsForDays } from "@wirecat/cli-core/documents"
 import type { Command } from "commander"
 import { DELETE_KEY, UPLOAD_KEY } from "../config.js"
 import { contextOf, diskFor, profileStateDir, tokenOf, writeGuard } from "../context.js"

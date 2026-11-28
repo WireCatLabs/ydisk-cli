@@ -1,7 +1,7 @@
 import { posix } from "node:path"
 import { CliError } from "@wirecat/cli-base"
 import type { FetchLike } from "@wirecat/cli-base/http"
-import type { ByteRange, MountEntry, MountSource } from "@wirecat/cli-core/mount"
+import type { ByteRange, MountEntry, MountSource } from "@wirecat/cli-core"
 import * as v from "valibot"
 import { type DiskFile, diskPath, diskSource, isFolder, PAGE } from "./source.js"
 import type { Transport } from "./transport.js"

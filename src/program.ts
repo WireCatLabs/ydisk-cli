@@ -4,6 +4,7 @@ import { annotate } from "@wirecat/cli-base/commands"
 import {
   appDoctorCommand,
   appMcpCommand,
+  appUpdate,
   commandsCommand,
   configCommand,
   createProgram as createSharedProgram,
@@ -17,8 +18,7 @@ import {
   sharedStoreCommand,
   skillCommand,
   upgradeCommand,
-} from "@wirecat/cli-core/cli"
-import { appUpdate } from "@wirecat/cli-core/update"
+} from "@wirecat/cli-core"
 import type { Command } from "commander"
 import { accountCommand } from "./commands/account.js"
 import { apiCommand } from "./commands/api.js"

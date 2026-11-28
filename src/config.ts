@@ -4,8 +4,8 @@ import {
   commandPermissions,
   serviceApiPermissions,
   settingsFor,
-} from "@wirecat/cli-core/cli"
-import { DOCUMENT_HISTORY_SETTINGS, DOCUMENT_SCAN_SETTINGS } from "@wirecat/cli-core/documents/cli"
+} from "@wirecat/cli-core"
+import { DOCUMENT_HISTORY_SETTINGS, DOCUMENT_SCAN_SETTINGS } from "@wirecat/cli-core/documents"
 import * as manifest from "./generated/manifest.js"
 import { IDENTITY, SERVICE } from "./identity.js"
 

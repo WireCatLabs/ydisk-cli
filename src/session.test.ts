@@ -2,7 +2,7 @@ import { mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync }
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { brokenKeyring, memoryKeyring } from "@wirecat/cli-base"
-import { ProfileTokenStore, type RunOptions } from "@wirecat/cli-core/cli"
+import { ProfileTokenStore, type RunOptions } from "@wirecat/cli-core"
 import { mcpOverStdio } from "@wirecat/cli-core/testing"
 import { afterEach, expect, it } from "vitest"
 import type { ServiceEnvironment } from "./context.js"

@@ -1,4 +1,4 @@
-import { tokenSessionCommand } from "@wirecat/cli-core/cli"
+import { tokenSessionCommand } from "@wirecat/cli-core"
 import type { Command } from "commander"
 import { configuration } from "../config.js"
 import { diskFor } from "../context.js"
